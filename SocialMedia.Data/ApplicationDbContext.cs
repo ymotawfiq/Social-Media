@@ -25,7 +25,9 @@ namespace SocialMedia.Data
         {
             builder.Entity<IdentityRole>().HasData(
                 new IdentityRole { ConcurrencyStamp="1", Name= "Admin", NormalizedName = "Admin"},
-                new IdentityRole { ConcurrencyStamp = "2", Name = "User", NormalizedName = "User" }
+                new IdentityRole { ConcurrencyStamp = "2", Name = "User", NormalizedName = "User" },
+                new IdentityRole { ConcurrencyStamp = "3", Name = "Owner", NormalizedName = "Owner" },
+                new IdentityRole { ConcurrencyStamp = "4", Name = "moderator", NormalizedName = "moderator" }
                 );
         }
 

@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
@@ -126,7 +123,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var loginResponse = await _userManagementService.GetOtpByLoginAsync(loginDto);
+                var loginResponse = await _userManagementService.LoginUserAsync(loginDto);
                 if (loginResponse.ResponseObject != null)
                 {
                     var user = loginResponse.ResponseObject.User;
@@ -162,11 +159,15 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("login-2FA")]
-        public async Task<IActionResult> LoginTwoFactorAuthenticationAsync(string otp, string email)
+        public async Task<IActionResult> LoginTwoFactorAuthenticationAsync(string otp, string userNameOrEmail)
         {
             try
             {
-                var response = await _userManagementService.LoginUserWithJwtTokenAsync(otp, email);
+                var response = await _userManagementService.LoginUserWithOTPAsync(otp, userNameOrEmail);
+                if (response.IsSuccess)
+                {
+                    return Ok(response);
+                }
                 return Ok(response);
             }
             catch(Exception ex)
@@ -188,9 +189,106 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpGet("current-user")]
-        public ClaimsPrincipal GetCurrentUser()
+        public async Task<IActionResult> GetCurrentUser()
         {
-            return HttpContext.User;
+            if (HttpContext.User != null && HttpContext.User.Identity != null &&
+                HttpContext.User.Identity.Name != null)
+            {
+                var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                if (currentUser != null)
+                {
+                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<object>
+                    {
+                        StatusCode = 200,
+                        IsSuccess = true,
+                        Message = "User founded successfully",
+                        ResponseObject = new
+                        {
+                            DisplayName = currentUser.DisplayName,
+                            FirstName = currentUser.FirstName,
+                            Email = currentUser.Email,
+                            LastName = currentUser.LastName,
+                            PhoneNumber = currentUser.PhoneNumber,
+                            UserName = currentUser.UserName
+                        }
+                    });
+                }
+                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                {
+                    StatusCode = 404,
+                    IsSuccess = false,
+                    Message = "User not found"
+                });
+            }
+            return RedirectPermanent("/error/401");
+        }
+
+        [HttpGet("Me/{userName}")]
+        public async Task<IActionResult> GetUserByUserNameAsync([FromRoute] string userName)
+        {
+            try
+            {
+                var userByUserName = await _userManager.FindByNameAsync(userName);
+                if (userByUserName == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                    {
+                        StatusCode = 404,
+                        IsSuccess = false,
+                        Message = "User not found"
+                    });
+                }
+                if (HttpContext.User != null && HttpContext.User.Identity != null &&
+                HttpContext.User.Identity.Name != null)
+                {
+                    var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (loggedInUser != null)
+                    {
+                        
+                        if(userByUserName.UserName == loggedInUser.UserName)
+                        {
+                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<object>
+                            {
+                                StatusCode = 200,
+                                IsSuccess = true,
+                                Message = "User founded successfully",
+                                ResponseObject = new
+                                {
+                                    DisplayName = loggedInUser.DisplayName,
+                                    FirstName = loggedInUser.FirstName,
+                                    Email = loggedInUser.Email,
+                                    LastName = loggedInUser.LastName,
+                                    PhoneNumber = loggedInUser.PhoneNumber,
+                                    UserName = loggedInUser.UserName,
+                                    roles = await _userManager.GetRolesAsync(loggedInUser)
+                                }
+                            });
+                        }
+                    }
+                }
+                return StatusCode(StatusCodes.Status200OK, new ApiResponse<object>
+                {
+                    StatusCode = 200,
+                    IsSuccess = true,
+                    Message = "User founded successfully",
+                    ResponseObject = new
+                    {
+                        DisplayName = userByUserName.DisplayName,
+                        FirstName = userByUserName.FirstName,
+                        LastName = userByUserName.LastName,
+                        UserName = userByUserName.UserName
+                    }
+                });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
         }
 
         [HttpPost("enable-2FA-byEmail")]
@@ -206,7 +304,7 @@ namespace SocialMedia.Api.Controllers
             var user = await _userManager.FindByNameAsync(userName);
             if (user != null)
             {
-                var response = await _userManagementService.EnableTwoFactorAuthenticationAsync(user.UserName);
+                var response = await _userManagementService.EnableTwoFactorAuthenticationAsync(user.Email!);
                 return Ok(response);
             }
             return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
@@ -337,11 +435,11 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("resetEmailLink")]
-        public async Task<IActionResult> SendEmailToResetEmailAsync(ResetEmailDto resetEmailDto)
+        public async Task<IActionResult> SendEmailToResetEmailAsync(ResetEmailObjectDto resetEmailObjectDto)
         {
             try
             {
-                var response = await _userManagementService.GenerateResetEmailTokenAsync(resetEmailDto);
+                var response = await _userManagementService.GenerateResetEmailTokenAsync(resetEmailObjectDto);
                 if (response.IsSuccess)
                 {
                     if (response.ResponseObject != null)
@@ -349,8 +447,8 @@ namespace SocialMedia.Api.Controllers
                         var resetEmailLink = Url.Action(nameof(GenerateEmailResetObject), "Account",
                             new
                             {
-                                oldEmail = resetEmailDto.OldEmail,
-                                newEmail = resetEmailDto.NewEmail,
+                                oldEmail = resetEmailObjectDto.OldEmail,
+                                newEmail = resetEmailObjectDto.NewEmail,
                                 token = response.ResponseObject.Token
                             }, Request.Scheme);
                         var message = new Message(new string[] { response.ResponseObject.OldEmail! },

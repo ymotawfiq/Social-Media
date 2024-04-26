@@ -33,19 +33,13 @@ namespace SocialMedia.Api.Controllers
         [HttpGet("401")]
         public async Task<IActionResult> UnauthorizedAsync()
         {
-            if (HttpContext.User.Identity != null && HttpContext.User.Identity.Name != null)
+            return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
             {
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized",
-                    ResponseObject = "Unauthorized"
-                });
-
-            }
-            return Redirect("/login");
-
+                StatusCode = 401,
+                IsSuccess = false,
+                Message = "Unauthorized",
+                ResponseObject = "Unauthorized"
+            });
         }
 
         [HttpGet("403")]

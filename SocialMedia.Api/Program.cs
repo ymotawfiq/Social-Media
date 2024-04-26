@@ -43,6 +43,12 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(op =>
     op.TokenLifespan = TimeSpan.FromMinutes(5);
 });
 
+builder.Services.ConfigureApplicationCookie(op =>
+{
+    op.AccessDeniedPath = "/error/403";
+    op.LoginPath = "/login";
+});
+
 builder.Services.AddAuthentication(op =>
 {
     op.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

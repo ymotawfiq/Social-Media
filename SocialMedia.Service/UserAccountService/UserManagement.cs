@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Crypto.Generators;
+using SocialMedia.Data;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
@@ -24,18 +26,21 @@ namespace SocialMedia.Service.UserAccountService
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly SignInManager<SiteUser> _signInManager;
+        private readonly ApplicationDbContext _dbContext;
         public UserManagement
             (
             UserManager<SiteUser> _userManager,
             RoleManager<IdentityRole> _roleManager,
             IConfiguration _configuration,
-            SignInManager<SiteUser> _signInManager
+            SignInManager<SiteUser> _signInManager,
+            ApplicationDbContext _dbContext
             )
         {
             this._configuration = _configuration;
             this._roleManager = _roleManager;
             this._userManager = _userManager;
             this._signInManager = _signInManager;
+            this._dbContext = _dbContext;
         }
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
@@ -157,9 +162,10 @@ namespace SocialMedia.Service.UserAccountService
             };
         }
 
-        public async Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(ResetEmailDto resetEmailDto)
+        public async Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(
+            ResetEmailObjectDto resetEmailObjectDto)
         {
-            var user = await _userManager.FindByEmailAsync(resetEmailDto.OldEmail);
+            var user = await _userManager.FindByEmailAsync(resetEmailObjectDto.OldEmail);
             if (user == null)
             {
                 return new ApiResponse<ResetEmailDto>
@@ -169,14 +175,37 @@ namespace SocialMedia.Service.UserAccountService
                     StatusCode = 404
                 };
             }
-            var token = await _userManager.GenerateChangeEmailTokenAsync(user, resetEmailDto.NewEmail);
-            resetEmailDto.Token = token;
+            else if(resetEmailObjectDto.OldEmail == resetEmailObjectDto.NewEmail)
+            {
+                return new ApiResponse<ResetEmailDto>
+                {
+                    IsSuccess = false,
+                    Message = "New email can't be same as old email",
+                    StatusCode = 400  
+                };
+            }
+            var userWithNewEmail = await _userManager.FindByEmailAsync(resetEmailObjectDto.NewEmail);
+            if (userWithNewEmail != null)
+            {
+                return new ApiResponse<ResetEmailDto>
+                {
+                    IsSuccess = false,
+                    Message = "Email already exists to user",
+                    StatusCode = 403
+                };
+            }
+            var token = await _userManager.GenerateChangeEmailTokenAsync(user, resetEmailObjectDto.NewEmail);
             return new ApiResponse<ResetEmailDto>
             {
                 IsSuccess = true,
                 Message = "Reset email token generated successfully",
                 StatusCode = 200,
-                ResponseObject = resetEmailDto
+                ResponseObject = new ResetEmailDto
+                {
+                    NewEmail = resetEmailObjectDto.NewEmail,
+                    OldEmail = resetEmailObjectDto.OldEmail,
+                    Token = token
+                }
             };
         }
 
@@ -234,15 +263,33 @@ namespace SocialMedia.Service.UserAccountService
             };
         }
 
-        public async Task<ApiResponse<LoginOtpResponse>> GetOtpByLoginAsync(LoginDto loginDto)
+        public async Task<ApiResponse<LoginOtpResponse>> LoginUserAsync(LoginDto loginDto)
         {
             var user = await GetUserByUserNameOrEmailAsync(loginDto.UserNameOrEmail);
             if (user != null)
             {
+                if (!user.EmailConfirmed)
+                {
+                    return new ApiResponse<LoginOtpResponse>
+                    {
+                        IsSuccess = false,
+                        Message = "Please confirm your email",
+                        StatusCode = 400
+                    };
+                }
                 await _signInManager.SignOutAsync();
-                await _signInManager.PasswordSignInAsync(user, loginDto.Password, false, false);
                 if (user.TwoFactorEnabled)
                 {
+                    var signIn = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+                    if (!signIn.Succeeded)
+                    {
+                        return new ApiResponse<LoginOtpResponse>
+                        {
+                            IsSuccess = false,
+                            Message = "Invalid user name or password",
+                            StatusCode = 400
+                        };
+                    }
                     var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
                     return new ApiResponse<LoginOtpResponse>
                     {
@@ -259,6 +306,17 @@ namespace SocialMedia.Service.UserAccountService
                 }
                 else
                 {
+                    var signIn = await _signInManager.PasswordSignInAsync(user,
+                            loginDto.Password, false, false);
+                    if (!signIn.Succeeded)
+                    {
+                        return new ApiResponse<LoginOtpResponse>
+                        {
+                            IsSuccess = false,
+                            Message = "Invalid user name or password",
+                            StatusCode = 400
+                        };
+                    }
                     return new ApiResponse<LoginOtpResponse>
                     {
                         IsSuccess = true,
@@ -271,6 +329,7 @@ namespace SocialMedia.Service.UserAccountService
                         }
                     };
                 }
+
             }
             return new ApiResponse<LoginOtpResponse>
             {
@@ -280,10 +339,11 @@ namespace SocialMedia.Service.UserAccountService
             };
         }
 
-        public async Task<ApiResponse<LoginResponse>> LoginUserWithJwtTokenAsync(string otp, string email)
+        public async Task<ApiResponse<LoginResponse>> LoginUserWithOTPAsync(string otp, 
+            string userNameOrEmail)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            var signIn = await _signInManager.TwoFactorSignInAsync("Email", otp, true, false);
+            var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
+            var signIn = await _signInManager.TwoFactorSignInAsync("Email", otp, false, false);
             if (signIn.Succeeded)
             {
                 if (user != null)
@@ -442,6 +502,28 @@ namespace SocialMedia.Service.UserAccountService
         }
 
         #region Private Method
+
+        private string getHash(string text)
+        {
+            // SHA512 is disposable by inheritance.  
+            using (var sha256 = SHA256.Create())
+            {
+                // Send a sample text to hash.  
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
+                // Get the hashed string.  
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
+        }
+
+        private string getSalt()
+        {
+            byte[] bytes = new byte[128 / 8];
+            using (var keyGenerator = RandomNumberGenerator.Create())
+            {
+                keyGenerator.GetBytes(bytes);
+                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            }
+        }
 
         private async Task<SiteUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
         {
