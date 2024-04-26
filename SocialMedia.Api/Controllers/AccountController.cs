@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
 using SocialMedia.Data.DTOs.Authentication.ResetPassword;
+using SocialMedia.Data.DTOs.Authentication.UpdateAccount;
 using SocialMedia.Data.DTOs.Authentication.User;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
@@ -75,14 +77,49 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpPost("resendConfirmationEmailLink")]
+        public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string email)
+        {
+            try
+            {
+                var response = await _userManagementService.GenerateEmailConfirmationTokenAsync(email);
+                if (response.IsSuccess)
+                {
+                    var emailConfirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
+                        new
+                        {
+                            email = email,
+                            token = response.ResponseObject
+                        }, Request.Scheme);
+                    var message = new Message(new string[] { email }, "Confirm email link", 
+                        emailConfirmationLink!);
+                    _emailService.SendEmail(message);
+                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                    {
+                        StatusCode = 200,
+                        IsSuccess = true,
+                        Message = "Email confirmation link resent successfully"
+                    });
+                }
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string email, string token)
         {
             var result = await _userManagementService.ConfirmEmailAsync(email, token);
             return Ok(result);
         }
-
-
 
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
@@ -156,11 +193,28 @@ namespace SocialMedia.Api.Controllers
             return HttpContext.User;
         }
 
-        [HttpPost("enable-2FA")]
-        public async Task<IActionResult> EnableTwoFactorAuthenticationAsync([FromBody]string email)
+        [HttpPost("enable-2FA-byEmail")]
+        public async Task<IActionResult> EnableTwoFactorAuthenticationByEmailAsync([FromBody]string email)
         {
             var response = await _userManagementService.EnableTwoFactorAuthenticationAsync(email);
             return Ok(response);
+        }
+
+        [HttpPost("enable-2FA-byUserName")]
+        public async Task<IActionResult> EnableTwoFactorAuthenticationByUserNameAsync([FromBody] string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user != null)
+            {
+                var response = await _userManagementService.EnableTwoFactorAuthenticationAsync(user.UserName);
+                return Ok(response);
+            }
+            return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+            {
+                StatusCode = 404,
+                IsSuccess = false,
+                Message = "User name not found"
+            });
         }
 
         [HttpPost("refresh-token")]
@@ -222,7 +276,7 @@ namespace SocialMedia.Api.Controllers
                         {
                             StatusCode = 200,
                             IsSuccess = true,
-                            Message = "Forget password link sent ssuccessfully to your email"
+                            Message = "Forget password link sent successfully to your email"
                         });
                     }
                 }
@@ -282,17 +336,12 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
-        [HttpPost("sendEmailToResetEmail")]
-        public async Task<IActionResult> SendEmailToResetEmailAsync(string oldEmail, string newEmail)
+        [HttpPost("resetEmailLink")]
+        public async Task<IActionResult> SendEmailToResetEmailAsync(ResetEmailDto resetEmailDto)
         {
             try
             {
-                var response = await _userManagementService.GenerateResetEmailTokenAsync(
-                new ResetEmailDto
-                {
-                    OldEmail = oldEmail,
-                    NewEmail = newEmail
-                });
+                var response = await _userManagementService.GenerateResetEmailTokenAsync(resetEmailDto);
                 if (response.IsSuccess)
                 {
                     if (response.ResponseObject != null)
@@ -300,8 +349,8 @@ namespace SocialMedia.Api.Controllers
                         var resetEmailLink = Url.Action(nameof(GenerateEmailResetObject), "Account",
                             new
                             {
-                                oldEmail = oldEmail,
-                                newEmail = newEmail,
+                                oldEmail = resetEmailDto.OldEmail,
+                                newEmail = resetEmailDto.NewEmail,
                                 token = response.ResponseObject.Token
                             }, Request.Scheme);
                         var message = new Message(new string[] { response.ResponseObject.OldEmail! },
@@ -363,6 +412,70 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpPut("updateAccountInfo")]
+        public async Task<IActionResult> UpdateAccountInfoAsync(
+            [FromBody] UpdateAccountInfoDto updateAccountDto)
+        {
+            try
+            {
+                if(HttpContext.User!=null && HttpContext.User.Identity!=null 
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (loggedInUser != null)
+                    {
+                        loggedInUser.FirstName = updateAccountDto.FirstName;
+                        loggedInUser.LastName = updateAccountDto.LastName;
+                        loggedInUser.DisplayName = updateAccountDto.DisplayName;
+                        await _userManager.UpdateAsync(loggedInUser);
+                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                        {
+                            StatusCode = 200,
+                            IsSuccess = true,
+                            Message = "Account updated successfully"
+                        });
+                    }
+                }
+
+                return RedirectPermanent("/error/403");
+
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("updateAccountRoles")]
+        public async Task<IActionResult> UpdateAccountRolesAsync(
+            [FromBody] UpdateAccountRolesDto updateAccountRolesDto)
+        {
+            var user = await GetUserByUserNameOrEmailAsync(updateAccountRolesDto.UserNameOrEmail);
+            if (user == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                {
+                    StatusCode = 404,
+                    IsSuccess = false,
+                    Message = "Account not found"
+                });
+            }
+            await _userManagementService.AssignRolesToUserAsync(updateAccountRolesDto.Roles, user);
+            await _userManager.UpdateAsync(user);
+            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+            {
+                StatusCode = 200,
+                IsSuccess = true,
+                Message = "Account roles updated successfully"
+            });
+        }
+
+
         [HttpDelete("delete-account")]
         public async Task<IActionResult> DeleteAccountAsync(string email)
         {
@@ -382,5 +495,25 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+
+        #region Private Methods
+
+        private async Task<SiteUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
+        {
+            var userByEmail = await _userManager.FindByEmailAsync(userNameOrEmail);
+            var userByName = await _userManager.FindByNameAsync(userNameOrEmail);
+            if (userByEmail == null && userByName != null)
+            {
+                return userByName;
+            }
+            else if (userByName == null && userByEmail != null)
+            {
+                return userByEmail;
+            }
+            return null;
+        }
+
+
+        #endregion
     }
 }

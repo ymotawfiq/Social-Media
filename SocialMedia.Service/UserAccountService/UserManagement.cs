@@ -1,6 +1,7 @@
 ﻿
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SocialMedia.Data.DTOs.Authentication.Login;
@@ -39,14 +40,32 @@ namespace SocialMedia.Service.UserAccountService
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
             List<string> assignRoles = new();
-            foreach(var role in roles)
+            var siteRoles = await _roleManager.Roles.ToListAsync();
+            if (roles.Contains("Admin"))
             {
-                if(await _roleManager.RoleExistsAsync(role))
+                foreach(var role in siteRoles)
                 {
-                    if(!await _userManager.IsInRoleAsync(user, role))
+                    if (role.Name != null)
                     {
-                        await _userManager.AddToRoleAsync(user, role);
-                        assignRoles.Add(role);
+                        if (!await _userManager.IsInRoleAsync(user, role.Name))
+                        {
+                            await _userManager.AddToRoleAsync(user, role.Name);
+                            assignRoles.Add(role.Name);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var role in roles)
+                {
+                    if (await _roleManager.RoleExistsAsync(role))
+                    {
+                        if (!await _userManager.IsInRoleAsync(user, role))
+                        {
+                            await _userManager.AddToRoleAsync(user, role);
+                            assignRoles.Add(role);
+                        }
                     }
                 }
             }
@@ -317,7 +336,7 @@ namespace SocialMedia.Service.UserAccountService
             return await GetJwtTokenAsync(user);
         }
 
-        public async Task<ApiResponse<string>> ResendEmailConfirmationAsync(string email)
+        public async Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if(user == null)

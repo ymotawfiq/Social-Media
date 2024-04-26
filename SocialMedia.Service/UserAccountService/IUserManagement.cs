@@ -21,7 +21,7 @@ namespace SocialMedia.Service.UserAccountService
         Task<ApiResponse<string>> ConfirmEmailAsync(string email, string token);
         Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
         Task<ApiResponse<ResetPasswordDto>> GenerateResetPasswordTokenAsync(string email);
-        Task<ApiResponse<string>> ResendEmailConfirmationAsync(string email);
+        Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string email);
         Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(ResetEmailDto resetEmailDto);
         Task<ApiResponse<string>> EnableTwoFactorAuthenticationAsync(string email);
         Task<ApiResponse<string>> DeleteAccountAsync(string email);
