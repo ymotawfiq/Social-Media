@@ -19,22 +19,21 @@ namespace SocialMedia.Service.SendEmailService
         {
             var emailMessage = CreateEmailMessage(message);
             Send(emailMessage);
-            var recipients = string.Join(", ", message.To);
-            return ResponseMessage.GetEmailSuccessMessage(recipients);
+            //var recipients = string.Join(", ", message.To);
+            return ResponseMessage.GetEmailSuccessMessage("Success");
         }
 
         private MimeMessage CreateEmailMessage(Message message)
         {
-            var emailMessage = new MimeMessage();
+            MimeMessage emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress("email", _emailConfig.From));
             emailMessage.To.AddRange(message.To);
             emailMessage.Subject = message.Subject;
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
-
             return emailMessage;
         }
 
-        private void Send(MimeMessage mailMessage)
+        private void Send(MimeMessage message)
         {
             using var client = new SmtpClient();
             try
@@ -43,11 +42,10 @@ namespace SocialMedia.Service.SendEmailService
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
                 client.Authenticate(_emailConfig.Username, _emailConfig.Password);
 
-                client.Send(mailMessage);
+                client.Send(message);
             }
-            catch
+            catch (Exception)
             {
-                //log an error message or throw an exception or both.
                 throw;
             }
             finally

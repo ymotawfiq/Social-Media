@@ -48,10 +48,10 @@ namespace SocialMedia.Api.Controllers
                         new
                         {
                             token = tokenResponse.ResponseObject.Token,
-                            email = registerDto.Email
+                            userNameOrEmail = registerDto.Email
                         }, Request.Scheme);
-                    var message = new Message(new string[] { registerDto.Email }, "Confirmation email link",
-                        confirmationLink!);
+                    var message = new Message(new string[] { registerDto.Email },
+                        "Confirmation Email Link", confirmationLink!);
                     _emailService.SendEmail(message);
 
                     return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
@@ -75,20 +75,20 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("resendConfirmationEmailLink")]
-        public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string email)
+        public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string userNameOrEmail)
         {
             try
             {
-                var response = await _userManagementService.GenerateEmailConfirmationTokenAsync(email);
+                var response = await _userManagementService.GenerateEmailConfirmationTokenAsync(userNameOrEmail);
                 if (response.IsSuccess)
                 {
                     var emailConfirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
                         new
                         {
-                            email = email,
+                            userNameOrEmail = userNameOrEmail,
                             token = response.ResponseObject
                         }, Request.Scheme);
-                    var message = new Message(new string[] { email }, "Confirm email link", 
+                    var message = new Message(new string[] { userNameOrEmail }, "Confirm email link", 
                         emailConfirmationLink!);
                     _emailService.SendEmail(message);
                     return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
@@ -112,9 +112,9 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpGet("confirm-email")]
-        public async Task<IActionResult> ConfirmEmail(string email, string token)
+        public async Task<IActionResult> ConfirmEmail(string userNameOrEmail, string token)
         {
-            var result = await _userManagementService.ConfirmEmailAsync(email, token);
+            var result = await _userManagementService.ConfirmEmail(userNameOrEmail, token);
             return Ok(result);
         }
 
@@ -574,13 +574,94 @@ namespace SocialMedia.Api.Controllers
         }
 
 
-        [HttpDelete("delete-account")]
-        public async Task<IActionResult> DeleteAccountAsync(string email)
+        [HttpGet("delete-account/{userNameOrEmail}")]
+        public async Task<IActionResult> DeleteAccountAsync([FromRoute] string userNameOrEmail)
         {
             try
             {
-                var response = await _userManagementService.DeleteAccountAsync(email);
-                return Ok(response);
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
+                    if (user != null && loggedInUser != null)
+                    {
+                        var loggedInUserRoles = await _userManager.GetRolesAsync(loggedInUser);
+                        if (loggedInUser.Email == user.Email || loggedInUserRoles.Contains("Admin"))
+                        {
+                            var response = await _userManagementService.DeleteAccountAsync(userNameOrEmail);
+                            return Ok(response);
+                        }
+                    }
+                    return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                    {
+                        StatusCode = 403,
+                        IsSuccess = false,
+                        Message = "Forbidden"
+                    });
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("delete-account")]
+        public async Task<IActionResult> DeleteAccount1Async(string userNameOrEmail)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
+                    if (user != null && user.Email != null && loggedInUser != null)
+                    {
+                        if (user.Email == loggedInUser.Email)
+                        {
+                            string url = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/delete-account/{userNameOrEmail}";
+                            var message = new Message(new string[] { user.Email }, "Delete account", url);
+                            _emailService.SendEmail(message);
+                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                            {
+                                StatusCode = 200,
+                                IsSuccess = true,
+                                Message = "Delete account email sent successfully to your email"
+                            });
+                        }
+                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                        {
+                            StatusCode = 403,
+                            IsSuccess = false,
+                            Message = "Forbidden"
+                        });
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                    {
+                        StatusCode = 404,
+                        IsSuccess = false,
+                        Message = "User not found"
+                    });
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
             }
             catch (Exception ex)
             {

@@ -83,12 +83,23 @@ namespace SocialMedia.Service.UserAccountService
             };
         }
 
-        public async Task<ApiResponse<string>> ConfirmEmailAsync(string email, string token)
+        public async Task<ApiResponse<string>> ConfirmEmail(string userNameOrEmail, string token)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
             if (user != null)
             {
-                await _userManager.ConfirmEmailAsync(user, token);
+                var confirmEmail = await _userManager.ConfirmEmailAsync(user, token);
+                if (!confirmEmail.Succeeded)
+                {
+                    return new ApiResponse<string>
+                    {
+                        IsSuccess = true,
+                        Message = "Failed to confirm email",
+                        StatusCode = 400,
+                        ResponseObject = "Failed to confirm email"
+                    };
+                }
+
                 return new ApiResponse<string>
                 {
                     IsSuccess = true,
@@ -96,10 +107,12 @@ namespace SocialMedia.Service.UserAccountService
                     StatusCode = 200,
                     ResponseObject = "Email confirmed successfully"
                 };
+                
             }
+
             return new ApiResponse<string>
             {
-                IsSuccess = false,
+                IsSuccess = true,
                 Message = "User not found",
                 StatusCode = 404,
                 ResponseObject = "User not found"
@@ -396,9 +409,9 @@ namespace SocialMedia.Service.UserAccountService
             return await GetJwtTokenAsync(user);
         }
 
-        public async Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string email)
+        public async Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string userNameOrEmail)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
             if(user == null)
             {
                 return new ApiResponse<string>
@@ -471,9 +484,9 @@ namespace SocialMedia.Service.UserAccountService
             };
         }
 
-        public async Task<ApiResponse<string>> DeleteAccountAsync(string email)
+        public async Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
             if (user == null)
             {
                 return new ApiResponse<string>
@@ -502,28 +515,6 @@ namespace SocialMedia.Service.UserAccountService
         }
 
         #region Private Method
-
-        private string getHash(string text)
-        {
-            // SHA512 is disposable by inheritance.  
-            using (var sha256 = SHA256.Create())
-            {
-                // Send a sample text to hash.  
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
-                // Get the hashed string.  
-                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
-            }
-        }
-
-        private string getSalt()
-        {
-            byte[] bytes = new byte[128 / 8];
-            using (var keyGenerator = RandomNumberGenerator.Create())
-            {
-                keyGenerator.GetBytes(bytes);
-                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-            }
-        }
 
         private async Task<SiteUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
         {

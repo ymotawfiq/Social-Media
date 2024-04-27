@@ -18,12 +18,12 @@ namespace SocialMedia.Service.UserAccountService
         Task<ApiResponse<LoginResponse>> GetJwtTokenAsync(SiteUser user);
         Task<ApiResponse<LoginResponse>> LoginUserWithOTPAsync(string otp, string userNameOrEmail);
         Task<ApiResponse<LoginResponse>> RenewAccessTokenAsync(LoginResponse tokens);
-        Task<ApiResponse<string>> ConfirmEmailAsync(string email, string token);
+        Task<ApiResponse<string>> ConfirmEmail(string userNameOrEmail, string token);
         Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
         Task<ApiResponse<ResetPasswordDto>> GenerateResetPasswordTokenAsync(string email);
         Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string email);
         Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(ResetEmailObjectDto resetEmailObjectDto);
         Task<ApiResponse<string>> EnableTwoFactorAuthenticationAsync(string email);
-        Task<ApiResponse<string>> DeleteAccountAsync(string email);
+        Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail);
     }
 }
