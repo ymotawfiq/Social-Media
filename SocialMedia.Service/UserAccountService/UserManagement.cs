@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Crypto.Generators;
 using SocialMedia.Data;
+using SocialMedia.Data.DTOs.Authentication.EmailConfirmation;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
@@ -409,12 +410,13 @@ namespace SocialMedia.Service.UserAccountService
             return await GetJwtTokenAsync(user);
         }
 
-        public async Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string userNameOrEmail)
+        public async Task<ApiResponse<EmailConfirmationDto>> GenerateEmailConfirmationTokenAsync
+            (string userNameOrEmail)
         {
             var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
             if(user == null)
             {
-                return new ApiResponse<string>
+                return new ApiResponse<EmailConfirmationDto>
                 {
                     IsSuccess = false,
                     Message = "User not found",
@@ -422,12 +424,16 @@ namespace SocialMedia.Service.UserAccountService
                 };
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            return new ApiResponse<string>
+            return new ApiResponse<EmailConfirmationDto>
             {
                 StatusCode = 200,
                 IsSuccess = true,
                 Message = "Email confirmation token generated successfully",
-                ResponseObject = token
+                ResponseObject = new EmailConfirmationDto
+                {
+                   Token = token,
+                    User = user
+                }
             };
         }
 

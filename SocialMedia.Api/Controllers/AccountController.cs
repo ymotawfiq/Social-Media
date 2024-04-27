@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
@@ -12,6 +14,7 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.MessageModel;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace SocialMedia.Api.Controllers
@@ -34,6 +37,32 @@ namespace SocialMedia.Api.Controllers
             this._userManager = _userManager;
         }
 
+        [HttpGet("accessToken")]
+        public async Task<ActionResult<string>> GetAccessToken()
+        {
+            if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+            {
+                var token = HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+                return token!;
+            }
+            return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+            {
+                StatusCode = 401,
+                IsSuccess = false,
+                Message = "Unauthorized"
+            });
+        }
+
+        [HttpGet("decodeJWTToken")]
+        public async Task<ActionResult<object>> DecodeAccessToken(string token)
+        {
+            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var decodedToken = DecodeJwt(jwtToken);
+            return decodedToken!;
+            //return GetEmailFromJwtPayload(token);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerDto)
         {
@@ -44,12 +73,15 @@ namespace SocialMedia.Api.Controllers
                 {
                     await _userManagementService.AssignRolesToUserAsync(registerDto.Roles,
                         tokenResponse.ResponseObject.User);
+
+
                     var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
                         new
                         {
                             token = tokenResponse.ResponseObject.Token,
                             userNameOrEmail = registerDto.Email
                         }, Request.Scheme);
+
                     var message = new Message(new string[] { registerDto.Email },
                         "Confirmation Email Link", confirmationLink!);
                     _emailService.SendEmail(message);
@@ -82,21 +114,32 @@ namespace SocialMedia.Api.Controllers
                 var response = await _userManagementService.GenerateEmailConfirmationTokenAsync(userNameOrEmail);
                 if (response.IsSuccess)
                 {
-                    var emailConfirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
-                        new
-                        {
-                            userNameOrEmail = userNameOrEmail,
-                            token = response.ResponseObject
-                        }, Request.Scheme);
-                    var message = new Message(new string[] { userNameOrEmail }, "Confirm email link", 
-                        emailConfirmationLink!);
-                    _emailService.SendEmail(message);
-                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                    if (response.ResponseObject!=null && response.ResponseObject.User != null)
                     {
-                        StatusCode = 200,
-                        IsSuccess = true,
-                        Message = "Email confirmation link resent successfully"
-                    });
+                        /*
+                         
+                         https://localhost:8001/confirm-email?token=CfDJ8D8ZUwNOdqxJuCP%2FLCTx6y7Qr5XBtpH90XpV%2Bgp7VTrU%2Finuy6r8K7rPgzwPGV%2BCHMJwPsfZoFxvS%2FqJrf%2BDwMjAvXrMyc95c%2BkaqAxNa3rbbFxzD9n%2F4v%2BHBBW852FDhnV%2BXZJRjyun%2BRjep0C5LIy99KSJjVipQhn1uCDVNusWCPZwNf4E3MkJAd6TZbnYvk72RA5fUC58rrYz1a%2BkuzHPqcW6VVUZ3ZUegR%2BoPPsUeSEJtNlS2btU%2BsHy9LkuLg%3D%3D&userNameOrEmail=yousef12
+                         */
+
+                        var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
+                            new
+                            {
+                                token = response.ResponseObject.Token,
+                                userNameOrEmail = userNameOrEmail
+                            }, Request.Scheme);
+
+                        var message = new Message(new string[] { response.ResponseObject.User.Email! }
+                        , "Confirm email link", confirmationLink!);
+
+                        _emailService.SendEmail(message);
+                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                        {
+                            StatusCode = 200,
+                            IsSuccess = true,
+                            Message = "Email confirmation link resent successfully"
+                        });
+                    }
+                    
                 }
                 return Ok(response);
             }
@@ -127,7 +170,7 @@ namespace SocialMedia.Api.Controllers
                 if (loginResponse.ResponseObject != null)
                 {
                     var user = loginResponse.ResponseObject.User;
-                    if (user != null)
+                    if (user != null && user.Email!=null)
                     {
                         if (user.TwoFactorEnabled)
                         {
@@ -334,7 +377,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpGet("reset-password-object")]
+        [HttpGet("generatePasswordResetObject")]
         public async Task<IActionResult> GenerateResetPasswordObject(string email,string token)
         {
             var resetPasswordObject = new ResetPasswordDto
@@ -361,12 +404,14 @@ namespace SocialMedia.Api.Controllers
                 {
                     if (response.ResponseObject != null)
                     {
+
                         var forgerPasswordLink = Url.Action(nameof(GenerateResetPasswordObject), "Account",
                             new
                             {
-                                email = response.ResponseObject.Email,
-                                token = response.ResponseObject.Token
+                                token = response.ResponseObject.Token,
+                                email = email
                             }, Request.Scheme);
+
                         var message = new Message(new string[] { response.ResponseObject.Email! },
                             "Forget password", forgerPasswordLink!);
                         _emailService.SendEmail(message);
@@ -447,10 +492,11 @@ namespace SocialMedia.Api.Controllers
                         var resetEmailLink = Url.Action(nameof(GenerateEmailResetObject), "Account",
                             new
                             {
+                                token = response.ResponseObject.Token,
                                 oldEmail = resetEmailObjectDto.OldEmail,
-                                newEmail = resetEmailObjectDto.NewEmail,
-                                token = response.ResponseObject.Token
+                                newEmail = resetEmailObjectDto.NewEmail
                             }, Request.Scheme);
+                        
                         var message = new Message(new string[] { response.ResponseObject.OldEmail! },
                             "Reset email", resetEmailLink!);
                         _emailService.SendEmail(message);
@@ -573,52 +619,7 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
-
-        [HttpGet("delete-account/{userNameOrEmail}")]
-        public async Task<IActionResult> DeleteAccountAsync([FromRoute] string userNameOrEmail)
-        {
-            try
-            {
-                if (HttpContext.User != null && HttpContext.User.Identity != null
-                    && HttpContext.User.Identity.Name != null)
-                {
-                    var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
-                    if (user != null && loggedInUser != null)
-                    {
-                        var loggedInUserRoles = await _userManager.GetRolesAsync(loggedInUser);
-                        if (loggedInUser.Email == user.Email || loggedInUserRoles.Contains("Admin"))
-                        {
-                            var response = await _userManagementService.DeleteAccountAsync(userNameOrEmail);
-                            return Ok(response);
-                        }
-                    }
-                    return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                    {
-                        StatusCode = 403,
-                        IsSuccess = false,
-                        Message = "Forbidden"
-                    });
-                }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
-            }
-        }
-
-        [HttpDelete("delete-account")]
+        [HttpDelete("deleteAccountLink")]
         public async Task<IActionResult> DeleteAccount1Async(string userNameOrEmail)
         {
             try
@@ -632,7 +633,10 @@ namespace SocialMedia.Api.Controllers
                     {
                         if (user.Email == loggedInUser.Email)
                         {
-                            string url = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/delete-account/{userNameOrEmail}";
+                            var token = HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+
+                            string url = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/" +
+                                $"delete-account?userNameOrEmail={userNameOrEmail}&token={token}";
                             var message = new Message(new string[] { user.Email }, "Delete account", url);
                             _emailService.SendEmail(message);
                             return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
@@ -674,6 +678,56 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpDelete("delete-account")]
+        public async Task<IActionResult> DeleteAccountAsync(string userNameOrEmail, string token)
+        {
+            try
+            {
+                bool checkToken = new JwtSecurityTokenHandler().CanReadToken(token);
+                if (!checkToken)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
+                    {
+                        StatusCode = 400,
+                        IsSuccess = false,
+                        Message = "Can't read token"
+                    });
+                }
+                var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                var userEmail = GetEmailFromJwtPayload(jwtToken);
+                if (userEmail != null && !userEmail.ToString().IsNullOrEmpty())
+                {
+                    var userByToken = await _userManager.FindByEmailAsync(userEmail);
+                    var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
+                    if (userByToken != null && user != null)
+                    {
+                        if (userByToken.UserName == user.UserName)
+                        {
+                            var response = await _userManagementService.DeleteAccountAsync(userNameOrEmail);
+                            return Ok(response);
+                        }
+                    }
+
+                }
+
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
 
         #region Private Methods
 
@@ -689,9 +743,53 @@ namespace SocialMedia.Api.Controllers
             {
                 return userByEmail;
             }
-            return null;
+            return null!;
         }
 
+        private object DecodeJwt(JwtSecurityToken token)
+        {
+            var keyId = token.Header.Kid;
+            var audience = token.Audiences.ToList();
+            var claims = token.Claims.Select(claim => (claim.Type, claim.Value)).ToList();
+            return new
+            {
+                keyId,
+                token.Issuer,
+                audience,
+                claims,
+                token.ValidTo,
+                token.SignatureAlgorithm,
+                token.RawData,
+                token.Subject,
+                token.ValidFrom,
+                token.Header,
+                token.Payload
+            };
+              
+            
+        }
+
+        private string GetEmailFromJwtPayload(JwtSecurityToken token)
+        {
+            
+            var payload = token.Payload;
+            var values = payload.Values;
+            return values.First().ToString()!;
+        }
+
+        /*
+         
+         "payload": 
+        {
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": "ymotawfiq@gmail.com",
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": "yousef12",
+            "jti": "12f11ec3-866b-4b9b-914a-058ecccd3f45",
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": "User",
+            "exp": 1714209353,
+            "iss": "https://localhost:8001",
+            "aud": "https://localhost:8001"
+         }
+         */
 
         #endregion
     }

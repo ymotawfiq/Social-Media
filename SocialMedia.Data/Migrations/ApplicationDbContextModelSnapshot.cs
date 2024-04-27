@@ -51,28 +51,28 @@ namespace SocialMedia.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "13e394c2-75ed-4ea9-8efe-914e7d493a29",
+                            Id = "36f46ec0-836e-4790-b036-5e8c48d0bae2",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "143d1ae6-e27b-43e4-8af9-22ea295d6843",
+                            Id = "ddb5d2b2-f1bd-4b8d-b309-745e29055878",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "User"
                         },
                         new
                         {
-                            Id = "dff801f6-8f3c-49a3-8b5c-0c9c95b907f4",
+                            Id = "24e485de-3e01-4272-acc5-5cea03f089cb",
                             ConcurrencyStamp = "3",
                             Name = "Owner",
                             NormalizedName = "Owner"
                         },
                         new
                         {
-                            Id = "b6e7c2ca-be0e-482f-9859-9059f10e0676",
+                            Id = "65001ed3-ebb2-4e71-bad3-cb59b70babfc",
                             ConcurrencyStamp = "4",
                             Name = "moderator",
                             NormalizedName = "moderator"

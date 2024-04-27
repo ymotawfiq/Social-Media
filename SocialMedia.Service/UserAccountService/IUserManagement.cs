@@ -1,5 +1,6 @@
 ﻿
 
+using SocialMedia.Data.DTOs.Authentication.EmailConfirmation;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
@@ -21,7 +22,7 @@ namespace SocialMedia.Service.UserAccountService
         Task<ApiResponse<string>> ConfirmEmail(string userNameOrEmail, string token);
         Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
         Task<ApiResponse<ResetPasswordDto>> GenerateResetPasswordTokenAsync(string email);
-        Task<ApiResponse<string>> GenerateEmailConfirmationTokenAsync(string email);
+        Task<ApiResponse<EmailConfirmationDto>> GenerateEmailConfirmationTokenAsync(string email);
         Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(ResetEmailObjectDto resetEmailObjectDto);
         Task<ApiResponse<string>> EnableTwoFactorAuthenticationAsync(string email);
         Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail);
