@@ -51,31 +51,38 @@ namespace SocialMedia.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "36f46ec0-836e-4790-b036-5e8c48d0bae2",
+                            Id = "fc099eed-4c03-4c8e-998d-93ad739eb012",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "ddb5d2b2-f1bd-4b8d-b309-745e29055878",
+                            Id = "fff06123-ded3-42be-849f-07acce8f7a59",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "User"
                         },
                         new
                         {
-                            Id = "24e485de-3e01-4272-acc5-5cea03f089cb",
+                            Id = "a1e78aa2-2689-44f1-b15c-aefb087c01cc",
                             ConcurrencyStamp = "3",
                             Name = "Owner",
                             NormalizedName = "Owner"
                         },
                         new
                         {
-                            Id = "65001ed3-ebb2-4e71-bad3-cb59b70babfc",
+                            Id = "7ec740e1-657d-4ae5-92e3-7cc5364a8528",
                             ConcurrencyStamp = "4",
-                            Name = "moderator",
-                            NormalizedName = "moderator"
+                            Name = "Moderator",
+                            NormalizedName = "Moderator"
+                        },
+                        new
+                        {
+                            Id = "c94f6e30-d1af-4536-aabf-ea1149e7f704",
+                            ConcurrencyStamp = "5",
+                            Name = "GroupMember",
+                            NormalizedName = "GroupMember"
                         });
                 });
 
@@ -266,6 +273,22 @@ namespace SocialMedia.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReactValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("React Value");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reacts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

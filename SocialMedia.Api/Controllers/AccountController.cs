@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -37,6 +38,7 @@ namespace SocialMedia.Api.Controllers
             this._userManager = _userManager;
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpGet("accessToken")]
         public async Task<ActionResult<string>> GetAccessToken()
         {
@@ -54,6 +56,7 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("decodeJWTToken")]
         public async Task<ActionResult<object>> DecodeAccessToken(string token)
         {
@@ -63,6 +66,7 @@ namespace SocialMedia.Api.Controllers
             //return GetEmailFromJwtPayload(token);
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerDto)
         {
@@ -106,6 +110,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("resendConfirmationEmailLink")]
         public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string userNameOrEmail)
         {
@@ -154,6 +159,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userNameOrEmail, string token)
         {
@@ -161,6 +167,7 @@ namespace SocialMedia.Api.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
         {
@@ -201,6 +208,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login-2FA")]
         public async Task<IActionResult> LoginTwoFactorAuthenticationAsync(string otp, string userNameOrEmail)
         {
@@ -224,13 +232,30 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+
         [HttpGet("logout")]
-        public async Task<string> LogoutAsync()
+        public async Task<IActionResult> LogoutAsync()
         {
-            await HttpContext.SignOutAsync();
-            return "Logout success";
+            if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+            {
+                await HttpContext.SignOutAsync();
+                return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
+                {
+                    Message = "Logged out successfully",
+                    IsSuccess = true,
+                    StatusCode = 200
+                });
+            }
+            return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
+            {
+                StatusCode = 400,
+                IsSuccess = false,
+                Message = "You are not logged in"
+            });
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpGet("current-user")]
         public async Task<IActionResult> GetCurrentUser()
         {
@@ -334,6 +359,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles ="Admin,User")]
         [HttpPost("enable-2FA-byEmail")]
         public async Task<IActionResult> EnableTwoFactorAuthenticationByEmailAsync([FromBody]string email)
         {
@@ -341,6 +367,7 @@ namespace SocialMedia.Api.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPost("enable-2FA-byUserName")]
         public async Task<IActionResult> EnableTwoFactorAuthenticationByUserNameAsync([FromBody] string userName)
         {
@@ -358,6 +385,7 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshTokenAsync(LoginResponse tokens)
         {
@@ -377,6 +405,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("generatePasswordResetObject")]
         public async Task<IActionResult> GenerateResetPasswordObject(string email,string token)
         {
@@ -394,6 +423,7 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("forget-password")]
         public async Task<IActionResult> ForgetPasswordAsync(string email)
         {
@@ -441,6 +471,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordDto resetPasswordDto)
         {
@@ -460,6 +491,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("generateEmailResetObject")]
         public async Task<IActionResult> GenerateEmailResetObject(string oldEmail, string newEmail
             , string token)
@@ -479,36 +511,47 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPost("resetEmailLink")]
         public async Task<IActionResult> SendEmailToResetEmailAsync(ResetEmailObjectDto resetEmailObjectDto)
         {
             try
             {
-                var response = await _userManagementService.GenerateResetEmailTokenAsync(resetEmailObjectDto);
-                if (response.IsSuccess)
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
                 {
-                    if (response.ResponseObject != null)
+                    var response = await _userManagementService.GenerateResetEmailTokenAsync(resetEmailObjectDto);
+                    if (response.IsSuccess)
                     {
-                        var resetEmailLink = Url.Action(nameof(GenerateEmailResetObject), "Account",
-                            new
-                            {
-                                token = response.ResponseObject.Token,
-                                oldEmail = resetEmailObjectDto.OldEmail,
-                                newEmail = resetEmailObjectDto.NewEmail
-                            }, Request.Scheme);
-                        
-                        var message = new Message(new string[] { response.ResponseObject.OldEmail! },
-                            "Reset email", resetEmailLink!);
-                        _emailService.SendEmail(message);
-                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                        if (response.ResponseObject != null)
                         {
-                            StatusCode = 200,
-                            IsSuccess = true,
-                            Message = "Email rest link sent to your email"
-                        });
+                            var resetEmailLink = Url.Action(nameof(GenerateEmailResetObject), "Account",
+                                new
+                                {
+                                    token = response.ResponseObject.Token,
+                                    oldEmail = resetEmailObjectDto.OldEmail,
+                                    newEmail = resetEmailObjectDto.NewEmail
+                                }, Request.Scheme);
+
+                            var message = new Message(new string[] { response.ResponseObject.OldEmail! },
+                                "Reset email", resetEmailLink!);
+                            _emailService.SendEmail(message);
+                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                            {
+                                StatusCode = 200,
+                                IsSuccess = true,
+                                Message = "Email rest link sent to your email"
+                            });
+                        }
                     }
+                    return Ok(response);
                 }
-                return Ok(response);
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = true,
+                    Message = "Unauthorized"
+                });
             }
             catch (Exception ex)
             {
@@ -521,28 +564,39 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPost("reset-email")]
         public async Task<IActionResult> ResetEmailAsync([FromBody] ResetEmailDto resetEmailDto)
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(resetEmailDto.OldEmail);
-                if (user != null)
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
                 {
-                    await _userManager.ChangeEmailAsync(user, resetEmailDto.NewEmail, resetEmailDto.Token);
-                    await _userManager.UpdateAsync(user);
-                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                    var user = await _userManager.FindByEmailAsync(resetEmailDto.OldEmail);
+                    if (user != null)
                     {
-                        StatusCode = 200,
-                        IsSuccess = true,
-                        Message = "Email changed successfully"
+                        await _userManager.ChangeEmailAsync(user, resetEmailDto.NewEmail, resetEmailDto.Token);
+                        await _userManager.UpdateAsync(user);
+                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                        {
+                            StatusCode = 200,
+                            IsSuccess = true,
+                            Message = "Email changed successfully"
+                        });
+                    }
+                    return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
+                    {
+                        StatusCode = 400,
+                        IsSuccess = false,
+                        Message = "Unable to reset email"
                     });
                 }
-                return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {
-                    StatusCode = 400,
+                    StatusCode = 401,
                     IsSuccess = false,
-                    Message = "Unable to reset email"
+                    Message = "Unauthorized"
                 });
             }
             catch (Exception ex)
@@ -556,6 +610,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPut("updateAccountInfo")]
         public async Task<IActionResult> UpdateAccountInfoAsync(
             [FromBody] UpdateAccountInfoDto updateAccountDto)
@@ -595,6 +650,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("updateAccountRoles")]
         public async Task<IActionResult> UpdateAccountRolesAsync(
             [FromBody] UpdateAccountRolesDto updateAccountRolesDto)
@@ -619,6 +675,7 @@ namespace SocialMedia.Api.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpDelete("deleteAccountLink")]
         public async Task<IActionResult> DeleteAccount1Async(string userNameOrEmail)
         {

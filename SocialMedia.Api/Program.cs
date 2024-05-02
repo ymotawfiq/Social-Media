@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
+using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Service.ReactService;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
 using System.Text;
@@ -83,9 +85,9 @@ builder.Services.AddSwaggerGen();
 // services injection
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserManagement, UserManagement>();
-
+builder.Services.AddScoped<IReactService, ReactService>();
 // repositories injection
-
+builder.Services.AddScoped<IReactRepository, ReactRepository>();
 
 
 builder.Services.AddControllers().AddJsonOptions(op =>
