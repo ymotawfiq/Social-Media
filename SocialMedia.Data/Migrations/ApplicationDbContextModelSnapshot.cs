@@ -51,35 +51,35 @@ namespace SocialMedia.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c5360e62-eac4-4476-b143-963e0ab7eb17",
+                            Id = "5312f69a-cc3b-448a-b0de-db27576f2d97",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "2128ca7d-1a61-4d79-bf04-c0e62164d986",
+                            Id = "a3f20d50-137e-4b85-b7e4-86f68ba1a8af",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "User"
                         },
                         new
                         {
-                            Id = "4844107e-7923-4fff-9ba8-69145350b06b",
+                            Id = "c170ab54-4fc3-4c38-8dc7-d065528b6113",
                             ConcurrencyStamp = "3",
                             Name = "Owner",
                             NormalizedName = "Owner"
                         },
                         new
                         {
-                            Id = "6a9d174f-7c14-44b0-a1e8-53d7b92147b5",
+                            Id = "c178cfe6-319f-4b13-a31a-1571e052f839",
                             ConcurrencyStamp = "4",
                             Name = "Moderator",
                             NormalizedName = "Moderator"
                         },
                         new
                         {
-                            Id = "05433b04-03a1-4bf8-83f0-cb60bea5bb56",
+                            Id = "7932404a-0a05-442b-8d9c-02687251d9f2",
                             ConcurrencyStamp = "5",
                             Name = "GroupMember",
                             NormalizedName = "GroupMember"
@@ -206,22 +206,33 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Display Name");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("Email");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("First Name");
+
+                    b.Property<bool>("IsFriendListPrivate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("Is Friend List Private");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Last Name");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -259,10 +270,15 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("User Name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -272,7 +288,55 @@ namespace SocialMedia.Data.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FollowerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Follower Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Followers");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Friend", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FriendId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Friend Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
@@ -284,22 +348,22 @@ namespace SocialMedia.Data.Migrations
                     b.Property<bool>("IsAccepted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PersonId")
+                    b.Property<string>("UserWhoReceivedId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("Friend Request Person Id");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserWhoSendId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("User sended friend request Id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId")
+                    b.HasIndex("UserWhoReceivedId")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserWhoSendId");
 
                     b.ToTable("FriendRequests");
                 });
@@ -371,11 +435,33 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("Followers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Friend", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("FriendRequests")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserWhoSendId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -384,7 +470,11 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
+                    b.Navigation("Followers");
+
                     b.Navigation("FriendRequests");
+
+                    b.Navigation("Friends");
                 });
 #pragma warning restore 612, 618
         }

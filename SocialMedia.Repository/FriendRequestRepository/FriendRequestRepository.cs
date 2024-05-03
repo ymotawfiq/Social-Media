@@ -23,6 +23,7 @@ namespace SocialMedia.Repository.FriendRequestRepository
             {
                 await _dbContext.FriendRequests.AddAsync(friendRequest);
                 await SaveChangesAsync();
+                friendRequest.User = null;
                 return friendRequest;
             }
             catch (Exception)
@@ -38,6 +39,7 @@ namespace SocialMedia.Repository.FriendRequestRepository
                 var friendRequest = await GetFriendRequestByIdAsync(friendRequestId);
                 _dbContext.Remove(friendRequest);
                 await SaveChangesAsync();
+                friendRequest.User = null;
                 return friendRequest;
             }
             catch (Exception)
@@ -64,8 +66,14 @@ namespace SocialMedia.Repository.FriendRequestRepository
             {
                 return
                     from u in await GetAllFriendRequestsAsync()
-                    where u.PersonId == userId
-                    select u;
+                    where u.UserWhoReceivedId == userId && u.IsAccepted == false
+                    select (new FriendRequest
+                    {
+                        Id = u.Id,
+                        IsAccepted = u.IsAccepted,
+                        UserWhoReceivedId = u.UserWhoReceivedId,
+                        UserWhoSendId = u.UserWhoSendId
+                    });
             }
             catch (Exception)
             {
@@ -101,8 +109,8 @@ namespace SocialMedia.Repository.FriendRequestRepository
         public async Task<FriendRequest> GetFriendRequestByUserAndPersonIdAsync
             (string userId, string personId)
         {
-            return await _dbContext.FriendRequests.Where(e => e.UserId == userId)
-                .Where(e => e.PersonId == personId).FirstOrDefaultAsync();
+            return await _dbContext.FriendRequests.Where(e => e.UserWhoSendId == userId)
+                .Where(e => e.UserWhoReceivedId == personId).FirstOrDefaultAsync();
         }
 
         public async Task SaveChangesAsync()
@@ -117,6 +125,7 @@ namespace SocialMedia.Repository.FriendRequestRepository
                 var friendRequest1 = await GetFriendRequestByIdAsync(friendRequest.Id);
                 friendRequest1.IsAccepted = friendRequest.IsAccepted;
                 await SaveChangesAsync();
+                friendRequest1.User = null;
                 return friendRequest1;
             }
             catch (Exception)

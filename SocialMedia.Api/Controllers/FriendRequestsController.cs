@@ -27,7 +27,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("addFriendRequest")]
-        public async Task<IActionResult> AddFriendRequestAsync([FromBody] FriendRequestDto friendRequestDto)
+        public async Task<IActionResult> AddFriendRequestAsync([FromBody] AddFriendRequestDto addFriendRequestDto)
         {
             try
             {
@@ -37,7 +37,13 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        friendRequestDto.UserId = user.Id;
+                        var friendRequestPerson = await GetUsetAsync(addFriendRequestDto.PersonIdOrUserNameOrEmail);
+
+                        var friendRequestDto = new FriendRequestDto
+                        {
+                            UserId = user.Id,
+                            PersonId = friendRequestPerson.Id
+                        };
                         if (await _userManager.IsInRoleAsync(user, "Admin"))
                         {
                             var response = await _friendRequestService.AddFriendRequestAsync(friendRequestDto);
@@ -75,7 +81,8 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("updateFriendRequest")]
-        public async Task<IActionResult> UpdateFriendRequestAsync([FromBody] FriendRequestDto friendRequestDto)
+        public async Task<IActionResult> UpdateFriendRequestAsync
+            ([FromBody] UpdateFriendRequestDto updateFriendRequestDto)
         {
             try
             {
@@ -86,12 +93,17 @@ namespace SocialMedia.Api.Controllers
                     if (user != null)
                     {
                         
-                        if (friendRequestDto.Id != null)
+                        if (updateFriendRequestDto.FriendRequestId != null)
                         {
                             var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(
-                            new Guid(friendRequestDto.Id));
-                            friendRequestDto.UserId = friendRequest.UserId;
-                            friendRequestDto.PersonId = friendRequest.PersonId;
+                            new Guid(updateFriendRequestDto.FriendRequestId));
+                            var friendRequestDto = new FriendRequestDto
+                            {
+                                UserId = friendRequest.UserWhoSendId,
+                                PersonId = friendRequest.UserWhoReceivedId,
+                                IsAccepted = updateFriendRequestDto.IsAccepted,
+                                Id = updateFriendRequestDto.FriendRequestId
+                            };
                             if (await _userManager.IsInRoleAsync(user, "Admin"))
                             {
                                 var response = await _friendRequestService.UpdateFriendRequestAsync(friendRequestDto);
@@ -152,7 +164,7 @@ namespace SocialMedia.Api.Controllers
                         var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
                         if (friendRequest != null)
                         {
-                            if (user.Id == friendRequest.UserId)
+                            if (user.Id == friendRequest.UserWhoSendId)
                             {
                                 var response = await _friendRequestService.DeleteFriendRequestByAsync(
                                     user, friendRequestId);
@@ -193,6 +205,39 @@ namespace SocialMedia.Api.Controllers
             {
                 var response = await _friendRequestService.GetAllFriendRequestsAsync();
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("friendRequests")]
+        public async Task<IActionResult> GetAllFriendsRequestsByUserIdAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _friendRequestService.GetAllFriendRequestsByUserIdAsync(user.Id);
+                        return Ok(response);
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
             }
             catch (Exception ex)
             {
@@ -288,6 +333,27 @@ namespace SocialMedia.Api.Controllers
                     Message = ex.Message
                 });
             }
+        }
+
+
+        private async Task<SiteUser> GetUsetAsync(string PersonIdOrUserNameOrEmail)
+        {
+            var userByName = await _userManager.FindByNameAsync(PersonIdOrUserNameOrEmail);
+            var userById = await _userManager.FindByIdAsync(PersonIdOrUserNameOrEmail);
+            var userByEmail = await _userManager.FindByEmailAsync(PersonIdOrUserNameOrEmail);
+            if (userByEmail != null)
+            {
+                return userByEmail;
+            }
+            else if (userById != null)
+            {
+                return userById;
+            }
+            else if (userByName != null)
+            {
+                return userByName;
+            }
+            return null!;
         }
 
     }

@@ -11,10 +11,10 @@ namespace SocialMedia.Data.ModelsConfigurations
         public void Configure(EntityTypeBuilder<FriendRequest> builder)
         {
             builder.HasKey(e => e.Id);
-            builder.HasOne(e => e.User).WithMany(e => e.FriendRequests).HasForeignKey(e => e.UserId);
-            builder.Property(e => e.PersonId).IsRequired().HasColumnName("Friend Request Person Id");
-            builder.HasIndex(e => e.PersonId).IsUnique();
-            builder.Property(e => e.UserId).IsRequired().HasColumnName("User sended friend request Id");
+            builder.HasOne(e => e.User).WithMany(e => e.FriendRequests).HasForeignKey(e => e.UserWhoSendId);
+            builder.Property(e => e.UserWhoReceivedId).IsRequired().HasColumnName("Friend Request Person Id");
+            builder.HasIndex(e => e.UserWhoReceivedId).IsUnique();
+            builder.Property(e => e.UserWhoSendId).IsRequired().HasColumnName("User sended friend request Id");
             builder.Property(e => e.IsAccepted).IsRequired();
         }
     }

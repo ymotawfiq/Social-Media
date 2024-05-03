@@ -33,8 +33,8 @@ namespace SocialMedia.Data.Extensions
             return new FriendRequest
             {
                 IsAccepted = false,
-                PersonId = friendRequestDto.PersonId,
-                UserId = friendRequestDto.UserId
+                UserWhoReceivedId = friendRequestDto.PersonId,
+                UserWhoSendId = friendRequestDto.UserId
             };
         }
 
@@ -48,11 +48,28 @@ namespace SocialMedia.Data.Extensions
             {
                 Id = new Guid(friendRequestDto.Id),
                 IsAccepted = friendRequestDto.IsAccepted,
-                PersonId = friendRequestDto.PersonId,
-                UserId = friendRequestDto.UserId
+                UserWhoReceivedId = friendRequestDto.PersonId,
+                UserWhoSendId = friendRequestDto.UserId
             };
         }
 
+        public static Friend ConvertFromFriendtDto_Add(FriendDto friendsDto)
+        {
+            return new Friend
+            {
+                FriendId =friendsDto.FriendId,
+                UserId = friendsDto.UserId
+            };
+        }
+
+        public static Follower ConvertFromFollowerDto_Add(FollowerDto followersDto)
+        {
+            return new Follower
+            {
+                UserId = followersDto.UserId,
+                FollowerId = followersDto.FollowerId
+            };
+        }
 
     }
 }

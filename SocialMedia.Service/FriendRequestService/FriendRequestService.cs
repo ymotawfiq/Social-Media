@@ -7,6 +7,8 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.FriendRequestRepository;
+using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Service.FriendsService;
 
 namespace SocialMedia.Service.FriendRequestService
 {
@@ -14,11 +16,16 @@ namespace SocialMedia.Service.FriendRequestService
     {
         private readonly IFriendRequestRepository _friendRequestRepository;
         private readonly UserManager<SiteUser> _userManager;
+        private readonly IFriendService _friendService;
+        private readonly IFriendsRepository _friendsRepository;
         public FriendRequestService(IFriendRequestRepository _friendRequestRepository,
-            UserManager<SiteUser> _userManager)
+            UserManager<SiteUser> _userManager, IFriendService _friendService,
+            IFriendsRepository friendsRepository)
         {
             this._friendRequestRepository = _friendRequestRepository;
             this._userManager = _userManager;
+            this._friendService = _friendService;
+            _friendsRepository = friendsRepository; 
         }
 
         public async Task<ApiResponse<FriendRequest>> AddFriendRequestAsync(FriendRequestDto friendRequestDto)
@@ -43,15 +50,32 @@ namespace SocialMedia.Service.FriendRequestService
                     StatusCode = 404
                 };
             }
-
+            else if (friendRequestDto.UserId == friendRequestDto.PersonId)
+            {
+                return new ApiResponse<FriendRequest>
+                {
+                    IsSuccess = false,
+                    Message = "You can't send friend request to yourself",
+                    StatusCode = 400
+                };
+            }
             var friendRequest = await _friendRequestRepository.GetFriendRequestByUserAndPersonIdAsync(
                 friendRequestDto.UserId, friendRequestDto.PersonId);
-            if (friendRequest != null)
+            if (friendRequest != null && friendRequest.IsAccepted == false)
             {
                 return new ApiResponse<FriendRequest>
                 {
                     IsSuccess = false,
                     Message = "Friend request already sent before please wait till user accept your friend request",
+                    StatusCode = 400,
+                };
+            }
+            else if (friendRequest != null && friendRequest.IsAccepted == true)
+            {
+                return new ApiResponse<FriendRequest>
+                {
+                    IsSuccess = false,
+                    Message = "You are already friends",
                     StatusCode = 400,
                 };
             }
@@ -253,16 +277,44 @@ namespace SocialMedia.Service.FriendRequestService
                     StatusCode = 404
                 };
             }
-            var updatedFriendRequest = await _friendRequestRepository.UpdateFriendRequestAsync(
-                ConvertFromDto.ConvertFromFriendRequestDto_Update(friendRequestDto));
-            updatedFriendRequest.User = null;
+            if (friendRequest.IsAccepted == false)
+            {
+                if (friendRequestDto.IsAccepted == true)
+                {
+                    var friendDto = new FriendDto
+                    {
+                        FriendId = friendRequestDto.UserId,
+                        UserId = friendRequestDto.PersonId
+                    };
+                    var newFriend = await _friendService.AddFriendAsync(friendDto);
+                    if (!newFriend.IsSuccess)
+                    {
+                        return new ApiResponse<FriendRequest>
+                        {
+                            IsSuccess = false,
+                            Message = "Friend request can't be accepted",
+                            StatusCode = 400,
+                        };
+                    }
+                    var updatedFriendRequest = await _friendRequestRepository.UpdateFriendRequestAsync(
+                                ConvertFromDto.ConvertFromFriendRequestDto_Update(friendRequestDto));
+                    updatedFriendRequest.User = null;
+                    return new ApiResponse<FriendRequest>
+                    {
+                        IsSuccess = true,
+                        Message = "Friend request accepted successfully",
+                        StatusCode = 200,
+                        ResponseObject = updatedFriendRequest
+                    };
+                }
+            }
             return new ApiResponse<FriendRequest>
             {
-                IsSuccess = true,
-                Message = "Friend request updated successfully",
-                StatusCode = 200,
-                ResponseObject = updatedFriendRequest
+                StatusCode = 400,
+                Message = "Can't update friend request",
+                IsSuccess = false
             };
+            
         }
     }
 }

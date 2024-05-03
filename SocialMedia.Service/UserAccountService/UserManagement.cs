@@ -149,7 +149,8 @@ namespace SocialMedia.Service.UserAccountService
                 DisplayName = registerDto.DisplayName,
                 FirstName = registerDto.FirstName,
                 LastName = registerDto.LastName,
-                SecurityStamp = Guid.NewGuid().ToString()
+                SecurityStamp = Guid.NewGuid().ToString(),
+                IsFriendListPrivate = true
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
