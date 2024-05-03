@@ -6,7 +6,9 @@ using Microsoft.OpenApi.Models;
 using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
+using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.ReactService;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
@@ -86,9 +88,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserManagement, UserManagement>();
 builder.Services.AddScoped<IReactService, ReactService>();
+builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
-
+builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

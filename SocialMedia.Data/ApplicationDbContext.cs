@@ -36,11 +36,13 @@ namespace SocialMedia.Data
 
         private void ApplyModelsConfigurations(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new ReactConfiguration());
+            builder.ApplyConfiguration(new ReactConfiguration())
+                   .ApplyConfiguration(new FriendRequestsConfiguration());
         }
 
 
         public DbSet<React> Reacts { get; set; }
+        public DbSet<FriendRequest> FriendRequests { get; set; }
 
     }
 }

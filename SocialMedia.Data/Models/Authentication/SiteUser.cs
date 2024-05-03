@@ -11,5 +11,6 @@ namespace SocialMedia.Data.Models.Authentication
         public string DisplayName { get; set; } = null!;
         public string? RefreshToken { get; set; } = null!;
         public DateTime? RefreshTokenExpiry { get; set; }
+        public List<FriendRequest>? FriendRequests { get; set; }
     }
 }

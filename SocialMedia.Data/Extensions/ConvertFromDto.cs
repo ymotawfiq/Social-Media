@@ -27,5 +27,32 @@ namespace SocialMedia.Data.Extensions
                 ReactValue = reactDto.ReactValue
             };
         }
+
+        public static FriendRequest ConvertFromFriendRequestDto_Add(FriendRequestDto friendRequestDto)
+        {
+            return new FriendRequest
+            {
+                IsAccepted = false,
+                PersonId = friendRequestDto.PersonId,
+                UserId = friendRequestDto.UserId
+            };
+        }
+
+        public static FriendRequest ConvertFromFriendRequestDto_Update(FriendRequestDto friendRequestDto)
+        {
+            if (friendRequestDto.Id == null)
+            {
+                throw new NullReferenceException("Friend request id must not be null");
+            }
+            return new FriendRequest
+            {
+                Id = new Guid(friendRequestDto.Id),
+                IsAccepted = friendRequestDto.IsAccepted,
+                PersonId = friendRequestDto.PersonId,
+                UserId = friendRequestDto.UserId
+            };
+        }
+
+
     }
 }

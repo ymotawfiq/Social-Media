@@ -51,35 +51,35 @@ namespace SocialMedia.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "fc099eed-4c03-4c8e-998d-93ad739eb012",
+                            Id = "c5360e62-eac4-4476-b143-963e0ab7eb17",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "fff06123-ded3-42be-849f-07acce8f7a59",
+                            Id = "2128ca7d-1a61-4d79-bf04-c0e62164d986",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "User"
                         },
                         new
                         {
-                            Id = "a1e78aa2-2689-44f1-b15c-aefb087c01cc",
+                            Id = "4844107e-7923-4fff-9ba8-69145350b06b",
                             ConcurrencyStamp = "3",
                             Name = "Owner",
                             NormalizedName = "Owner"
                         },
                         new
                         {
-                            Id = "7ec740e1-657d-4ae5-92e3-7cc5364a8528",
+                            Id = "6a9d174f-7c14-44b0-a1e8-53d7b92147b5",
                             ConcurrencyStamp = "4",
                             Name = "Moderator",
                             NormalizedName = "Moderator"
                         },
                         new
                         {
-                            Id = "c94f6e30-d1af-4536-aabf-ea1149e7f704",
+                            Id = "05433b04-03a1-4bf8-83f0-cb60bea5bb56",
                             ConcurrencyStamp = "5",
                             Name = "GroupMember",
                             NormalizedName = "GroupMember"
@@ -275,6 +275,35 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PersonId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Friend Request Person Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User sended friend request Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FriendRequests");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
                 {
                     b.Property<Guid>("Id")
@@ -340,6 +369,22 @@ namespace SocialMedia.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("FriendRequests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
+                {
+                    b.Navigation("FriendRequests");
                 });
 #pragma warning restore 612, 618
         }
