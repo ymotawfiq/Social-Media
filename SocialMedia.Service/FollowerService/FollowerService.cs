@@ -26,31 +26,15 @@ namespace SocialMedia.Service.FollowerService
             {
                 var follower = await _userManager.FindByIdAsync(followersDto.FollowerId);
                 var user = await _userManager.FindByIdAsync(followersDto.UserId);
-                if (user == null)
+                var isFollowing = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
+                    user!.Id, follower!.Id);
+                if (isFollowing != null)
                 {
                     return new ApiResponse<Follower>
                     {
                         IsSuccess = false,
-                        Message = "User you want to follow not found",
-                        StatusCode = 404
-                    };
-                }
-                if (follower == null)
-                {
-                    return new ApiResponse<Follower>
-                    {
-                        IsSuccess = false,
-                        Message = "Follower not found",
-                        StatusCode = 404
-                    };
-                }
-                if (followersDto.UserId == followersDto.FollowerId)
-                {
-                    return new ApiResponse<Follower>
-                    {
-                        StatusCode = 400,
-                        IsSuccess = false,
-                        Message = "You can't unfollow yourself"
+                        Message = "You already following this person",
+                        StatusCode = 400
                     };
                 }
                 var follow = await _followerRepository.FollowAsync(
@@ -59,7 +43,7 @@ namespace SocialMedia.Service.FollowerService
                 {
                     IsSuccess = true,
                     Message = "Followed successfully",
-                    StatusCode = 201
+                    StatusCode = 200
                 };
             }
             catch (Exception)
@@ -70,18 +54,8 @@ namespace SocialMedia.Service.FollowerService
 
         public async Task<ApiResponse<IEnumerable<Follower>>> GetAllFollowers(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return new ApiResponse<IEnumerable<Follower>>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
-            }
             var followers = await _followerRepository.GetAllFollowers(userId);
-            if (followers == null)
+            if (followers.ToList().Count==0)
             {
                 return new ApiResponse<IEnumerable<Follower>>
                 {
@@ -103,31 +77,14 @@ namespace SocialMedia.Service.FollowerService
         {
             var user = await _userManager.FindByIdAsync(userId);
             var follower = await _userManager.FindByIdAsync(followerId);
-            if (user == null)
-            {
-                return new ApiResponse<Follower>
-                {
-                    IsSuccess = false, 
-                    Message = "User not found",
-                    StatusCode = 404
-                };
-            }
-            if (follower == null)
-            {
-                return new ApiResponse<Follower>
-                {
-                    IsSuccess = false,
-                    Message = "Follower not found",
-                    StatusCode = 404
-                };
-            }
+
             if(userId == followerId)
             {
                 return new ApiResponse<Follower>
                 {
-                    StatusCode = 400,
+                    StatusCode = 403,
                     IsSuccess = false,
-                    Message = "You can't unfollow yourself"
+                    Message = "Forbidden"
                 };
             }
             var isFollowed = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(userId, followerId);

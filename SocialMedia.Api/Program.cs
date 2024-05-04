@@ -6,13 +6,17 @@ using Microsoft.OpenApi.Models;
 using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
+using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FollowerRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Service.BlockService;
 using SocialMedia.Service.FollowerService;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
+using SocialMedia.Service.PolicyService;
 using SocialMedia.Service.ReactService;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
@@ -95,11 +99,15 @@ builder.Services.AddScoped<IReactService, ReactService>();
 builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<IFollowerService, FollowerService>();
+builder.Services.AddScoped<IBlockService, BlockService>();
+builder.Services.AddScoped<IPolicyService, PolicyService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 builder.Services.AddScoped<IFriendsRepository, FriendsRepository>();
 builder.Services.AddScoped<IFollowerRepository, FollowerRepository>();
+builder.Services.AddScoped<IBlockRepository, BlockRepository>();
+builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

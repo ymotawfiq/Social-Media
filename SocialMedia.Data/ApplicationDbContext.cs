@@ -19,20 +19,20 @@ namespace SocialMedia.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            //SeedRoles(builder);
+            SeedRoles(builder);
             ApplyModelsConfigurations(builder);
         }
 
-        //private void SeedRoles(ModelBuilder builder)
-        //{
-        //    builder.Entity<IdentityRole>().HasData(
-        //        new IdentityRole { ConcurrencyStamp = "1", Name= "Admin", NormalizedName = "Admin"},
-        //        new IdentityRole { ConcurrencyStamp = "2", Name = "User", NormalizedName = "User" },
-        //        new IdentityRole { ConcurrencyStamp = "3", Name = "Owner", NormalizedName = "Owner" },
-        //        new IdentityRole { ConcurrencyStamp = "4", Name = "Moderator", NormalizedName = "Moderator" },
-        //        new IdentityRole { ConcurrencyStamp = "5", Name = "GroupMember", NormalizedName = "GroupMember" }
-        //        );
-        //}
+        private void SeedRoles(ModelBuilder builder)
+        {
+            builder.Entity<IdentityRole>().HasData(
+                new IdentityRole { ConcurrencyStamp = "1", Name = "Admin", NormalizedName = "Admin" },
+                new IdentityRole { ConcurrencyStamp = "2", Name = "User", NormalizedName = "User" },
+                new IdentityRole { ConcurrencyStamp = "3", Name = "Owner", NormalizedName = "Owner" },
+                new IdentityRole { ConcurrencyStamp = "4", Name = "Moderator", NormalizedName = "Moderator" },
+                new IdentityRole { ConcurrencyStamp = "5", Name = "GroupMember", NormalizedName = "GroupMember" }
+                );
+        }
 
         private void ApplyModelsConfigurations(ModelBuilder builder)
         {
@@ -40,7 +40,9 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new FriendRequestsConfiguration())
                    .ApplyConfiguration(new FriendsConfigurations())
                    .ApplyConfiguration(new SiteUserConfigurations())
-                   .ApplyConfiguration(new FollowerConfigurations());
+                   .ApplyConfiguration(new FollowerConfigurations())
+                   .ApplyConfiguration(new BlockConfigurations())
+                   .ApplyConfiguration(new PolicyConfigurations());
         }
 
 
@@ -48,6 +50,8 @@ namespace SocialMedia.Data
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Friend> Friends { get; set; }
         public DbSet<Follower> Followers { get; set; }
+        public DbSet<Block> Blocks { get; set; }
+        public DbSet<Policy> Policies { get; set; }
 
     }
 }

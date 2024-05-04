@@ -12,6 +12,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.HasKey(e => e.Id);
             builder.Property(e => e.FriendId).IsRequired().HasColumnName("Friend Id");
             builder.HasOne(e => e.User).WithMany(e => e.Friends).HasForeignKey(e => e.UserId);
+            builder.Property(e => e.UserId).IsRequired().HasColumnName("User Id");
         }
     }
 }

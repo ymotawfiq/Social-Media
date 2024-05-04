@@ -71,5 +71,52 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+        public static Block ConvertFromBlockDto_BlockUnBlock(BlockDto blockDto)
+        {
+            return new Block
+            {
+                BlockedUserId = blockDto.BlockedUserId,
+                UserId = blockDto.UserId
+            };
+        }
+
+        public static Block ConvertFromBlockDto_Update(BlockDto blockDto)
+        {
+            if (blockDto.Id == null)
+            {
+                throw new NullReferenceException("Block id must not be null");
+            }
+            return new Block
+            {
+                BlockedUserId = blockDto.BlockedUserId,
+                UserId = blockDto.UserId
+            };
+        }
+
+
+        public static Policy ConvertFromPolicyDto_Add(PolicyDto policyDto)
+        {
+            return new Policy
+            {
+                PolicyType = policyDto.PolicyType
+            };
+        }
+
+
+        public static Policy ConvertFromPolicyDto_Update(PolicyDto policyDto)
+        {
+            if (policyDto.Id == null)
+            {
+                throw new NullReferenceException("Policy id must not be null");
+            }
+            return new Policy
+            {
+                Id = new Guid(policyDto.Id),
+                PolicyType = policyDto.PolicyType
+            };
+        }
+
+
+
     }
 }

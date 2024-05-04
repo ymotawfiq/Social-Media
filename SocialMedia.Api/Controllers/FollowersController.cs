@@ -6,6 +6,7 @@ using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Service.FollowerService;
 
 namespace SocialMedia.Api.Controllers
@@ -17,10 +18,13 @@ namespace SocialMedia.Api.Controllers
 
         private readonly IFollowerService _followerService;
         private readonly UserManager<SiteUser> _userManager;
-        public FollowersController(IFollowerService _followerService, UserManager<SiteUser> _userManager)
+        private readonly IBlockRepository _blockRepository;
+        public FollowersController(IFollowerService _followerService, UserManager<SiteUser> _userManager,
+            IBlockRepository _blockRepository)
         {
             this._followerService = _followerService;
             this._userManager = _userManager;
+            this._blockRepository = _blockRepository;
         }
 
 
@@ -34,13 +38,36 @@ namespace SocialMedia.Api.Controllers
                 {
                     var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var user = await GetUsetAsync(followDto.UserIdOrUserNameOrEmail);
-                    var followerDto = new FollowerDto
+                    if(follower!=null && user != null)
                     {
-                        UserId = user!.Id,
-                        FollowerId = follower!.Id
-                    };
-                    var response = await _followerService.FollowAsync(followerDto);
-                    return Ok(response);
+                        if (user.Id != follower.Id)
+                        {
+                            var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                                user.Id, follower.Id);
+                            if (isBlocked == null)
+                            {
+                                var followerDto = new FollowerDto
+                                {
+                                    UserId = user!.Id,
+                                    FollowerId = follower!.Id
+                                };
+                                var response = await _followerService.FollowAsync(followerDto);
+                                return Ok(response);
+                            }
+                        }
+                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                        {
+                            StatusCode = 403,
+                            Message = "Forbidden",
+                            IsSuccess = false
+                        });
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                    {
+                        StatusCode = 406,
+                        Message = "User you want to follow not found",
+                        IsSuccess = false
+                    });
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {
@@ -69,13 +96,32 @@ namespace SocialMedia.Api.Controllers
             {
                 var user = await GetUsetAsync(userIdOrUserNameOrEmail);
                 var follower = await GetUsetAsync(followerIdOrUserNameOrEmail);
-                var followerDto = new FollowerDto
+                if(user!=null && follower != null)
                 {
-                    UserId = user.Id,
-                    FollowerId = follower.Id
-                };
-                var response = await _followerService.FollowAsync(followerDto);
-                return Ok(response);
+                    if (user.Id != follower.Id)
+                    {
+                        var followerDto = new FollowerDto
+                        {
+                            UserId = user.Id,
+                            FollowerId = follower.Id
+                        };
+                        var response = await _followerService.FollowAsync(followerDto);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                    {
+                        StatusCode = 403,
+                        Message = "Forbidden",
+                        IsSuccess = false
+                    });
+                }
+                return StatusCode(StatusCodes.Status406NotAcceptable, new ApiResponse<string>
+                {
+                    StatusCode = 406,
+                    Message = "Not Acceptable",
+                    IsSuccess = false
+                });
+                
             }
             catch(Exception ex)
             {
@@ -97,8 +143,17 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var response = await _followerService.GetAllFollowers(user!.Id);
-                    return Ok(response);
+                    if (user != null)
+                    {
+                        var response = await _followerService.GetAllFollowers(user!.Id);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                    {
+                        StatusCode = 404,
+                        IsSuccess = false,
+                        Message = "User not found"
+                    });
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {
@@ -118,15 +173,41 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [Authorize(Roles ="Admin")]
+
         [HttpGet("followers/{userIdOrName}")]
         public async Task<IActionResult> FollowersAsync([FromRoute] string userIdOrName)
         {
             try
             {
-                var user = await GetUsetAsync(userIdOrName);
-                var response = await _followerService.GetAllFollowers(user.Id);
-                return Ok(response);
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name!=null)
+                {
+                    var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var user = await GetUsetAsync(userIdOrName);
+                    if (currentUser != null && user!=null)
+                    {
+                        var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                            user.Id, currentUser.Id);
+                        if (isBlocked == null)
+                        {
+                            var response = await _followerService.GetAllFollowers(user.Id);
+                            return Ok(response);
+                        }
+                    }
+                    return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                    {
+                        StatusCode = 403,
+                        IsSuccess = false,
+                        Message = "Forbidden"
+                    });
+                }
+
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
             }
             catch (Exception ex)
             {
@@ -149,8 +230,31 @@ namespace SocialMedia.Api.Controllers
                 {
                     var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var user = await GetUsetAsync(userIdOrUserNameOrEmail);
-                    var response = await _followerService.UnfollowAsync(user.Id, follower!.Id);
-                    return Ok(response);
+                    if (user != null && follower!=null)
+                    {
+                        if(user.Id != follower.Id)
+                        {
+                            var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                                user.Id, follower.Id);
+                            if (isBlocked == null)
+                            {
+                                var response = await _followerService.UnfollowAsync(user.Id, follower.Id);
+                                return Ok(response);
+                            }      
+                        }
+                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                        {
+                            StatusCode = 403,
+                            IsSuccess = false,
+                            Message = "Forbidden"
+                        });
+                    }
+                    return StatusCode(StatusCodes.Status406NotAcceptable, new ApiResponse<string>
+                    {
+                        StatusCode = 406,
+                        Message = "Not Acceptable",
+                        IsSuccess = false
+                    });
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {

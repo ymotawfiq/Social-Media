@@ -25,24 +25,15 @@ namespace SocialMedia.Service.FriendsService
         }
         public async Task<ApiResponse<Friend>> AddFriendAsync(FriendDto friendsDto)
         {
-            var user = await _userManager.FindByIdAsync(friendsDto.UserId);
-            var friend = await _userManager.FindByIdAsync(friendsDto.FriendId);
-            if (user == null)
+            var existFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(friendsDto.UserId,
+                friendsDto.FriendId);
+            if (existFriend != null)
             {
                 return new ApiResponse<Friend>
                 {
                     IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
-            }
-            if (friend == null)
-            {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "Friend not found",
-                    StatusCode = 404
+                    Message = "You are already friends",
+                    StatusCode = 400
                 };
             }
             var newFriend = await _friendsRepository.AddFriendAsync(
@@ -58,36 +49,6 @@ namespace SocialMedia.Service.FriendsService
 
         public async Task<ApiResponse<Friend>> DeleteFriendAsync(string userId, string friendId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            var friend = await _userManager.FindByIdAsync(friendId);
-            if (user == null)
-            {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
-            }
-            if (friend == null)
-            {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "Friend not found",
-                    StatusCode = 404
-                };
-            }
-
-            if (user == friend)
-            {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "Friend and user id can't be same",
-                    StatusCode = 400
-                };
-            }
             var isYourFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
             if (isYourFriend == null)
             {
@@ -96,17 +57,6 @@ namespace SocialMedia.Service.FriendsService
                     IsSuccess = false,
                     Message = "Friend not in your friend list",
                     StatusCode = 404
-                };
-            }
-            var friendRequest = await _friendRequestRepository.GetFriendRequestByUserAndPersonIdAsync(friendId, userId);
-            var deletedFriendRequest = await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequest.Id);
-            if (deletedFriendRequest == null)
-            {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "Can't delete friend",
-                    StatusCode = 400
                 };
             }
             var deletedFriend = await _friendsRepository.DeleteFriendAsync(userId, friendId);
@@ -133,7 +83,7 @@ namespace SocialMedia.Service.FriendsService
         {
             var friends = await _friendsRepository.GetAllUserFriendsAsync(userId);
             
-            if (friends == null)
+            if (friends.ToList().Count==0)
             {
                 return new ApiResponse<IEnumerable<Friend>>
                 {

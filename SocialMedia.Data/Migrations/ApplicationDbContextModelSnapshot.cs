@@ -51,35 +51,35 @@ namespace SocialMedia.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5312f69a-cc3b-448a-b0de-db27576f2d97",
+                            Id = "c4380211-7b12-438c-86ad-faed304fc1f2",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "a3f20d50-137e-4b85-b7e4-86f68ba1a8af",
+                            Id = "f6a4ab99-dd2c-4922-aa17-17a922977a5a",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "User"
                         },
                         new
                         {
-                            Id = "c170ab54-4fc3-4c38-8dc7-d065528b6113",
+                            Id = "cf9fe55c-1df9-4e86-aac7-1b657f2799fc",
                             ConcurrencyStamp = "3",
                             Name = "Owner",
                             NormalizedName = "Owner"
                         },
                         new
                         {
-                            Id = "c178cfe6-319f-4b13-a31a-1571e052f839",
+                            Id = "2dcc92bb-ac49-4b72-b429-bccbb6e5a8bc",
                             ConcurrencyStamp = "4",
                             Name = "Moderator",
                             NormalizedName = "Moderator"
                         },
                         new
                         {
-                            Id = "7932404a-0a05-442b-8d9c-02687251d9f2",
+                            Id = "efe0eaf9-27ba-4865-8617-42d16a5beb66",
                             ConcurrencyStamp = "5",
                             Name = "GroupMember",
                             NormalizedName = "GroupMember"
@@ -294,6 +294,29 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BlockedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Blocked User Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Blocks");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
                 {
                     b.Property<Guid>("Id")
@@ -330,7 +353,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
 
                     b.HasKey("Id");
 
@@ -366,6 +390,25 @@ namespace SocialMedia.Data.Migrations
                     b.HasIndex("UserWhoSendId");
 
                     b.ToTable("FriendRequests");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PolicyType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyType")
+                        .IsUnique();
+
+                    b.ToTable("Policies");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
@@ -435,6 +478,17 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("Blocks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -470,6 +524,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
+                    b.Navigation("Blocks");
+
                     b.Navigation("Followers");
 
                     b.Navigation("FriendRequests");
