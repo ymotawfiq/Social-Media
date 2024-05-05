@@ -98,6 +98,7 @@ namespace SocialMedia.Data.Extensions
         {
             return new Policy
             {
+                Id = Guid.NewGuid().ToString(),
                 PolicyType = policyDto.PolicyType
             };
         }
@@ -111,8 +112,53 @@ namespace SocialMedia.Data.Extensions
             }
             return new Policy
             {
-                Id = new Guid(policyDto.Id),
+                Id = policyDto.Id.ToString(),
                 PolicyType = policyDto.PolicyType
+            };
+        }
+
+        public static ReactPolicy ConvertFromReactPolicyDto_Add(ReactPolicyDto reactPolicyDto)
+        {
+            return new ReactPolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = reactPolicyDto.PolicyId
+            };
+        }
+
+
+        public static ReactPolicy ConvertFromReactPolicyDto_Update(ReactPolicyDto reactPolicyDto)
+        {
+            if (reactPolicyDto.Id == null)
+            {
+                throw new NullReferenceException("React policy id must not be null");
+            }
+            return new ReactPolicy
+            {
+                Id = reactPolicyDto.Id,
+                PolicyId = reactPolicyDto.PolicyId
+            };
+        }
+
+        public static CommentPolicy ConvertFromCommentPolicyDto_Add(CommentPolicyDto commentPolicyDto)
+        {
+            return new CommentPolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = commentPolicyDto.PolicyId
+            };
+        }
+
+        public static CommentPolicy ConvertFromCommentPolicyDto_Update(CommentPolicyDto commentPolicyDto)
+        {
+            if (commentPolicyDto.Id == null)
+            {
+                throw new NullReferenceException("Comment policy id must not be null");
+            }
+            return new CommentPolicy
+            {
+                Id = commentPolicyDto.Id,
+                PolicyId = commentPolicyDto.PolicyId
             };
         }
 

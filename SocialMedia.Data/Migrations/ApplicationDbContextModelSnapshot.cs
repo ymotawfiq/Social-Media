@@ -47,43 +47,6 @@ namespace SocialMedia.Data.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "c4380211-7b12-438c-86ad-faed304fc1f2",
-                            ConcurrencyStamp = "1",
-                            Name = "Admin",
-                            NormalizedName = "Admin"
-                        },
-                        new
-                        {
-                            Id = "f6a4ab99-dd2c-4922-aa17-17a922977a5a",
-                            ConcurrencyStamp = "2",
-                            Name = "User",
-                            NormalizedName = "User"
-                        },
-                        new
-                        {
-                            Id = "cf9fe55c-1df9-4e86-aac7-1b657f2799fc",
-                            ConcurrencyStamp = "3",
-                            Name = "Owner",
-                            NormalizedName = "Owner"
-                        },
-                        new
-                        {
-                            Id = "2dcc92bb-ac49-4b72-b429-bccbb6e5a8bc",
-                            ConcurrencyStamp = "4",
-                            Name = "Moderator",
-                            NormalizedName = "Moderator"
-                        },
-                        new
-                        {
-                            Id = "efe0eaf9-27ba-4865-8617-42d16a5beb66",
-                            ConcurrencyStamp = "5",
-                            Name = "GroupMember",
-                            NormalizedName = "GroupMember"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -317,6 +280,24 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Blocks");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.CommentPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("CommentPolicies");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
                 {
                     b.Property<Guid>("Id")
@@ -394,9 +375,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PolicyType")
                         .IsRequired()
@@ -425,6 +405,24 @@ namespace SocialMedia.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reacts");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.ReactPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("ReactPolicies");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -489,6 +487,17 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.CommentPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("CommentPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -522,6 +531,17 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.ReactPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("ReactPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Navigation("Blocks");
@@ -531,6 +551,13 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("FriendRequests");
 
                     b.Navigation("Friends");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
+                {
+                    b.Navigation("CommentPolicies");
+
+                    b.Navigation("ReactPolicies");
                 });
 #pragma warning restore 612, 618
         }

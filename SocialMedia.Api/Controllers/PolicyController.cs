@@ -75,8 +75,8 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpGet("getPolicy/{policyId}")]
-        public async Task<IActionResult> GetPolicyByIdAsync([FromRoute] Guid policyId)
+        [HttpGet("policyById/{policyId}")]
+        public async Task<IActionResult> GetPolicyByIdAsync([FromRoute] string policyId)
         {
             try
             {
@@ -94,12 +94,88 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpDelete("deletePolicy/{policyId}")]
-        public async Task<IActionResult> DeletePolicyByIdAsync([FromRoute] Guid policyId)
+        [HttpGet("policyByName/{policyName}")]
+        public async Task<IActionResult> GetPolicyByNameAsync([FromRoute]string policyName)
+        {
+            try
+            {
+                var response = await _policyService.GetPolicyByNameAsync(policyName);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("policy/{policyIdOrName}")]
+        public async Task<IActionResult> GetPolicyByIdOrNameAsync([FromRoute] string policyIdOrName)
+        {
+            try
+            {
+                var response = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("deletePolicyById/{policyId}")]
+        public async Task<IActionResult> DeletePolicyByIdAsync([FromRoute] string policyId)
         {
             try
             {
                 var response = await _policyService.DeletePolicyByIdAsync(policyId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("deletePolicyByName/{policyName}")]
+        public async Task<IActionResult> DeletePolicyByNameAsync([FromRoute] string policyName)
+        {
+            try
+            {
+                var response = await _policyService.DeletePolicyByNameAsync(policyName);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("deletePolicy/{policyIdOrName}")]
+        public async Task<IActionResult> DeletePolicyByIdOrNameAsync([FromRoute] string policyIdOrName)
+        {
+            try
+            {
+                var response = await _policyService.DeletePolicyByIdOrNameAsync(policyIdOrName);
                 return Ok(response);
             }
             catch (Exception ex)

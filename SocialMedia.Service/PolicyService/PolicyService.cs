@@ -38,9 +38,9 @@ namespace SocialMedia.Service.PolicyService
             };
         }
 
-        public async Task<ApiResponse<Policy>> DeletePolicyByIdAsync(Guid policyId)
+        public async Task<ApiResponse<Policy>> DeletePolicyByIdAsync(string policyId)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(policyId);
+            var policy = await _policyRepository.GetPolicyByIdAsync(policyId.ToString());
             if (policy == null)
             {
                 return new ApiResponse<Policy>
@@ -58,6 +58,64 @@ namespace SocialMedia.Service.PolicyService
                 StatusCode = 200,
                 ResponseObject = deletedPolicy
             };
+        }
+
+        public async Task<ApiResponse<Policy>> DeletePolicyByIdOrNameAsync(string policyIdOrName)
+        {
+            try
+            {
+                var policy = await GetPolicyAsync(policyIdOrName);
+                if (policy == null)
+                {
+                    return new ApiResponse<Policy>
+                    {
+                        IsSuccess = false,
+                        Message = "Policy not found",
+                        StatusCode = 404
+                    };
+                }
+                var deletedPolicy = await _policyRepository.DeletePolicyByIdAsync(policy.Id);
+                return new ApiResponse<Policy>
+                {
+                    IsSuccess = true,
+                    Message = "Policy deleted successfully",
+                    StatusCode = 200,
+                    ResponseObject = deletedPolicy
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ApiResponse<Policy>> DeletePolicyByNameAsync(string policyName)
+        {
+            try
+            {
+                var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
+                if (policy == null)
+                {
+                    return new ApiResponse<Policy>
+                    {
+                        IsSuccess = false,
+                        Message = "Policy not found",
+                        StatusCode = 404
+                    };
+                }
+                var deletedPolicy = await _policyRepository.DeletePolicyByIdAsync(policy.Id);
+                return new ApiResponse<Policy>
+                {
+                    StatusCode = 200,
+                    IsSuccess = true,
+                    Message = "Policy deleted successfully",
+                    ResponseObject = deletedPolicy
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<ApiResponse<IEnumerable<Policy>>> GetPoliciesAsync()
@@ -82,7 +140,7 @@ namespace SocialMedia.Service.PolicyService
             };
         }
 
-        public async Task<ApiResponse<Policy>> GetPolicyByIdAsync(Guid policyId)
+        public async Task<ApiResponse<Policy>> GetPolicyByIdAsync(string policyId)
         {
             var policy = await _policyRepository.GetPolicyByIdAsync(policyId);
             if (policy == null)
@@ -101,6 +159,62 @@ namespace SocialMedia.Service.PolicyService
                 StatusCode = 200,
                 ResponseObject = policy
             };
+        }
+
+        public async Task<ApiResponse<Policy>> GetPolicyByIdOrNameAsync(string policyIdOrName)
+        {
+            try
+            {
+                var policy = await GetPolicyAsync(policyIdOrName);
+                if (policy == null)
+                {
+                    return new ApiResponse<Policy>
+                    {
+                        IsSuccess = false,
+                        Message = "Policy not found",
+                        StatusCode = 404
+                    };
+                }
+                return new ApiResponse<Policy>
+                {
+                    IsSuccess = true,
+                    Message = "Policy found successfully",
+                    StatusCode = 200,
+                    ResponseObject = policy
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ApiResponse<Policy>> GetPolicyByNameAsync(string policyName)
+        {
+            try
+            {
+                var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
+                if (policy == null)
+                {
+                    return new ApiResponse<Policy>
+                    {
+                        IsSuccess = false,
+                        Message = "Policy not found",
+                        StatusCode = 404
+                    };
+                }
+                return new ApiResponse<Policy>
+                {
+                    StatusCode = 200,
+                    IsSuccess = true,
+                    Message = "Policy found successfully",
+                    ResponseObject = policy
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<ApiResponse<Policy>> UpdatePolicyAsync(PolicyDto policyDto)
@@ -123,6 +237,14 @@ namespace SocialMedia.Service.PolicyService
                 StatusCode = 200,
                 ResponseObject = updatedPolicy
             };
+        }
+
+
+        private async Task<Policy> GetPolicyAsync(string policyIdOrName)
+        {
+            var policyById = await _policyRepository.GetPolicyByIdAsync(policyIdOrName);
+            var policyByName = await _policyRepository.GetPolicyByNameAsync(policyIdOrName);
+            return policyById == null ? policyByName! : policyById;
         }
     }
 }

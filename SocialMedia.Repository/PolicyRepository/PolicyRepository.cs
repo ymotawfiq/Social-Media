@@ -17,6 +17,7 @@ namespace SocialMedia.Repository.PolicyRepository
         {
             try
             {
+                policy.PolicyType = policy.PolicyType.ToUpper();
                 await _dbContext.Policies.AddAsync(policy);
                 await SaveChangesAsync();
                 return policy;
@@ -27,7 +28,21 @@ namespace SocialMedia.Repository.PolicyRepository
             }
         }
 
-        public async Task<Policy> DeletePolicyByIdAsync(Guid policyId)
+        public async Task<Policy> DeletePolicyAsync(string policyIdOrName)
+        {
+            try
+            {
+                var policyById = await GetPolicyByIdAsync(policyIdOrName);
+                var policyByName = await GetPolicyByNameAsync(policyIdOrName);
+                return policyById == null ? policyByName! : policyById;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Policy> DeletePolicyByIdAsync(string policyId)
         {
             try
             {
@@ -54,13 +69,27 @@ namespace SocialMedia.Repository.PolicyRepository
             }
         }
 
-        public async Task<Policy> GetPolicyByIdAsync(Guid policyId)
+        public async Task<Policy> GetPolicyByIdAsync(string policyId)
         {
             try
             {
-                return (await _dbContext.Policies.Where(e => e.Id == policyId).FirstOrDefaultAsync())!;
+                return (await _dbContext.Policies.Where(e => e.Id == policyId)
+                    .FirstOrDefaultAsync())!;
             }
             catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Policy> GetPolicyByNameAsync(string policyName)
+        {
+            try
+            {
+                policyName = policyName.ToUpper();
+                return (await _dbContext.Policies.Where(e => e.PolicyType == policyName).FirstOrDefaultAsync())!;
+            }
+            catch(Exception)
             {
                 throw;
             }
@@ -75,8 +104,8 @@ namespace SocialMedia.Repository.PolicyRepository
         {
             try
             {
-                var policy1 = await GetPolicyByIdAsync(policy.Id);
-                policy1.PolicyType = policy.PolicyType;
+                var policy1 = await GetPolicyByIdAsync(policy.Id.ToString());
+                policy1.PolicyType = policy.PolicyType.ToUpper();
                 await SaveChangesAsync();
                 return policy1;
             }
