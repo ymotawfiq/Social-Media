@@ -16,5 +16,6 @@ namespace SocialMedia.Data.Models.Authentication
         public List<Friend>? Friends { get; set; }
         public List<Follower>? Followers { get; set; }
         public List<Block>? Blocks { get; set; }
+        public List<UserPosts>? UserPosts { get; set; }
     }
 }

@@ -45,7 +45,7 @@ namespace SocialMedia.Repository.CommentPolicyRepository
 
         public async Task<IEnumerable<CommentPolicy>> GetCommentPoliciesAsync()
         {
-            return await _dbContext.CommentPolicies.ToListAsync();
+            return await _dbContext.CommentPolicies.Include(e=>e.Policy).ToListAsync();
         }
 
         public async Task<CommentPolicy> GetCommentPolicyByIdAsync(string commentPolicyId)

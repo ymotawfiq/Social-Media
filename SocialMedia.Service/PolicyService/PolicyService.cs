@@ -29,6 +29,16 @@ namespace SocialMedia.Service.PolicyService
                     StatusCode = 500
                 };
             }
+            var policy = await _policyRepository.GetPolicyByNameAsync(policyDto.PolicyType);
+            if (policy != null)
+            {
+                return new ApiResponse<Policy>
+                {
+                    IsSuccess = false,
+                    Message = "Policy already exists",
+                    StatusCode = 400
+                };
+            }
             return new ApiResponse<Policy>
             {
                 IsSuccess = true,

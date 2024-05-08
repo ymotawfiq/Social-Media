@@ -18,6 +18,7 @@ namespace SocialMedia.Api.Controllers
             this._policyService = _policyService;
         }
 
+        [Authorize(Roles ="User")]
         [HttpGet("policies")]
         public async Task<IActionResult> GetPoliciesAsync()
         {

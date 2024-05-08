@@ -7,7 +7,7 @@ using SocialMedia.Service.CommentPolicyService;
 
 namespace SocialMedia.Api.Controllers
 {
-    [Authorize(Roles ="Admin")]
+    
     [ApiController]
     public class CommentPolicyController : ControllerBase
     {
@@ -17,6 +17,7 @@ namespace SocialMedia.Api.Controllers
             this._commentPolicyService = _commentPolicyService;
         }
 
+        [Authorize(Roles = "User")]
         [HttpGet("commentPolicies")]
         public async Task<IActionResult> GetAllCommentPoliciesAsync()
         {
@@ -36,6 +37,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("addCommentPolicy")]
         public async Task<IActionResult> AddCommentPolicyAsync([FromBody] CommentPolicyDto commentPolicyDto)
         {
@@ -55,6 +57,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("updateCommentPolicy")]
         public async Task<IActionResult> UpdateCommentPolicyAsync([FromBody] CommentPolicyDto commentPolicyDto)
         {
@@ -74,6 +77,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "User")]
         [HttpGet("commentPolicy/{commentPolicyId}")]
         public async Task<IActionResult> AddCommentPolicyAsync([FromRoute] string commentPolicyId)
         {
@@ -93,6 +97,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("deleteCommentPolicy/{commentPolicyId}")]
         public async Task<IActionResult> DeleteCommentPolicyAsync([FromRoute] string commentPolicyId)
         {

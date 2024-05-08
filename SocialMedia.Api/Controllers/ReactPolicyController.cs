@@ -9,7 +9,7 @@ namespace SocialMedia.Api.Controllers
 {
 
     [ApiController]
-    [Authorize(Roles ="Admin")]
+    
     public class ReactPolicyController : ControllerBase
     {
         private readonly IReactPolicyService _reactPolicyService;
@@ -18,6 +18,7 @@ namespace SocialMedia.Api.Controllers
             this._reactPolicyService = _reactPolicyService;
         }
 
+        [Authorize(Roles = "User")]
         [HttpGet("reactPolicies")]
         public async Task<IActionResult> GetAllReactPoliciesAsync()
         {
@@ -37,6 +38,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("addReactPolicy")]
         public async Task<IActionResult> AddReactPoliciesAsync([FromBody] ReactPolicyDto reactPolicyDto)
         {
@@ -56,6 +58,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("updateReactPolicy")]
         public async Task<IActionResult> UpdateReactPolicyAsync([FromBody] ReactPolicyDto reactPolicyDto)
         {
@@ -75,6 +78,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("reactPolicy/{reactPolicyId}")]
         public async Task<IActionResult> GetReactPolicyByIdAsync([FromRoute]string reactPolicyId)
         {
@@ -94,6 +98,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("deleteReactPolicy/{reactPolicyId}")]
         public async Task<IActionResult> DeleteReactPolicyByIdAsync([FromRoute] string reactPolicyId)
         {

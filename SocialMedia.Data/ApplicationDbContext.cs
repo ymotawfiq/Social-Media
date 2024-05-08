@@ -44,7 +44,10 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new BlockConfigurations())
                    .ApplyConfiguration(new PolicyConfigurations())
                    .ApplyConfiguration(new ReactPolicyConfigurations())
-                   .ApplyConfiguration(new CommentPolicyConfigurations());
+                   .ApplyConfiguration(new CommentPolicyConfigurations())
+                   .ApplyConfiguration(new PostConfigurations())
+                   .ApplyConfiguration(new UserPostsConfigurations())
+                   .ApplyConfiguration(new PostImagesConfigurations());
         }
 
 
@@ -56,6 +59,8 @@ namespace SocialMedia.Data
         public DbSet<Policy> Policies { get; set; }
         public DbSet<ReactPolicy> ReactPolicies { get; set; }
         public DbSet<CommentPolicy> CommentPolicies { get; set; }
-
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<UserPosts> UserPosts { get; set; }
+        public DbSet<PostImages> PostImages { get; set; }
     }
 }

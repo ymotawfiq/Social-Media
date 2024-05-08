@@ -110,7 +110,7 @@ namespace SocialMedia.Service.CommentPolicyService
             return new ApiResponse<IEnumerable<CommentPolicy>>
             {
                 IsSuccess = true,
-                Message = "React policies found successfully",
+                Message = "Comment policies found successfully",
                 StatusCode = 200,
                 ResponseObject = commentPolicies
             };

@@ -8,6 +8,7 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
+using System.Linq;
 
 namespace SocialMedia.Service.FriendsService
 {
@@ -98,6 +99,58 @@ namespace SocialMedia.Service.FriendsService
                 Message = "Friends found successfully",
                 StatusCode = 200,
                 ResponseObject = friends
+            };
+        }
+
+        public async Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId)
+        {
+            var check = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
+            if (check == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    IsSuccess = true,
+                    Message = "Not friend",
+                    StatusCode = 200,
+                    ResponseObject = false
+                };
+            }
+            return new ApiResponse<bool>
+            {
+                IsSuccess = true,
+                Message = "Friend",
+                StatusCode = 200,
+                ResponseObject = true
+            };
+        }
+
+        public async Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId)
+        {
+            var friendsOfFriends = (await _friendsRepository.GetUserFriendsOfFriendsAsync(userId)).ToList();
+            var friend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
+            if (friend != null)
+            {
+                foreach (var f in friendsOfFriends)
+                {
+                    if (f.Contains(friend))
+                    {
+                        return new ApiResponse<bool>
+                        {
+                            IsSuccess = true,
+                            Message = "Friend of friend",
+                            StatusCode = 200,
+                            ResponseObject = true
+                        };
+                    }
+                }
+            }
+            
+            return new ApiResponse<bool>
+            {
+                IsSuccess = true,
+                Message = "Not friend of friend",
+                StatusCode = 200,
+                ResponseObject = false
             };
         }
     }

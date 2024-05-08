@@ -10,6 +10,8 @@ namespace SocialMedia.Service.FriendsService
     {
         Task<ApiResponse<Friend>> AddFriendAsync(FriendDto friendsDto);
         Task<ApiResponse<Friend>> DeleteFriendAsync(string userId, string friendId);
+        Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId);
+        Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId);
         Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(string userId);
     }
 }

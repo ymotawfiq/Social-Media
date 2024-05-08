@@ -12,7 +12,8 @@ namespace SocialMedia.Data.ModelsConfigurations
         {
             builder.HasKey(e => e.Id);
             builder.HasIndex(e => e.PolicyId).IsUnique();
-            builder.HasOne(e => e.Policy).WithMany(e => e.ReactPolicies).HasForeignKey(e => e.PolicyId);
+            builder.HasOne(e => e.Policy).WithMany(e => e.ReactPolicies).HasForeignKey(e => e.PolicyId)
+                .OnDelete(DeleteBehavior.NoAction);
             builder.Property(e => e.PolicyId).IsRequired().HasColumnName("Policy Id");
         }
     }

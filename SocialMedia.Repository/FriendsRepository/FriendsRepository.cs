@@ -56,6 +56,20 @@ namespace SocialMedia.Repository.FriendsRepository
             return friend1 == null ? friend2! : friend1;
         }
 
+        public async Task<IEnumerable<IEnumerable<Friend>>> GetUserFriendsOfFriendsAsync(string userId)
+        {
+            var userFriends = await GetAllUserFriendsAsync(userId);
+            var friendsOfFriends = new List<List<Friend>>();
+            if (userFriends != null)
+            {
+                foreach(var f in userFriends)
+                {
+                    friendsOfFriends.Add((await GetAllUserFriendsAsync(f.UserId)).ToList());
+                }
+            }
+            return friendsOfFriends;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();

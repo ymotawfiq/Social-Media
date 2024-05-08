@@ -43,7 +43,7 @@ namespace SocialMedia.Repository.ReactPolicyRepository
 
         public async Task<IEnumerable<ReactPolicy>> GetReactPoliciesAsync()
         {
-            return await _dbContext.ReactPolicies.ToListAsync();
+            return await _dbContext.ReactPolicies.Include(e=>e.Policy).ToListAsync();
         }
 
         public async Task<ReactPolicy> GetReactPolicyByIdAsync(string reactPolicyId)
