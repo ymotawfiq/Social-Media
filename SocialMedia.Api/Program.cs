@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
+using SocialMedia.Repository.AccountPolicyRepository;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FollowerRepository;
@@ -16,6 +18,7 @@ using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
 using SocialMedia.Repository.UserPostsRepository;
+using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.BlockService;
 using SocialMedia.Service.CommentPolicyService;
 using SocialMedia.Service.FollowerService;
@@ -37,6 +40,7 @@ var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(op =>
 {
     op.UseSqlServer(connection);
+    op.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
 
@@ -112,6 +116,7 @@ builder.Services.AddScoped<IReactPolicyService, ReactPolicyService>();
 builder.Services.AddScoped<ICommentPolicyService, CommentPolicyService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserPostsRepository, UserPostsRepository>();
+builder.Services.AddScoped<IAccountPolicyService, AccountPolicyService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -122,6 +127,7 @@ builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 builder.Services.AddScoped<IReactPolicyRepository, ReactPolicyRepository>();
 builder.Services.AddScoped<ICommentPolicyRepository, CommentPolicyRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IAccountPolicyRepository, AccountPolicyRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

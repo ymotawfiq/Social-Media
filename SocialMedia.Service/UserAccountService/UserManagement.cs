@@ -14,6 +14,8 @@ using SocialMedia.Data.DTOs.Authentication.ResetPassword;
 using SocialMedia.Data.DTOs.Authentication.User;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.AccountPolicyRepository;
+using SocialMedia.Service.AccountPolicyService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -28,13 +30,15 @@ namespace SocialMedia.Service.UserAccountService
         private readonly IConfiguration _configuration;
         private readonly SignInManager<SiteUser> _signInManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IAccountPolicyService _accountPolicyService;
         public UserManagement
             (
             UserManager<SiteUser> _userManager,
             RoleManager<IdentityRole> _roleManager,
             IConfiguration _configuration,
             SignInManager<SiteUser> _signInManager,
-            ApplicationDbContext _dbContext
+            ApplicationDbContext _dbContext,
+            IAccountPolicyService _accountPolicyService
             )
         {
             this._configuration = _configuration;
@@ -42,6 +46,7 @@ namespace SocialMedia.Service.UserAccountService
             this._userManager = _userManager;
             this._signInManager = _signInManager;
             this._dbContext = _dbContext;
+            this._accountPolicyService = _accountPolicyService;
         }
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
@@ -142,16 +147,8 @@ namespace SocialMedia.Service.UserAccountService
                     StatusCode = 403
                 };
             }
-            var user = new SiteUser
-            {
-                Email = registerDto.Email,
-                UserName = registerDto.UserName,
-                DisplayName = registerDto.DisplayName,
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                IsFriendListPrivate = true
-            };
+            //var accountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync("public");
+            var user = await CheckAccountPolicyAndCreateUserAsync(registerDto);
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (result.Succeeded)
@@ -523,6 +520,22 @@ namespace SocialMedia.Service.UserAccountService
 
         #region Private Method
 
+        private async Task<SiteUser> CheckAccountPolicyAndCreateUserAsync(RegisterDto registerDto)
+        {
+            var accountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync("public");
+            var user = new SiteUser
+            {
+                Email = registerDto.Email,
+                UserName = registerDto.UserName,
+                DisplayName = registerDto.DisplayName,
+                FirstName = registerDto.FirstName,
+                LastName = registerDto.LastName,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                IsFriendListPrivate = true,
+                AccountPolicyId = accountPolicy.ResponseObject!.Id
+            };
+            return user;
+        }
         private async Task<SiteUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
         {
             var userByEmail = await _userManager.FindByEmailAsync(userNameOrEmail);

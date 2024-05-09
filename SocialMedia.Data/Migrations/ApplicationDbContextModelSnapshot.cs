@@ -155,6 +155,24 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.AccountPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("AccountPolicies");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Property<string>("Id")
@@ -162,6 +180,11 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("AccountPolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Account Policy Id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -239,6 +262,8 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnName("User Name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountPolicyId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -567,6 +592,28 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.AccountPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("AccountPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.AccountPolicy", "AccountPolicy")
+                        .WithMany("Users")
+                        .HasForeignKey("AccountPolicyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("AccountPolicy");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -690,6 +737,11 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.AccountPolicy", b =>
+                {
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Navigation("Blocks");
@@ -710,6 +762,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
                 {
+                    b.Navigation("AccountPolicies");
+
                     b.Navigation("CommentPolicies");
 
                     b.Navigation("Posts");

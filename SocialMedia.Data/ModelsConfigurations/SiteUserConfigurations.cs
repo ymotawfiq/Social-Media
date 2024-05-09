@@ -19,6 +19,9 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.DisplayName).IsRequired().HasColumnName("Display Name");
             builder.Property(e => e.IsFriendListPrivate).IsRequired()
                 .HasColumnName("Is Friend List Private").HasDefaultValue(true);
+            builder.HasOne(e => e.AccountPolicy).WithMany(e => e.Users).HasForeignKey(e => e.AccountPolicyId)
+                .OnDelete(DeleteBehavior.NoAction);
+            builder.Property(e => e.AccountPolicyId).IsRequired().HasColumnName("User Account Policy Id");
         }
     }
 }

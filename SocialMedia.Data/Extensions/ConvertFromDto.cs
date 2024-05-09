@@ -162,7 +162,24 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+        public static AccountPolicy ConvertFromAccountPolicyDto_Add(AddAccountPolicyDto addAccountPolicyDto)
+        {
+            return new AccountPolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = addAccountPolicyDto.PolicyIdOrName
+            };
+        }
 
+        public static AccountPolicy 
+            ConvertFromAccountPolicyDto_Update(UpdateAccountPolicyDto updateAccountPolicyDto)
+        {
+            return new AccountPolicy
+            {
+                Id = updateAccountPolicyDto.Id,
+                PolicyId = updateAccountPolicyDto.PolicyIdOrName
+            };
+        }
 
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using SocialMedia.Data.DTOs;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
@@ -13,6 +14,7 @@ using SocialMedia.Data.DTOs.Authentication.User;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.MessageModel;
+using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,16 +28,19 @@ namespace SocialMedia.Api.Controllers
         private readonly IUserManagement _userManagementService;
         private readonly IEmailService _emailService;
         private readonly UserManager<SiteUser> _userManager;
+        private readonly IAccountPolicyService _accountPolicyService;
         public AccountController
             (
             IUserManagement _userManagementService,
             IEmailService _emailService,
-            UserManager<SiteUser> _userManager
+            UserManager<SiteUser> _userManager,
+            IAccountPolicyService _accountPolicyService
             )
         {
             this._userManagementService = _userManagementService;
             this._emailService = _emailService;
             this._userManager = _userManager;
+            this._accountPolicyService = _accountPolicyService;
         }
 
         [Authorize(Roles ="Admin")]
@@ -610,6 +615,78 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpPut("updateAccountPolicy")]
+        public async Task<IActionResult> UpdateUserPolicyAsync
+            ([FromBody] UpdateUserPolicyDto updateUserPolicyDto)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (currentUser != null)
+                    {
+                        var routeUser = await GetUserByUserNameOrEmailOrIdAsync(
+                            updateUserPolicyDto.UserIdOrUserNameOrEmail);
+                        if (routeUser != null)
+                        {
+                            if (routeUser.Id == currentUser.Id
+                            || await _userManager.IsInRoleAsync(currentUser, "Admin"))
+                            {
+                                var accountPolicy = await _accountPolicyService
+                                    .GetAccountPolicyByPolicyAsync(updateUserPolicyDto.PolicyIdOrName);
+                                if (accountPolicy.ResponseObject != null)
+                                {
+                                    routeUser.AccountPolicyId = accountPolicy.ResponseObject.Id;
+                                    await _userManager.UpdateAsync(routeUser);
+                                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                                    {
+                                        StatusCode = 200,
+                                        IsSuccess = true,
+                                        Message = "Account policy updated successfully"
+                                    });
+                                }
+                                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                                {
+                                    StatusCode = 404,
+                                    IsSuccess = false,
+                                    Message = "Account policy not found"
+                                });
+                            }
+                            return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
+                            {
+                                StatusCode = 403,
+                                IsSuccess = false,
+                                Message = "Forbidden"
+                            });
+                        }
+                        return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
+                        {
+                            StatusCode = 404,
+                            IsSuccess = false,
+                            Message = "User not found"
+                        });
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [Authorize(Roles = "Admin,User")]
         [HttpPut("updateAccountInfo")]
         public async Task<IActionResult> UpdateAccountInfoAsync(
@@ -655,7 +732,7 @@ namespace SocialMedia.Api.Controllers
         public async Task<IActionResult> UpdateAccountRolesAsync(
             [FromBody] UpdateAccountRolesDto updateAccountRolesDto)
         {
-            var user = await GetUserByUserNameOrEmailAsync(updateAccountRolesDto.UserNameOrEmail);
+            var user = await GetUserByUserNameOrEmailOrIdAsync(updateAccountRolesDto.UserNameOrEmail);
             if (user == null)
             {
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
@@ -685,7 +762,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
+                    var user = await GetUserByUserNameOrEmailOrIdAsync(userNameOrEmail);
                     if (user != null && user.Email != null && loggedInUser != null)
                     {
                         if (user.Email == loggedInUser.Email)
@@ -755,7 +832,7 @@ namespace SocialMedia.Api.Controllers
                 if (userEmail != null && !userEmail.ToString().IsNullOrEmpty())
                 {
                     var userByToken = await _userManager.FindByEmailAsync(userEmail);
-                    var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
+                    var user = await GetUserByUserNameOrEmailOrIdAsync(userNameOrEmail);
                     if (userByToken != null && user != null)
                     {
                         if (userByToken.UserName == user.UserName)
@@ -788,17 +865,22 @@ namespace SocialMedia.Api.Controllers
 
         #region Private Methods
 
-        private async Task<SiteUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
+        private async Task<SiteUser> GetUserByUserNameOrEmailOrIdAsync(string userNameOrEmailOrId)
         {
-            var userByEmail = await _userManager.FindByEmailAsync(userNameOrEmail);
-            var userByName = await _userManager.FindByNameAsync(userNameOrEmail);
-            if (userByEmail == null && userByName != null)
+            var userById = await _userManager.FindByIdAsync(userNameOrEmailOrId);
+            var userByEmail = await _userManager.FindByEmailAsync(userNameOrEmailOrId);
+            var userByName = await _userManager.FindByNameAsync(userNameOrEmailOrId);
+            if (userByName != null)
             {
                 return userByName;
             }
-            else if (userByName == null && userByEmail != null)
+            else if (userByEmail != null)
             {
                 return userByEmail;
+            }
+            else if (userById != null)
+            {
+                return userById;
             }
             return null!;
         }
