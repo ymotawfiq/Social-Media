@@ -45,7 +45,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("post")]
-        public async Task<IActionResult> PoasAsync([FromForm] AddPostDto addPostDto)
+        public async Task<IActionResult> PosTAsync([FromForm] CreatePostDto createPostDto)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var response = await _postService.AddPostAsync(user, addPostDto);
+                        var response = await _postService.AddPostAsync(user, createPostDto);
                         return Ok(response);
                     }
                 }
@@ -243,6 +243,109 @@ namespace SocialMedia.Api.Controllers
                         IsSuccess = false,
                         Message = "Post not found"
                     });
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("updatePostPolicy")]
+        public async Task<IActionResult> UpdatePostPolicyAsync([FromBody] UpdatePostPolicyDto updatePostPolicyDto)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name!=null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _postService.UpdatePostPolicyAsync(user, updatePostPolicyDto);
+                        return Ok(response);
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("updatePostReactPolicy")]
+        public async Task<IActionResult> UpdatePostReactPolicyAsync
+            ([FromBody] UpdatePostReactPolicyDto updatePostReactPolicyDto)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _postService
+                            .UpdatePostReactPolicyAsync(user, updatePostReactPolicyDto);
+                        return Ok(response);
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
+                {
+                    StatusCode = 401,
+                    IsSuccess = false,
+                    Message = "Unauthorized"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
+                {
+                    StatusCode = 500,
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("updatePostCommentPolicy")]
+        public async Task<IActionResult> UpdatePostCommentPolicyAsync
+            ([FromBody] UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _postService
+                            .UpdatePostCommentPolicyAsync(user, updatePostCommentPolicyDto);
+                        return Ok(response);
+                    }
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {

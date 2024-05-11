@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Crypto.Generators;
 using SocialMedia.Data;
+using SocialMedia.Data.DTOs;
 using SocialMedia.Data.DTOs.Authentication.EmailConfirmation;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
@@ -15,6 +16,10 @@ using SocialMedia.Data.DTOs.Authentication.User;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.AccountPolicyRepository;
+using SocialMedia.Repository.CommentPolicyRepository;
+using SocialMedia.Repository.PolicyRepository;
+using SocialMedia.Repository.PostRepository;
+using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Service.AccountPolicyService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -31,6 +36,10 @@ namespace SocialMedia.Service.UserAccountService
         private readonly SignInManager<SiteUser> _signInManager;
         private readonly ApplicationDbContext _dbContext;
         private readonly IAccountPolicyService _accountPolicyService;
+        private readonly IPolicyRepository _policyRepository;
+        private readonly IPostRepository _postRepository;
+        private readonly IReactPolicyRepository _reactPolicyRepository;
+        private readonly ICommentPolicyRepository _commentPolicyRepository;
         public UserManagement
             (
             UserManager<SiteUser> _userManager,
@@ -38,7 +47,11 @@ namespace SocialMedia.Service.UserAccountService
             IConfiguration _configuration,
             SignInManager<SiteUser> _signInManager,
             ApplicationDbContext _dbContext,
-            IAccountPolicyService _accountPolicyService
+            IAccountPolicyService _accountPolicyService,
+            IPolicyRepository _policyRepository,
+            IPostRepository _postRepository,
+            IReactPolicyRepository _reactPolicyRepository,
+            ICommentPolicyRepository _commentPolicyRepository
             )
         {
             this._configuration = _configuration;
@@ -47,6 +60,10 @@ namespace SocialMedia.Service.UserAccountService
             this._signInManager = _signInManager;
             this._dbContext = _dbContext;
             this._accountPolicyService = _accountPolicyService;
+            this._policyRepository = _policyRepository;
+            this._postRepository = _postRepository;
+            this._reactPolicyRepository = _reactPolicyRepository;
+            this._commentPolicyRepository = _commentPolicyRepository;
         }
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
@@ -518,6 +535,54 @@ namespace SocialMedia.Service.UserAccountService
             };
         }
 
+
+        public async Task<ApiResponse<bool>> UpdateAccountPolicyToPrivateAsync(SiteUser siteUser, 
+            UpdateUserPolicyDto updateUserPolicyDto)
+        {
+            try
+            {
+                await _postRepository.UpdateUserPostsPolicyToFriendsOnlyAsync(siteUser);
+                var accountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync(
+                    updateUserPolicyDto.PolicyIdOrName);
+                if (accountPolicy.ResponseObject != null)
+                {
+                    siteUser.AccountPolicyId = accountPolicy.ResponseObject.Id;
+                    await _userManager.UpdateAsync(siteUser);
+                    return new ApiResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Message = "Accout policy updated successfully",
+                        StatusCode = 200
+                    };
+                }
+                return new ApiResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = "Accout policy not found",
+                    StatusCode = 404
+                };
+            }
+            
+
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ApiResponse<bool>> UpdateAccountPolicyToPublicAsync
+            (SiteUser siteUser, UpdateUserPolicyDto updateUserPolicyDto)
+        {
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         #region Private Method
 
         private async Task<SiteUser> CheckAccountPolicyAndCreateUserAsync(RegisterDto registerDto)
@@ -608,6 +673,8 @@ namespace SocialMedia.Service.UserAccountService
                 out SecurityToken securityToken);
             return principal;
         }
+
+
 
         #endregion
 

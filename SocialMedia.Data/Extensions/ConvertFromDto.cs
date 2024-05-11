@@ -181,5 +181,68 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+
+        public static Post ConvertFromCreatePostDto_Add(CreatePostDto createPostDto, Policy policy,
+            ReactPolicy reactPolicy, CommentPolicy commentPolicy)
+        {
+            return new Post
+            {
+                Id = Guid.NewGuid().ToString(),
+                CommentPolicyId = commentPolicy.Id!,
+                PolicyId = policy.Id!,
+                PostedAt = DateTime.Now,
+                Content = createPostDto.PostContent,
+                ReactPolicyId = reactPolicy.Id!,
+                UpdatedAt = DateTime.Now
+            };
+        }
+
+        public static Post ConvertFromPostDto_Update(UpdatePostDto updatePostDto, PostDto postDto,
+            Post oldPost)
+        {
+            return new Post
+            {
+                Id = postDto.PostId,
+                CommentPolicyId = postDto.CommentPolicyId,
+                PolicyId = postDto.PolicyId,
+                PostedAt = oldPost.PostedAt,
+                Content = updatePostDto.PostContent,
+                ReactPolicyId = postDto.ReactPolicyId,
+                UpdatedAt = DateTime.Now
+            };
+        }
+
+
+        public static Post ConvertFromPostPolicy_Update(UpdatePostPolicyDto updatePostPolicyDto)
+        {
+            return new Post
+            {
+                Id = updatePostPolicyDto.PostId,
+                PolicyId = updatePostPolicyDto.PolicyIdOrName,
+            };
+        }
+
+        public static Post ConvertFromPostReactPolicy_Update(UpdatePostReactPolicyDto updatePostReactPolicy)
+        {
+            return new Post
+            {
+                Id = updatePostReactPolicy.PostId,
+                PolicyId = updatePostReactPolicy.PolicyIdOrName,
+            };
+        }
+
+
+        public static Post ConvertFromPostCommentPolicy_Update(UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
+        {
+            return new Post
+            {
+                Id = updatePostCommentPolicyDto.PostId,
+                PolicyId = updatePostCommentPolicyDto.PolicyIdOrName,
+            };
+        }
+
+
+
+
     }
 }

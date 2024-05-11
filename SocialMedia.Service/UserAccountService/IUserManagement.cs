@@ -1,5 +1,6 @@
 ﻿
 
+using SocialMedia.Data.DTOs;
 using SocialMedia.Data.DTOs.Authentication.EmailConfirmation;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
@@ -26,5 +27,9 @@ namespace SocialMedia.Service.UserAccountService
         Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(ResetEmailObjectDto resetEmailObjectDto);
         Task<ApiResponse<string>> EnableTwoFactorAuthenticationAsync(string email);
         Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail);
+        Task<ApiResponse<bool>> UpdateAccountPolicyToPrivateAsync(SiteUser siteUser,
+            UpdateUserPolicyDto updateUserPolicyDto);
+        Task<ApiResponse<bool>> UpdateAccountPolicyToPublicAsync(SiteUser siteUser,
+            UpdateUserPolicyDto updateUserPolicyDto);
     }
 }

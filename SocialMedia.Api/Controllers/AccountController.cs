@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
@@ -14,6 +13,10 @@ using SocialMedia.Data.DTOs.Authentication.User;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.MessageModel;
+using SocialMedia.Repository.CommentPolicyRepository;
+using SocialMedia.Repository.PolicyRepository;
+using SocialMedia.Repository.PostRepository;
+using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
@@ -29,18 +32,30 @@ namespace SocialMedia.Api.Controllers
         private readonly IEmailService _emailService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IAccountPolicyService _accountPolicyService;
+        private readonly IPolicyRepository _policyRepository;
+        private readonly IPostRepository _postRepository;
+        private readonly IReactPolicyRepository _reactPolicyRepository;
+        private readonly ICommentPolicyRepository _commentPolicyRepository;
         public AccountController
             (
             IUserManagement _userManagementService,
             IEmailService _emailService,
             UserManager<SiteUser> _userManager,
-            IAccountPolicyService _accountPolicyService
+            IAccountPolicyService _accountPolicyService,
+            IPolicyRepository _policyRepository,
+            IPostRepository _postRepository,
+            IReactPolicyRepository _reactPolicyRepository,
+            ICommentPolicyRepository _commentPolicyRepository
             )
         {
             this._userManagementService = _userManagementService;
             this._emailService = _emailService;
             this._userManager = _userManager;
             this._accountPolicyService = _accountPolicyService;
+            this._policyRepository = _policyRepository;
+            this._postRepository = _postRepository;
+            this._reactPolicyRepository = _reactPolicyRepository;
+            this._commentPolicyRepository = _commentPolicyRepository;
         }
 
         [Authorize(Roles ="Admin")]
@@ -615,7 +630,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPut("updateAccountPolicy")]
+        [HttpPut("updateUserAccountPolicy")]
         public async Task<IActionResult> UpdateUserPolicyAsync
             ([FromBody] UpdateUserPolicyDto updateUserPolicyDto)
         {
@@ -631,13 +646,32 @@ namespace SocialMedia.Api.Controllers
                             updateUserPolicyDto.UserIdOrUserNameOrEmail);
                         if (routeUser != null)
                         {
-                            if (routeUser.Id == currentUser.Id
-                            || await _userManager.IsInRoleAsync(currentUser, "Admin"))
+                            if (routeUser.Id == currentUser.Id)
                             {
                                 var accountPolicy = await _accountPolicyService
                                     .GetAccountPolicyByPolicyAsync(updateUserPolicyDto.PolicyIdOrName);
                                 if (accountPolicy.ResponseObject != null)
                                 {
+                                    var userPolicy = await _accountPolicyService.GetAccountPolicyByIdAsync(
+                                        routeUser.AccountPolicyId);
+                                    if (userPolicy.ResponseObject != null)
+                                    {
+                                        var policy = await _policyRepository.GetPolicyByIdAsync(userPolicy
+                                            .ResponseObject.PolicyId);
+                                        if (policy != null)
+                                        {
+                                            var updatedPolicy = await _policyRepository.GetPolicyByIdAsync(
+                                                    accountPolicy.ResponseObject.PolicyId);
+                                            if (policy.PolicyType == "PUBLIC" 
+                                                && updatedPolicy.PolicyType == "PRIVATE")
+                                            {
+                                                var response = await _userManagementService
+                                                    .UpdateAccountPolicyToPrivateAsync(routeUser,
+                                                    updateUserPolicyDto);
+                                                return Ok(response);
+                                            }
+                                        }
+                                    }
                                     routeUser.AccountPolicyId = accountPolicy.ResponseObject.Id;
                                     await _userManager.UpdateAsync(routeUser);
                                     return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>

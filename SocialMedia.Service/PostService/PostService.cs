@@ -1,13 +1,13 @@
 ﻿
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Hosting;
-using SocialMedia.Data;
+
 using SocialMedia.Data.DTOs;
+using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.AccountPolicyRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
@@ -15,6 +15,8 @@ using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.FriendsService;
+using SocialMedia.Service.PolicyService;
+using SocialMedia.Service.ReactPolicyService;
 
 namespace SocialMedia.Service.PostService
 {
@@ -26,13 +28,17 @@ namespace SocialMedia.Service.PostService
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendsRepository _friendsRepository;
         private readonly IFriendService _friendService;
+        private readonly IPolicyService _policyService;
         private readonly IUserPostsRepository _userPostsRepository;
-       
+        private readonly IReactPolicyService _reactPolicyService;
+        private readonly IAccountPolicyRepository _accountPolicyRepository;
+
         public PostService(IPostRepository _postRepository,
              ICommentPolicyRepository _commentPolicyRepository,
             IReactPolicyRepository _reactPolicyRepository, IPolicyRepository _policyRepository,
             IFriendsRepository _friendsRepository, IFriendService _friendService,
-            IUserPostsRepository _userPostsRepository)
+            IUserPostsRepository _userPostsRepository, IPolicyService _policyService,
+            IReactPolicyService _reactPolicyService, IAccountPolicyRepository _accountPolicyRepository)
         {
             this._postRepository = _postRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
@@ -41,13 +47,14 @@ namespace SocialMedia.Service.PostService
             this._friendsRepository = _friendsRepository;
             this._friendService = _friendService;
             this._userPostsRepository = _userPostsRepository;
+            this._policyService = _policyService;
+            this._reactPolicyService = _reactPolicyService;
+            this._accountPolicyRepository = _accountPolicyRepository;
         }
-        public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto addPostDto)
+        public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, CreatePostDto createPostDto)
         {
-            var commentPolicy = await _commentPolicyRepository
-                .GetCommentPolicyByIdAsync(addPostDto.CommentPolicyId);
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(addPostDto.ReactPolicyId);
-            var policy = await _policyRepository.GetPolicyByIdAsync(addPostDto.PolicyId);
+            var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByIdAsync(user.AccountPolicyId);
+            var policy = await _policyRepository.GetPolicyByIdAsync(accountPolicy.PolicyId);
             if (policy == null)
             {
                 return new ApiResponse<PostDto>
@@ -57,7 +64,16 @@ namespace SocialMedia.Service.PostService
                     StatusCode = 404
                 };
             }
-            else if (reactPolicy == null)
+            if (policy.PolicyType == "PUBLIC")
+            {
+                policy = await _policyRepository.GetPolicyByNameAsync("public");
+            }
+            else if (policy.PolicyType == "PRIVATE")
+            {
+                policy = await _policyRepository.GetPolicyByNameAsync("friends only");
+            }
+            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
+            if (reactPolicy == null)
             {
                 return new ApiResponse<PostDto>
                 {
@@ -66,7 +82,8 @@ namespace SocialMedia.Service.PostService
                     StatusCode = 404
                 };
             }
-            else if (commentPolicy == null)
+            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
+            if (commentPolicy == null)
             {
                 return new ApiResponse<PostDto>
                 {
@@ -75,11 +92,12 @@ namespace SocialMedia.Service.PostService
                     StatusCode = 404
                 };
             }
-            var post = CreatePostFromAddPostDto(addPostDto);
+            var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, policy, reactPolicy,
+                commentPolicy);
             var postImages = new List<PostImages>();
-            if (addPostDto.Images != null)
+            if (createPostDto.Images != null)
             {
-                foreach(var i in addPostDto.Images)
+                foreach(var i in createPostDto.Images)
                 {
                     postImages.Add(new PostImages
                     {
@@ -350,15 +368,16 @@ namespace SocialMedia.Service.PostService
                             });
                         }
                     }
-                    
                 }
-                var post = await CreatePostFromUpdatePostDto(updatePostDto);
+                var oldPost = await _postRepository.IsPostExistsAsync(postDto.PostId);
+                var post = ConvertFromDto.ConvertFromPostDto_Update(updatePostDto,
+                    postDto, oldPost);
                 var updatedPost = await _postRepository.UpdatePostAsync(user, post, postImages);
                 var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
                 userPosts.User = null;
                 return new ApiResponse<PostDto>
                 {
-                    IsSuccess = false,
+                    IsSuccess = true,
                     Message = "Post updated successfully",
                     StatusCode = 200,
                     ResponseObject = updatedPost
@@ -448,47 +467,141 @@ namespace SocialMedia.Service.PostService
             };
         }
 
-        private Post CreatePostFromAddPostDto(AddPostDto postDto)
+
+
+        public async Task<ApiResponse<bool>> UpdatePostPolicyAsync
+            (SiteUser user, UpdatePostPolicyDto updatePostPolicyDto)
         {
-            return new Post
+            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
+                updatePostPolicyDto.PostId);
+            if (userPost != null)
             {
-                Id = Guid.NewGuid().ToString(),
-                CommentPolicyId = postDto.CommentPolicyId,
-                Content = postDto.PostContent,
-                PolicyId = postDto.PolicyId,
-                PostedAt = DateTime.Now,
-                ReactPolicyId = postDto.ReactPolicyId,
-                UpdatedAt = DateTime.Now
+                var policy = await _policyService.GetPolicyByIdOrNameAsync(updatePostPolicyDto.PolicyIdOrName);
+                if (policy.ResponseObject != null)
+                {
+                    var post = await _postRepository.GetPostByIdAsync(user, updatePostPolicyDto.PostId);
+                    post.PolicyId = policy.ResponseObject.Id;
+                    await _postRepository.UpdatePostPolicyAsync(user, ConvertFromPostDto(post));
+                    return new ApiResponse<bool>
+                    {
+                        IsSuccess = true,
+                        Message = "Post policy updated successfully",
+                        StatusCode = 200,
+                        ResponseObject = true
+                    };
+                }
+                return new ApiResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = "Policy not found",
+                    StatusCode = 404
+                };
+            }
+            return new ApiResponse<bool>
+            {
+                IsSuccess = false,
+                Message = "Post not found for this user",
+                StatusCode = 404
             };
         }
 
-        private async Task<Post> CreatePostFromUpdatePostDto(UpdatePostDto postDto)
+        public async Task<ApiResponse<bool>> UpdatePostReactPolicyAsync
+            (SiteUser user, UpdatePostReactPolicyDto updatePostReactPolicy)
         {
-            var post = await _postRepository.IsPostExistsAsync(postDto.PostId);
-            return new Post
+            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
+                updatePostReactPolicy.PostId);
+            if (userPost != null)
             {
-                Id = postDto.PostId,
-                CommentPolicyId = postDto.CommentPolicyId,
-                Content = postDto.PostContent,
-                PolicyId = postDto.PolicyId,
-                PostedAt = post.PostedAt,
-                ReactPolicyId = postDto.ReactPolicyId,
-                UpdatedAt = DateTime.Now
+                var policy = await _policyService.GetPolicyByIdOrNameAsync(updatePostReactPolicy.PolicyIdOrName);
+                if (policy.ResponseObject != null)
+                {
+                    var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(
+                        policy.ResponseObject.Id);
+                    if (reactPolicy != null)
+                    {
+                        var post = await _postRepository.GetPostByIdAsync(user, updatePostReactPolicy.PostId);
+                        post.ReactPolicyId = reactPolicy.Id;
+                        await _postRepository.UpdatePostReactPolicyAsync(user, ConvertFromPostDto(post));
+                        return new ApiResponse<bool>
+                        {
+                            IsSuccess = true,
+                            Message = "Post react policy updated successfully",
+                            StatusCode = 200,
+                            ResponseObject = true
+                        };
+                    }
+                    return new ApiResponse<bool>
+                    {
+                        IsSuccess = false,
+                        Message = "React policy not found",
+                        StatusCode = 404
+                    };
+                }
+                return new ApiResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = "Policy not found",
+                    StatusCode = 404
+                };
+            }
+            return new ApiResponse<bool>
+            {
+                IsSuccess = false,
+                Message = "Post not found for this user",
+                StatusCode = 404
+            };
+        }
+
+        public async Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync
+            (SiteUser user, UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
+        {
+            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
+                updatePostCommentPolicyDto.PostId);
+            if (userPost != null)
+            {
+                var policy = await _policyService.GetPolicyByIdOrNameAsync(
+                    updatePostCommentPolicyDto.PolicyIdOrName);
+                if (policy.ResponseObject != null)
+                {
+                    var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(
+                        policy.ResponseObject.Id);
+                    if (commentPolicy != null)
+                    {
+                        var post = await _postRepository.GetPostByIdAsync(user, updatePostCommentPolicyDto.PostId);
+                        post.CommentPolicyId = commentPolicy.Id;
+                        await _postRepository.UpdatePostCommentPolicyAsync(user, ConvertFromPostDto(post));
+                        return new ApiResponse<bool>
+                        {
+                            IsSuccess = true,
+                            Message = "Post comment policy updated successfully",
+                            StatusCode = 200,
+                            ResponseObject = true
+                        };
+                    }
+                    return new ApiResponse<bool>
+                    {
+                        IsSuccess = false,
+                        Message = "Comment policy not found",
+                        StatusCode = 404
+                    };
+                }
+                return new ApiResponse<bool>
+                {
+                    IsSuccess = false,
+                    Message = "Policy not found",
+                    StatusCode = 404
+                };
+            }
+            return new ApiResponse<bool>
+            {
+                IsSuccess = false,
+                Message = "Post not found for this user",
+                StatusCode = 404
             };
         }
 
 
-        private async Task SetUserInfoNull(string postId)
-        {
-            var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(postId);
-            userPosts.User.PasswordHash = null;
-            userPosts.User.UserName = null;
-            userPosts.User.Email = null;
-            userPosts.User.SecurityStamp = null;
-            userPosts.User.ConcurrencyStamp = null;
-            userPosts.User.NormalizedEmail = null;
-            userPosts.User.NormalizedUserName = null;
-        }
+
         private string SavePostImages(IFormFile image)
         {
             var path = @"D:\my_source_code\C sharp\SocialMedia.Solution\ImageStorageTest\PostsImages";
@@ -519,5 +632,17 @@ namespace SocialMedia.Service.PostService
         }
 
         
+        private Post ConvertFromPostDto(PostDto post)
+        {
+            return new Post
+            {
+                Id = post.PostId,
+                CommentPolicyId = post.CommentPolicyId,
+                PolicyId = post.PolicyId,
+                ReactPolicyId = post.ReactPolicyId,
+                UpdatedAt = DateTime.Now,
+            };
+        }
+
     }
 }
