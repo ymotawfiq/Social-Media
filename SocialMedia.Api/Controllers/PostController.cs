@@ -97,7 +97,7 @@ namespace SocialMedia.Api.Controllers
                             if (routeUser != null)
                             {
                                 var response = await _postService
-                                    .GetPostByIdAsync(currentUser, routeUser,post.Id);
+                                    .GetPostByIdAsync(currentUser, routeUser, post.Id);
                                 return Ok(response);
                             }
                         }

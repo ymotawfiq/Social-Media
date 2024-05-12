@@ -29,7 +29,6 @@ namespace SocialMedia.Service.UserAccountService
         Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail);
         Task<ApiResponse<bool>> UpdateAccountPolicyToPrivateAsync(SiteUser siteUser,
             UpdateUserPolicyDto updateUserPolicyDto);
-        Task<ApiResponse<bool>> UpdateAccountPolicyToPublicAsync(SiteUser siteUser,
-            UpdateUserPolicyDto updateUserPolicyDto);
+
     }
 }

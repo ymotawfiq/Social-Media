@@ -12,6 +12,7 @@ using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
+using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.FriendsService;
@@ -32,13 +33,16 @@ namespace SocialMedia.Service.PostService
         private readonly IUserPostsRepository _userPostsRepository;
         private readonly IReactPolicyService _reactPolicyService;
         private readonly IAccountPolicyRepository _accountPolicyRepository;
+        private readonly IPostViewRepository _postViewRepository;
+        
 
         public PostService(IPostRepository _postRepository,
              ICommentPolicyRepository _commentPolicyRepository,
             IReactPolicyRepository _reactPolicyRepository, IPolicyRepository _policyRepository,
             IFriendsRepository _friendsRepository, IFriendService _friendService,
             IUserPostsRepository _userPostsRepository, IPolicyService _policyService,
-            IReactPolicyService _reactPolicyService, IAccountPolicyRepository _accountPolicyRepository)
+            IReactPolicyService _reactPolicyService, IAccountPolicyRepository _accountPolicyRepository,
+            IPostViewRepository _postViewRepository)
         {
             this._postRepository = _postRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
@@ -50,6 +54,7 @@ namespace SocialMedia.Service.PostService
             this._policyService = _policyService;
             this._reactPolicyService = _reactPolicyService;
             this._accountPolicyRepository = _accountPolicyRepository;
+            this._postViewRepository = _postViewRepository;
         }
         public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, CreatePostDto createPostDto)
         {
@@ -398,11 +403,67 @@ namespace SocialMedia.Service.PostService
             var post = await _postRepository.GetPostByIdAsync(routeUser, postId);
             if (post != null)
             {
-                //await SetUserInfoNull(postId);
                 var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(postId);
                 userPosts.User = null;
-                if (routeUser.Id==currentUser.Id)
+                var postPolicy = await _policyService.GetPolicyByIdAsync(post.PolicyId);
+                if (postPolicy.ResponseObject != null)
+                {
+                    if (postPolicy.ResponseObject.PolicyType == "PRIVATE")
                     {
+                        var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(
+                            currentUser.Id, postId);
+                        if (userPost == null)
+                        {
+                            return new ApiResponse<PostDto>
+                            {
+                                IsSuccess = false,
+                                Message = "Forbidden",
+                                StatusCode = 403
+                            };
+                        }
+                    }
+                    else if (postPolicy.ResponseObject.PolicyType == "FRIENDS ONLY")
+                    {
+                        var isFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
+                            currentUser.Id, routeUser.Id);
+                        if (isFriend == null)
+                        {
+                            return new ApiResponse<PostDto>
+                            {
+                                IsSuccess = false,
+                                Message = "Forbidden",
+                                StatusCode = 403
+                            };
+                        }
+                    }
+                    else if (postPolicy.ResponseObject.PolicyType == "FRIENDS OF FRIENDS")
+                    {
+                        var isFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
+                            currentUser.Id, routeUser.Id);
+                        var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(routeUser.Id,
+                            currentUser.Id);
+                        if (isFriend == null || !isFriendOfFriend.ResponseObject)
+                        {
+                            return new ApiResponse<PostDto>
+                            {
+                                IsSuccess = false,
+                                Message = "Forbidden",
+                                StatusCode = 403
+                            };
+                        }
+                    }
+                    var postView = await _postViewRepository.GetPostViewByPostIdAsync(postId);
+                    if (postView == null)
+                    {
+                        await _postViewRepository.AddPostViewAsync(
+                            new PostView
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                PostId = postId,
+                                UserId = currentUser.Id,
+                                ViewNumber = 1
+                            }
+                            );
                         return new ApiResponse<PostDto>
                         {
                             IsSuccess = true,
@@ -411,9 +472,7 @@ namespace SocialMedia.Service.PostService
                             ResponseObject = post
                         };
                     }
-                var policy = await _policyRepository.GetPolicyByIdAsync(post.PolicyId);
-                if (policy.PolicyType == "PUBLIC")
-                {
+                    await _postViewRepository.UpdatePostViewAsync(postView);
                     return new ApiResponse<PostDto>
                     {
                         IsSuccess = true,
@@ -422,48 +481,18 @@ namespace SocialMedia.Service.PostService
                         ResponseObject = post
                     };
                 }
-                else if(policy.PolicyType=="FRIENDS ONLY")
-                {
-                    var isFriend = await _friendService.IsUserFriendAsync(routeUser.Id, currentUser.Id);
-                    if (isFriend.ResponseObject)
-                    {
-                        return new ApiResponse<PostDto>
-                        {
-                            IsSuccess = true,
-                            Message = "Post found successfully",
-                            StatusCode = 200,
-                            ResponseObject = post
-                        };
-                    }
-                }
-                else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                {
-                    var isFriendOfFriend = await _friendService
-                        .IsUserFriendOfFriendAsync(routeUser.Id, currentUser.Id);
-                    if (isFriendOfFriend.ResponseObject)
-                    {
-                        return new ApiResponse<PostDto>
-                        {
-                            IsSuccess = true,
-                            Message = "Post found successfully",
-                            StatusCode = 200,
-                            ResponseObject = post
-                        };
-                    }
-                }
-
                 return new ApiResponse<PostDto>
                 {
                     IsSuccess = false,
-                    Message = "Forbidden",
-                    StatusCode = 403,
+                    Message = "Post policy not found",
+                    StatusCode = 404,
                 };
             }
             return new ApiResponse<PostDto>
             {
                 IsSuccess = false,
                 Message = "Post not found",
-                StatusCode = 404
+                StatusCode = 404,
             };
         }
 

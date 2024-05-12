@@ -15,6 +15,7 @@ using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
+using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
 using SocialMedia.Repository.UserPostsRepository;
@@ -128,6 +129,7 @@ builder.Services.AddScoped<IReactPolicyRepository, ReactPolicyRepository>();
 builder.Services.AddScoped<ICommentPolicyRepository, CommentPolicyRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IAccountPolicyRepository, AccountPolicyRepository>();
+builder.Services.AddScoped<IPostViewRepository, PostViewRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

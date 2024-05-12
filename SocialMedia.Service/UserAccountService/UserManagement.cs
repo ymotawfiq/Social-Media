@@ -570,19 +570,6 @@ namespace SocialMedia.Service.UserAccountService
             }
         }
 
-        public async Task<ApiResponse<bool>> UpdateAccountPolicyToPublicAsync
-            (SiteUser siteUser, UpdateUserPolicyDto updateUserPolicyDto)
-        {
-            try
-            {
-
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         #region Private Method
 
         private async Task<SiteUser> CheckAccountPolicyAndCreateUserAsync(RegisterDto registerDto)

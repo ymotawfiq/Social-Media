@@ -1,6 +1,5 @@
 ﻿
 
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data.Models;
@@ -48,7 +47,8 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new PostConfigurations())
                    .ApplyConfiguration(new UserPostsConfigurations())
                    .ApplyConfiguration(new PostImagesConfigurations())
-                   .ApplyConfiguration(new AccountPolicyConfigurations());
+                   .ApplyConfiguration(new AccountPolicyConfigurations())
+                   .ApplyConfiguration(new PostViewConfigurations());
         }
 
 
@@ -64,5 +64,6 @@ namespace SocialMedia.Data
         public DbSet<UserPosts> UserPosts { get; set; }
         public DbSet<PostImages> PostImages { get; set; }
         public DbSet<AccountPolicy> AccountPolicies { get; set; }
+        public DbSet<PostView> PostViews { get; set; }
     }
 }

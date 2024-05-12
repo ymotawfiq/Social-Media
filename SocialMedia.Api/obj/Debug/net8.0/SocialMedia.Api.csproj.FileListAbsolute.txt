@@ -8,11 +8,7 @@ D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Azure.Core.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Azure.Identity.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Google.Protobuf.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Humanizer.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\K4os.Compression.LZ4.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\K4os.Compression.LZ4.Streams.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\K4os.Hash.xxHash.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\MailKit.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
@@ -66,7 +62,6 @@ D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\MimeKit.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Mono.TextTemplating.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\MySql.Data.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\MySqlConnector.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\NETCore.MailKit.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Newtonsoft.Json.dll
@@ -99,7 +94,6 @@ D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\System.Security.Permissions.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\System.Windows.Extensions.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\Twilio.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\ZstdSharp.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\af\Humanizer.resources.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\ar\Humanizer.resources.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\az\Humanizer.resources.dll
@@ -246,11 +240,6 @@ D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win\lib\net7.0\Microsoft.Win32.SystemEvents.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x64\native\comerr64.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x64\native\gssapi64.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x64\native\k5sprt64.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x64\native\krb5_64.dll
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win-x64\native\krbcc64.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Drawing.Common.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Security.Cryptography.ProtectedData.dll

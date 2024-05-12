@@ -16,5 +16,6 @@ namespace SocialMedia.Data.Models
         public CommentPolicy? CommentPolicy { get; set; }
         public List<UserPosts>? UserPosts { get; set; }
         public List<PostImages>? PostImages { get; set; }
+        public List<PostView>? PostViews { get; set; }
     }
 }

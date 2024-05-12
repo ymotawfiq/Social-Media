@@ -269,6 +269,9 @@ namespace SocialMedia.Repository.PostRepository
             };
         }
 
-
+        public async Task<Post> GetPostByIdAsync(string postId)
+        {
+            return (await _dbContext.Posts.Where(e => e.Id == postId).FirstOrDefaultAsync())!;
+        }
     }
 }
