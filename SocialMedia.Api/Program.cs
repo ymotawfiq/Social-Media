@@ -11,6 +11,7 @@ using SocialMedia.Repository.AccountPolicyRepository;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FollowerRepository;
+using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
@@ -23,6 +24,7 @@ using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.BlockService;
 using SocialMedia.Service.CommentPolicyService;
 using SocialMedia.Service.FollowerService;
+using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.PolicyService;
@@ -118,6 +120,7 @@ builder.Services.AddScoped<ICommentPolicyService, CommentPolicyService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserPostsRepository, UserPostsRepository>();
 builder.Services.AddScoped<IAccountPolicyService, AccountPolicyService>();
+builder.Services.AddScoped<IFriendListPolicyService, FriendListPolicyService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -130,6 +133,7 @@ builder.Services.AddScoped<ICommentPolicyRepository, CommentPolicyRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IAccountPolicyRepository, AccountPolicyRepository>();
 builder.Services.AddScoped<IPostViewRepository, PostViewRepository>();
+builder.Services.AddScoped<IFriendListPolicyRepository, FriendListPolicyRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

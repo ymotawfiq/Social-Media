@@ -48,7 +48,8 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new UserPostsConfigurations())
                    .ApplyConfiguration(new PostImagesConfigurations())
                    .ApplyConfiguration(new AccountPolicyConfigurations())
-                   .ApplyConfiguration(new PostViewConfigurations());
+                   .ApplyConfiguration(new PostViewConfigurations())
+                   .ApplyConfiguration(new FriendListPolicyConfigurations());
         }
 
 
@@ -65,5 +66,6 @@ namespace SocialMedia.Data
         public DbSet<PostImages> PostImages { get; set; }
         public DbSet<AccountPolicy> AccountPolicies { get; set; }
         public DbSet<PostView> PostViews { get; set; }
+        public DbSet<FriendListPolicy> FriendListPolicies { get; set; }
     }
 }

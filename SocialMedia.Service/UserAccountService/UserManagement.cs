@@ -17,10 +17,12 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.AccountPolicyRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
+using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Service.AccountPolicyService;
+using SocialMedia.Service.FriendListPolicyService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -40,6 +42,8 @@ namespace SocialMedia.Service.UserAccountService
         private readonly IPostRepository _postRepository;
         private readonly IReactPolicyRepository _reactPolicyRepository;
         private readonly ICommentPolicyRepository _commentPolicyRepository;
+        private readonly IFriendsRepository _friendsRepository;
+        private readonly IFriendListPolicyService _friendListPolicyService;
         public UserManagement
             (
             UserManager<SiteUser> _userManager,
@@ -51,7 +55,9 @@ namespace SocialMedia.Service.UserAccountService
             IPolicyRepository _policyRepository,
             IPostRepository _postRepository,
             IReactPolicyRepository _reactPolicyRepository,
-            ICommentPolicyRepository _commentPolicyRepository
+            ICommentPolicyRepository _commentPolicyRepository,
+            IFriendsRepository _friendsRepository,
+            IFriendListPolicyService _friendListPolicyService
             )
         {
             this._configuration = _configuration;
@@ -64,6 +70,8 @@ namespace SocialMedia.Service.UserAccountService
             this._postRepository = _postRepository;
             this._reactPolicyRepository = _reactPolicyRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
+            this._friendsRepository = _friendsRepository;
+            this._friendListPolicyService = _friendListPolicyService;
         }
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
@@ -166,11 +174,11 @@ namespace SocialMedia.Service.UserAccountService
             }
             //var accountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync("public");
             var user = await CheckAccountPolicyAndCreateUserAsync(registerDto);
-
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (result.Succeeded)
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                await SetAccountSettingsAsync(user.Id);
                 return new ApiResponse<CreateUserResponse>
                 {
                     IsSuccess = true,
@@ -659,6 +667,22 @@ namespace SocialMedia.Service.UserAccountService
             var principal = tokenHandler.ValidateToken(accessToken, tokenValidationParameters,
                 out SecurityToken securityToken);
             return principal;
+        }
+
+
+        private async Task SetAccountSettingsAsync(string userId)
+        {
+            var userFriendList = await _friendsRepository.GetAllUserFriendsAsync(userId);
+            if (userFriendList == null || userFriendList.ToList().Count == 0)
+            {
+                await _friendListPolicyService.AddFriendListPolicyAsync(
+                    new AddFriendListPolicyDto
+                    {
+                        PolicyIdOrName = "PUBLIC",
+                        UserIdOrNameOrEmail = userId
+                    }
+                    );
+            }
         }
 
 

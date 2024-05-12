@@ -10,5 +10,6 @@ namespace SocialMedia.Data.Models
         public List<CommentPolicy>? CommentPolicies { get; set; }
         public List<Post>? Posts { get; set; }
         public List<AccountPolicy>? AccountPolicies { get; set; } 
+        public List<FriendListPolicy>? FriendListPolicies { get; set; }
     }
 }

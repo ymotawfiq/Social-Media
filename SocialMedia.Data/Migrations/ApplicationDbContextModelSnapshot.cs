@@ -369,6 +369,31 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Friends");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.FriendListPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("FriendListPolicies");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -682,6 +707,25 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.FriendListPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("FriendListPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("FriendListPolicies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -783,6 +827,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("Followers");
 
+                    b.Navigation("FriendListPolicies");
+
                     b.Navigation("FriendRequests");
 
                     b.Navigation("Friends");
@@ -800,6 +846,8 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("AccountPolicies");
 
                     b.Navigation("CommentPolicies");
+
+                    b.Navigation("FriendListPolicies");
 
                     b.Navigation("Posts");
 

@@ -242,6 +242,28 @@ namespace SocialMedia.Data.Extensions
         }
 
 
+        public static FriendListPolicy ConvertFriendListPolicyDto_Update(
+            UpdateFriendListPolicyDto updateFriendListPolicyDto)
+        {
+            return new FriendListPolicy
+            {
+                UserId = updateFriendListPolicyDto.UserIdOrUserIdOrNameOrEmail,
+                PolicyId = updateFriendListPolicyDto.PolicyIdOrName,
+            };
+        }
+
+        public static FriendListPolicy ConvertFriendListPolicyDto_Add(
+            AddFriendListPolicyDto addFriendListPolicyDto)
+        {
+            return new FriendListPolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = addFriendListPolicyDto.PolicyIdOrName,
+                UserId = addFriendListPolicyDto.UserIdOrNameOrEmail
+            };
+        }
+
+
 
 
     }
