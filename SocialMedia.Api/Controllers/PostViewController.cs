@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.PostViewRepository;
@@ -26,12 +27,12 @@ namespace SocialMedia.Api.Controllers
                 if (post != null)
                 {
                     var postView = await _postViewRepository.GetPostViewByPostIdAsync(postId);
-                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
+                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<PostView>
                     {
                         StatusCode = 200,
                         IsSuccess = true,
                         Message = "Post views found successfully",
-                        ResponseObject = $"Post views {postView.ViewNumber}"
+                        ResponseObject = postView
                     });
                 }
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>

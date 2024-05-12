@@ -460,7 +460,6 @@ namespace SocialMedia.Service.PostService
                             {
                                 Id = Guid.NewGuid().ToString(),
                                 PostId = postId,
-                                UserId = currentUser.Id,
                                 ViewNumber = 1
                             }
                             );

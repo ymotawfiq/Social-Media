@@ -19,6 +19,5 @@ namespace SocialMedia.Data.Models.Authentication
         public List<Follower>? Followers { get; set; }
         public List<Block>? Blocks { get; set; }
         public List<UserPosts>? UserPosts { get; set; }
-        public List<PostView>? PostViews { get; set; }
     }
 }
