@@ -23,6 +23,7 @@ using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.FriendListPolicyService;
+using SocialMedia.Service.GenericReturn;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -105,13 +106,8 @@ namespace SocialMedia.Service.UserAccountService
                     }
                 }
             }
-            return new ApiResponse<List<string>>
-            {
-                IsSuccess = true,
-                Message = "Roles assugned successfully to user",
-                StatusCode = 200,
-                ResponseObject = assignRoles
-            };
+            return StatusCodeReturn<List<string>>
+                ._200_Success("Roles assugned successfully to user", assignRoles);
         }
 
         public async Task<ApiResponse<string>> ConfirmEmail(string userNameOrEmail, string token)
@@ -122,32 +118,17 @@ namespace SocialMedia.Service.UserAccountService
                 var confirmEmail = await _userManager.ConfirmEmailAsync(user, token);
                 if (!confirmEmail.Succeeded)
                 {
-                    return new ApiResponse<string>
-                    {
-                        IsSuccess = true,
-                        Message = "Failed to confirm email",
-                        StatusCode = 400,
-                        ResponseObject = "Failed to confirm email"
-                    };
+                    return StatusCodeReturn<string>
+                        ._400_BadRequest("Failed to confirm email");
                 }
 
-                return new ApiResponse<string>
-                {
-                    IsSuccess = true,
-                    Message = "Email confirmed successfully",
-                    StatusCode = 200,
-                    ResponseObject = "Email confirmed successfully"
-                };
+                return StatusCodeReturn<string>
+                    ._200_Success("Email confirmed successfully");
                 
             }
 
-            return new ApiResponse<string>
-            {
-                IsSuccess = true,
-                Message = "User not found",
-                StatusCode = 404,
-                ResponseObject = "User not found"
-            };
+            return StatusCodeReturn<string>
+                ._404_NotFound("User not found");
         }
 
         public async Task<ApiResponse<CreateUserResponse>> CreateUserWithTokenAsync(RegisterDto registerDto)
@@ -155,22 +136,14 @@ namespace SocialMedia.Service.UserAccountService
             var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
             if (existingUser != null)
             {
-                return new ApiResponse<CreateUserResponse>
-                {
-                    IsSuccess = false,
-                    Message = "User with this email already exists",
-                    StatusCode = 403
-                };
+                return StatusCodeReturn<CreateUserResponse>
+                    ._403_Forbidden("User with this email already exists");
             }
             existingUser = await _userManager.FindByNameAsync(registerDto.UserName);
             if (existingUser != null)
             {
-                return new ApiResponse<CreateUserResponse>
-                {
-                    IsSuccess = false,
-                    Message = "User with this user name already exists",
-                    StatusCode = 403
-                };
+                return StatusCodeReturn<CreateUserResponse>
+                    ._403_Forbidden("User with this user name already exists");
             }
             //var accountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync("public");
             var user = await CheckAccountPolicyAndCreateUserAsync(registerDto);
@@ -179,24 +152,16 @@ namespace SocialMedia.Service.UserAccountService
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 await SetAccountSettingsAsync(user.Id);
-                return new ApiResponse<CreateUserResponse>
+                var Object = new CreateUserResponse
                 {
-                    IsSuccess = true,
-                    Message = "User created successfully",
-                    StatusCode = 201,
-                    ResponseObject = new CreateUserResponse
-                    {
-                        Token = token,
-                        User = user
-                    }
+                    Token = token,
+                    User = user
                 };
+                return StatusCodeReturn<CreateUserResponse>
+                    ._201_Created("User created successfully", Object);
             }
-            return new ApiResponse<CreateUserResponse>
-            {
-                IsSuccess = false,
-                Message = "Failed to create user",
-                StatusCode = 500
-            };
+            return StatusCodeReturn<CreateUserResponse>
+                ._500_ServerError("Failed to create user");
         }
 
         public async Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(
@@ -205,45 +170,29 @@ namespace SocialMedia.Service.UserAccountService
             var user = await _userManager.FindByEmailAsync(resetEmailObjectDto.OldEmail);
             if (user == null)
             {
-                return new ApiResponse<ResetEmailDto>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<ResetEmailDto>
+                    ._404_NotFound("User not found");
             }
             else if(resetEmailObjectDto.OldEmail == resetEmailObjectDto.NewEmail)
             {
-                return new ApiResponse<ResetEmailDto>
-                {
-                    IsSuccess = false,
-                    Message = "New email can't be same as old email",
-                    StatusCode = 400  
-                };
+                return StatusCodeReturn<ResetEmailDto>
+                    ._400_BadRequest("New email can't be same as old email");
             }
             var userWithNewEmail = await _userManager.FindByEmailAsync(resetEmailObjectDto.NewEmail);
             if (userWithNewEmail != null)
             {
-                return new ApiResponse<ResetEmailDto>
-                {
-                    IsSuccess = false,
-                    Message = "Email already exists to user",
-                    StatusCode = 403
-                };
+                return StatusCodeReturn<ResetEmailDto>
+                    ._403_Forbidden("Email already exists to user");
             }
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, resetEmailObjectDto.NewEmail);
-            return new ApiResponse<ResetEmailDto>
+            var ResponseObject = new ResetEmailDto
             {
-                IsSuccess = true,
-                Message = "Reset email token generated successfully",
-                StatusCode = 200,
-                ResponseObject = new ResetEmailDto
-                {
-                    NewEmail = resetEmailObjectDto.NewEmail,
-                    OldEmail = resetEmailObjectDto.OldEmail,
-                    Token = token
-                }
+                NewEmail = resetEmailObjectDto.NewEmail,
+                OldEmail = resetEmailObjectDto.OldEmail,
+                Token = token
             };
+            return StatusCodeReturn<ResetEmailDto>
+                ._201_Created("Reset email token generated successfully", ResponseObject);
         }
 
         public async Task<ApiResponse<ResetPasswordDto>> GenerateResetPasswordTokenAsync(string email)
@@ -251,25 +200,17 @@ namespace SocialMedia.Service.UserAccountService
             var user = await _userManager.FindByEmailAsync(email);
             if(user == null)
             {
-                return new ApiResponse<ResetPasswordDto>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<ResetPasswordDto>
+                    ._404_NotFound("User not found");
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            return new ApiResponse<ResetPasswordDto>
+            var ResponseObject = new ResetPasswordDto
             {
-                StatusCode = 200,
-                Message = "Reset password token generated successfully",
-                IsSuccess = true,
-                ResponseObject = new ResetPasswordDto
-                {
-                    Token = token,
-                    Email = email
-                }
+                Token = token,
+                Email = email
             };
+            return StatusCodeReturn<ResetPasswordDto>
+                ._200_Success("Reset password token generated successfully", ResponseObject);
         }
 
         public async Task<ApiResponse<LoginResponse>> GetJwtTokenAsync(SiteUser user)
@@ -279,25 +220,21 @@ namespace SocialMedia.Service.UserAccountService
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(refreshTokenValidity);
             await _userManager.UpdateAsync(user);
-            return new ApiResponse<LoginResponse>
+            var ResponseObject = new LoginResponse
             {
-                IsSuccess = true,
-                Message = "Token created successfully",
-                StatusCode = 200,
-                ResponseObject = new LoginResponse
+                AccessToken = new TokenType
                 {
-                    AccessToken = new TokenType
-                    {
-                        ExpiryTokenDate = (await GenerateUserToken(user)).ValidTo,
-                        Token = new JwtSecurityTokenHandler().WriteToken(await GenerateUserToken(user))
-                    },
-                    RefreshToken = new TokenType
-                    {
-                        Token = refreshToken,
-                        ExpiryTokenDate = (DateTime) user.RefreshTokenExpiry
-                    }
+                    ExpiryTokenDate = (await GenerateUserToken(user)).ValidTo,
+                    Token = new JwtSecurityTokenHandler().WriteToken(await GenerateUserToken(user))
+                },
+                RefreshToken = new TokenType
+                {
+                    Token = refreshToken,
+                    ExpiryTokenDate = (DateTime)user.RefreshTokenExpiry
                 }
             };
+            return StatusCodeReturn<LoginResponse>
+                ._200_Success("Token created successfully", ResponseObject);
         }
 
         public async Task<ApiResponse<LoginOtpResponse>> LoginUserAsync(LoginDto loginDto)
@@ -307,12 +244,8 @@ namespace SocialMedia.Service.UserAccountService
             {
                 if (!user.EmailConfirmed)
                 {
-                    return new ApiResponse<LoginOtpResponse>
-                    {
-                        IsSuccess = false,
-                        Message = "Please confirm your email",
-                        StatusCode = 400
-                    };
+                    return StatusCodeReturn<LoginOtpResponse>
+                        ._400_BadRequest("Please confirm your email");
                 }
                 await _signInManager.SignOutAsync();
                 if (user.TwoFactorEnabled)
@@ -320,26 +253,18 @@ namespace SocialMedia.Service.UserAccountService
                     var signIn = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
                     if (!signIn.Succeeded)
                     {
-                        return new ApiResponse<LoginOtpResponse>
-                        {
-                            IsSuccess = false,
-                            Message = "Invalid user name or password",
-                            StatusCode = 400
-                        };
+                        return StatusCodeReturn<LoginOtpResponse>
+                            ._400_BadRequest("Invalid user name or password");
                     }
                     var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-                    return new ApiResponse<LoginOtpResponse>
+                    var ResponseObject = new LoginOtpResponse
                     {
-                        IsSuccess = true,
-                        Message = "OTP generated successfully",
-                        StatusCode = 200,
-                        ResponseObject = new LoginOtpResponse
-                        {
-                            IsTwoFactorEnabled = user.TwoFactorEnabled,
-                            Token = token,
-                            User = user
-                        }
+                        IsTwoFactorEnabled = user.TwoFactorEnabled,
+                        Token = token,
+                        User = user
                     };
+                    return StatusCodeReturn<LoginOtpResponse>
+                        ._200_Success("OTP generated successfully", ResponseObject);
                 }
                 else
                 {
@@ -347,33 +272,21 @@ namespace SocialMedia.Service.UserAccountService
                             loginDto.Password, false, false);
                     if (!signIn.Succeeded)
                     {
-                        return new ApiResponse<LoginOtpResponse>
-                        {
-                            IsSuccess = false,
-                            Message = "Invalid user name or password",
-                            StatusCode = 400
-                        };
+                        return StatusCodeReturn<LoginOtpResponse>
+                            ._400_BadRequest("Invalid user name or password");
                     }
-                    return new ApiResponse<LoginOtpResponse>
+                    var ResponseObject = new LoginOtpResponse
                     {
-                        IsSuccess = true,
-                        Message = "Token generated successfully",
-                        StatusCode = 200,
-                        ResponseObject = new LoginOtpResponse
-                        {
-                            IsTwoFactorEnabled = user.TwoFactorEnabled,
-                            Token = new JwtSecurityTokenHandler().WriteToken(await GenerateUserToken(user))
-                        }
+                        IsTwoFactorEnabled = user.TwoFactorEnabled,
+                        Token = new JwtSecurityTokenHandler().WriteToken(await GenerateUserToken(user))
                     };
+                    return StatusCodeReturn<LoginOtpResponse>
+                        ._200_Success("Token generated successfully", ResponseObject);
                 }
 
             }
-            return new ApiResponse<LoginOtpResponse>
-            {
-                IsSuccess = false,
-                StatusCode = 404,
-                Message = "User not found"
-            };
+            return StatusCodeReturn<LoginOtpResponse>
+                ._404_NotFound("User not found");
         }
 
         public async Task<ApiResponse<LoginResponse>> LoginUserWithOTPAsync(string otp, 
@@ -388,12 +301,8 @@ namespace SocialMedia.Service.UserAccountService
                     return await GetJwtTokenAsync(user);
                 }
             }
-            return new ApiResponse<LoginResponse>
-            {
-                IsSuccess = false,
-                StatusCode = 400,
-                Message = "Invalid OTP"
-            };
+            return StatusCodeReturn<LoginResponse>
+                ._400_BadRequest("Invalid OTP");
         }
 
         public async Task<ApiResponse<LoginResponse>> RenewAccessTokenAsync(LoginResponse tokens)
@@ -402,32 +311,20 @@ namespace SocialMedia.Service.UserAccountService
             var refreshToken = tokens.RefreshToken;
             if(accessToken==null || refreshToken == null)
             {
-                return new ApiResponse<LoginResponse>
-                {
-                    IsSuccess = false,
-                    Message = "Access token or refresh token must not be null",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<LoginResponse>
+                    ._400_BadRequest("Access token or refresh token must not be null");
             }
             var principal = GetClaimsPrincipal(accessToken.Token);
             if(principal.Identity==null || principal.Identity.Name == null)
             {
-                return new ApiResponse<LoginResponse>
-                {
-                    IsSuccess = false,
-                    Message = "Principal name empty",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<LoginResponse>
+                    ._400_BadRequest("Principal name empty");
             }
             var user = await _userManager.FindByNameAsync(principal.Identity.Name);
             if (user == null)
             {
-                return new ApiResponse<LoginResponse>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<LoginResponse>
+                    ._404_NotFound("User not found");
             }
 
             return await GetJwtTokenAsync(user);
@@ -439,25 +336,17 @@ namespace SocialMedia.Service.UserAccountService
             var user = await GetUserByUserNameOrEmailAsync(userNameOrEmail);
             if(user == null)
             {
-                return new ApiResponse<EmailConfirmationDto>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<EmailConfirmationDto>
+                    ._404_NotFound("User not found");
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            return new ApiResponse<EmailConfirmationDto>
+            var ResponseObject = new EmailConfirmationDto
             {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "Email confirmation token generated successfully",
-                ResponseObject = new EmailConfirmationDto
-                {
-                   Token = token,
-                    User = user
-                }
+                Token = token,
+                User = user
             };
+            return StatusCodeReturn<EmailConfirmationDto>
+                ._200_Success("Email confirmation token generated successfully", ResponseObject);
         }
 
         public async Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
@@ -465,30 +354,18 @@ namespace SocialMedia.Service.UserAccountService
             var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
             if (user == null)
             {
-                return new ApiResponse<string>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<string>
+                    ._404_NotFound("User not found");
             }
             var result = await _userManager.ResetPasswordAsync(user,
                 resetPasswordDto.Token, resetPasswordDto.Password);
             if (result.Succeeded)
             {
-                return new ApiResponse<string>
-                {
-                    IsSuccess = true,
-                    Message = "Password reset successfully",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<string>
+                    ._200_Success("Password reset successfully");
             }
-            return new ApiResponse<string>
-            {
-                IsSuccess = true,
-                Message = "Failed to reset password",
-                StatusCode = 400
-            };
+            return StatusCodeReturn<string>
+                ._400_BadRequest("Failed to reset password");
         }
 
         public async Task<ApiResponse<string>> EnableTwoFactorAuthenticationAsync(string email)
@@ -496,21 +373,13 @@ namespace SocialMedia.Service.UserAccountService
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                return new ApiResponse<string>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<string>
+                    ._404_NotFound("User not found");
             }
             await _userManager.SetTwoFactorEnabledAsync(user, true);
             await _userManager.UpdateAsync(user);
-            return new ApiResponse<string>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "Two factor authentication enabled successfully"
-            };
+            return StatusCodeReturn<string>
+                ._200_Success("Two factor authentication enabled successfully");
         }
 
         public async Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail)
@@ -556,19 +425,11 @@ namespace SocialMedia.Service.UserAccountService
                 {
                     siteUser.AccountPolicyId = accountPolicy.ResponseObject.Id;
                     await _userManager.UpdateAsync(siteUser);
-                    return new ApiResponse<bool>
-                    {
-                        IsSuccess = true,
-                        Message = "Accout policy updated successfully",
-                        StatusCode = 200
-                    };
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Accout policy updated successfully");
                 }
-                return new ApiResponse<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Accout policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<bool>
+                    ._404_NotFound("Accout policy not found");
             }
             
 
@@ -596,6 +457,7 @@ namespace SocialMedia.Service.UserAccountService
             };
             return user;
         }
+
         private async Task<SiteUser> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
         {
             var userByEmail = await _userManager.FindByEmailAsync(userNameOrEmail);

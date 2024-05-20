@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models.ApiResponseModel;
+using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.ReactPolicyService;
 
 namespace SocialMedia.Api.Controllers
@@ -29,12 +30,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -49,12 +46,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -69,12 +62,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -89,12 +78,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -109,12 +94,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 

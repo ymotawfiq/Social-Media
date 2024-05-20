@@ -16,6 +16,7 @@ using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.FriendsService;
+using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
 using SocialMedia.Service.ReactPolicyService;
 
@@ -62,12 +63,8 @@ namespace SocialMedia.Service.PostService
             var policy = await _policyRepository.GetPolicyByIdAsync(accountPolicy.PolicyId);
             if (policy == null)
             {
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<PostDto>
+                    ._404_NotFound("Policy not found");
             }
             if (policy.PolicyType == "PUBLIC")
             {
@@ -80,22 +77,14 @@ namespace SocialMedia.Service.PostService
             var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
             if (reactPolicy == null)
             {
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = false,
-                    Message = "React policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<PostDto>
+                    ._404_NotFound("React policy not found");
             }
             var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
             if (commentPolicy == null)
             {
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = false,
-                    Message = "Comment policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<PostDto>
+                    ._404_NotFound("Comment policy not found");
             }
             var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, policy, reactPolicy,
                 commentPolicy);
@@ -115,13 +104,8 @@ namespace SocialMedia.Service.PostService
             var newPostDto = await _postRepository.AddPostAsync(user, post, postImages);
             var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
             userPosts.User = null;
-            return new ApiResponse<PostDto>
-            {
-                IsSuccess = true,
-                Message = "Post created successfully",
-                StatusCode = 201,
-                ResponseObject = newPostDto
-            };
+            return StatusCodeReturn<PostDto>
+                    ._201_Created("Post created successfully", newPostDto);
         }
 
         public async Task<ApiResponse<PostDto>> DeletePostAsync(SiteUser user, string postId)
@@ -129,12 +113,8 @@ namespace SocialMedia.Service.PostService
             var existPost = await _postRepository.IsPostExistsAsync(postId);
             if (existPost == null)
             {
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = false,
-                    Message = "Post not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<PostDto>
+                    ._404_NotFound("Post not found");
             }
             var post = await _postRepository.GetPostByIdAsync(user, postId);
             if(post.Images!=null && post.Images.Count != 0)
@@ -145,12 +125,8 @@ namespace SocialMedia.Service.PostService
                 }
             }
             await _postRepository.DeletePostAsync(user, postId);
-            return new ApiResponse<PostDto>
-            {
-                StatusCode = 200,
-                Message = "Post deleted successfully",
-                IsSuccess = true
-            };
+            return StatusCodeReturn<PostDto>
+                    ._200_Success("Post deleted successfully");
         }
 
         public async Task<ApiResponse<PostDto>> GetPostByIdAsync(SiteUser user, string postId)
@@ -158,21 +134,12 @@ namespace SocialMedia.Service.PostService
             var existPost = await _postRepository.IsPostExistsAsync(postId);
             if (existPost == null)
             {
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = false,
-                    Message = "Post not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<PostDto>
+                    ._404_NotFound("Post not found");
             }
             var post = await _postRepository.GetPostByIdAsync(user, postId);
-            return new ApiResponse<PostDto>
-            {
-                StatusCode = 200,
-                Message = "Post found successfully",
-                IsSuccess = true,
-                ResponseObject = post
-            };
+            return StatusCodeReturn<PostDto>
+                    ._200_Success("Post found successfully", post);
         }
 
         public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsAsync(SiteUser user)
@@ -180,21 +147,11 @@ namespace SocialMedia.Service.PostService
             var posts = await _postRepository.GetUserPostsAsync(user);
             if (posts.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<PostDto>>
-                {
-                    IsSuccess = true,
-                    Message = "No posts found",
-                    ResponseObject = posts,
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<PostDto>>
+                    ._200_Success("No posts found", posts);
             }
-            return new ApiResponse<IEnumerable<PostDto>>
-            {
-                IsSuccess = true,
-                Message = "Posts found successfully",
-                ResponseObject = posts,
-                StatusCode = 200
-            };
+            return StatusCodeReturn<IEnumerable<PostDto>>
+                    ._200_Success("Posts found successfully", posts);
         }
 
 
@@ -204,31 +161,17 @@ namespace SocialMedia.Service.PostService
             var checkPolicy = await _policyRepository.GetPolicyByNameAsync(policy.PolicyType);
             if (checkPolicy == null)
             {
-                return new ApiResponse<IEnumerable<PostDto>>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<IEnumerable<PostDto>>
+                    ._404_NotFound("Policy not found");
             }
             var userPosts = await _postRepository.GetUserPostsByPolicyAsync(user, policy);
             if (userPosts.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<PostDto>>
-                {
-                    IsSuccess = true,
-                    Message = "No posts found",
-                    StatusCode = 200,
-                    ResponseObject = userPosts
-                };
+                return StatusCodeReturn<IEnumerable<PostDto>>
+                    ._200_Success("No posts found");
             }
-            return new ApiResponse<IEnumerable<PostDto>>
-            {
-                IsSuccess = true,
-                Message = "Posts found successfully",
-                StatusCode = 200,
-                ResponseObject = userPosts
-            };
+            return StatusCodeReturn<IEnumerable<PostDto>>
+                    ._200_Success("Posts found successfully", userPosts);
         }
 
 
@@ -252,21 +195,11 @@ namespace SocialMedia.Service.PostService
             }
             if (posts.Count == 0)
             {
-                return new ApiResponse<IEnumerable<List<PostDto>>>
-                {
-                    IsSuccess = true,
-                    ResponseObject = posts,
-                    Message = " No posts found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                    ._200_Success("No posts found");
             }
-            return new ApiResponse<IEnumerable<List<PostDto>>>
-            {
-                IsSuccess = true,
-                ResponseObject = posts,
-                Message = "Posts found successfully",
-                StatusCode = 200
-            };
+            return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                    ._200_Success("Posts found successfully", posts);
         }
 
         public async Task<ApiResponse<IEnumerable<List<PostDto>>>> 
@@ -289,21 +222,11 @@ namespace SocialMedia.Service.PostService
             }
             if (posts.Count == 0)
             {
-                return new ApiResponse<IEnumerable<List<PostDto>>>
-                {
-                    IsSuccess = true,
-                    ResponseObject = posts,
-                    Message = " No posts found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                    ._200_Success("No posts found");
             }
-            return new ApiResponse<IEnumerable<List<PostDto>>>
-            {
-                IsSuccess = true,
-                ResponseObject = posts,
-                Message = "Posts found successfully",
-                StatusCode = 200
-            };
+            return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                    ._200_Success("Posts found successfully", posts);
         }
 
 
@@ -326,20 +249,11 @@ namespace SocialMedia.Service.PostService
             {
                 var posts = new List<List<PostDto>>();
                 posts.Add(publicPosts.ToList());
-                return new ApiResponse<IEnumerable<List<PostDto>>>
-                {
-                    IsSuccess = true,
-                    Message = "Posts found successfully",
-                    StatusCode = 200,
-                    ResponseObject = posts
-                };
+                return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                    ._200_Success("Posts found successfully", posts);
             }
-            return new ApiResponse<IEnumerable<List<PostDto>>>
-            {
-                IsSuccess = false,
-                Message = "No posts found successfully",
-                StatusCode = 404
-            };
+            return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                    ._404_NotFound("No posts found");
         }
 
 
@@ -380,20 +294,11 @@ namespace SocialMedia.Service.PostService
                 var updatedPost = await _postRepository.UpdatePostAsync(user, post, postImages);
                 var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
                 userPosts.User = null;
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = true,
-                    Message = "Post updated successfully",
-                    StatusCode = 200,
-                    ResponseObject = updatedPost
-                };
+                return StatusCodeReturn<PostDto>
+                    ._200_Success("Post updated successfully", updatedPost);
             }
-            return new ApiResponse<PostDto>
-            {
-                IsSuccess = false,
-                Message = "Forbidden",
-                StatusCode = 403
-            };
+            return StatusCodeReturn<PostDto>
+                ._403_Forbidden();
         }
 
 
@@ -414,12 +319,7 @@ namespace SocialMedia.Service.PostService
                             currentUser.Id, postId);
                         if (userPost == null)
                         {
-                            return new ApiResponse<PostDto>
-                            {
-                                IsSuccess = false,
-                                Message = "Forbidden",
-                                StatusCode = 403
-                            };
+                            return StatusCodeReturn<PostDto>._403_Forbidden();
                         }
                     }
                     else if (postPolicy.ResponseObject.PolicyType == "FRIENDS ONLY")
@@ -428,12 +328,7 @@ namespace SocialMedia.Service.PostService
                             currentUser.Id, routeUser.Id);
                         if (isFriend == null)
                         {
-                            return new ApiResponse<PostDto>
-                            {
-                                IsSuccess = false,
-                                Message = "Forbidden",
-                                StatusCode = 403
-                            };
+                            return StatusCodeReturn<PostDto>._403_Forbidden();
                         }
                     }
                     else if (postPolicy.ResponseObject.PolicyType == "FRIENDS OF FRIENDS")
@@ -444,12 +339,7 @@ namespace SocialMedia.Service.PostService
                             currentUser.Id);
                         if (isFriend == null || !isFriendOfFriend.ResponseObject)
                         {
-                            return new ApiResponse<PostDto>
-                            {
-                                IsSuccess = false,
-                                Message = "Forbidden",
-                                StatusCode = 403
-                            };
+                            return StatusCodeReturn<PostDto>._403_Forbidden();
                         }
                     }
                     var postView = await _postViewRepository.GetPostViewByPostIdAsync(postId);
@@ -463,36 +353,18 @@ namespace SocialMedia.Service.PostService
                                 ViewNumber = 1
                             }
                             );
-                        return new ApiResponse<PostDto>
-                        {
-                            IsSuccess = true,
-                            Message = "Post found successfully",
-                            StatusCode = 200,
-                            ResponseObject = post
-                        };
+                        return StatusCodeReturn<PostDto>
+                        ._200_Success("Post found successfully", post);
                     }
                     await _postViewRepository.UpdatePostViewAsync(postView);
-                    return new ApiResponse<PostDto>
-                    {
-                        IsSuccess = true,
-                        Message = "Post found successfully",
-                        StatusCode = 200,
-                        ResponseObject = post
-                    };
+                    return StatusCodeReturn<PostDto>
+                        ._200_Success("Post found successfully", post);
                 }
-                return new ApiResponse<PostDto>
-                {
-                    IsSuccess = false,
-                    Message = "Post policy not found",
-                    StatusCode = 404,
-                };
+                return StatusCodeReturn<PostDto>
+                ._404_NotFound("Post policy not found");
             }
-            return new ApiResponse<PostDto>
-            {
-                IsSuccess = false,
-                Message = "Post not found",
-                StatusCode = 404,
-            };
+            return StatusCodeReturn<PostDto>
+                ._404_NotFound("Post not found");
         }
 
 
@@ -510,27 +382,14 @@ namespace SocialMedia.Service.PostService
                     var post = await _postRepository.GetPostByIdAsync(user, updatePostPolicyDto.PostId);
                     post.PolicyId = policy.ResponseObject.Id;
                     await _postRepository.UpdatePostPolicyAsync(user, ConvertFromPostDto(post));
-                    return new ApiResponse<bool>
-                    {
-                        IsSuccess = true,
-                        Message = "Post policy updated successfully",
-                        StatusCode = 200,
-                        ResponseObject = true
-                    };
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Post policy updated successfully", true);
                 }
-                return new ApiResponse<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<bool>
+                ._404_NotFound("Policy not found");
             }
-            return new ApiResponse<bool>
-            {
-                IsSuccess = false,
-                Message = "Post not found for this user",
-                StatusCode = 404
-            };
+            return StatusCodeReturn<bool>
+                ._404_NotFound("Post not found for this user");
         }
 
         public async Task<ApiResponse<bool>> UpdatePostReactPolicyAsync
@@ -550,34 +409,17 @@ namespace SocialMedia.Service.PostService
                         var post = await _postRepository.GetPostByIdAsync(user, updatePostReactPolicy.PostId);
                         post.ReactPolicyId = reactPolicy.Id;
                         await _postRepository.UpdatePostReactPolicyAsync(user, ConvertFromPostDto(post));
-                        return new ApiResponse<bool>
-                        {
-                            IsSuccess = true,
-                            Message = "Post react policy updated successfully",
-                            StatusCode = 200,
-                            ResponseObject = true
-                        };
+                        return StatusCodeReturn<bool>
+                        ._200_Success("Post react policy updated successfully", true);
                     }
-                    return new ApiResponse<bool>
-                    {
-                        IsSuccess = false,
-                        Message = "React policy not found",
-                        StatusCode = 404
-                    };
+                    return StatusCodeReturn<bool>
+                ._404_NotFound("React policy not found");
                 }
-                return new ApiResponse<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<bool>
+                ._404_NotFound("Policy not found");
             }
-            return new ApiResponse<bool>
-            {
-                IsSuccess = false,
-                Message = "Post not found for this user",
-                StatusCode = 404
-            };
+            return StatusCodeReturn<bool>
+                ._404_NotFound("Post not found for this user");
         }
 
         public async Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync
@@ -598,34 +440,17 @@ namespace SocialMedia.Service.PostService
                         var post = await _postRepository.GetPostByIdAsync(user, updatePostCommentPolicyDto.PostId);
                         post.CommentPolicyId = commentPolicy.Id;
                         await _postRepository.UpdatePostCommentPolicyAsync(user, ConvertFromPostDto(post));
-                        return new ApiResponse<bool>
-                        {
-                            IsSuccess = true,
-                            Message = "Post comment policy updated successfully",
-                            StatusCode = 200,
-                            ResponseObject = true
-                        };
+                        return StatusCodeReturn<bool>
+                        ._200_Success("Post comment policy updated successfully", true);
                     }
-                    return new ApiResponse<bool>
-                    {
-                        IsSuccess = false,
-                        Message = "Comment policy not found",
-                        StatusCode = 404
-                    };
+                    return StatusCodeReturn<bool>
+                ._404_NotFound("Comment policy not found");
                 }
-                return new ApiResponse<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<bool>
+                ._404_NotFound("Policy not found");
             }
-            return new ApiResponse<bool>
-            {
-                IsSuccess = false,
-                Message = "Post not found for this user",
-                StatusCode = 404
-            };
+            return StatusCodeReturn<bool>
+                ._404_NotFound("Post not found for this user");
         }
 
 

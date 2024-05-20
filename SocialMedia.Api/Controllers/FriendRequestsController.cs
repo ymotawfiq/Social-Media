@@ -9,6 +9,7 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Service.FriendRequestService;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {
@@ -39,7 +40,8 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var friendRequestPerson = await GetUsetAsync(addFriendRequestDto.PersonIdOrUserNameOrEmail);
+                    var friendRequestPerson = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        addFriendRequestDto.PersonIdOrUserNameOrEmail);
                     if (user != null && friendRequestPerson!=null)
                     {
                         if (user.Id != friendRequestPerson.Id)
@@ -59,35 +61,19 @@ namespace SocialMedia.Api.Controllers
                             }
                             
                         }
-                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                        {
-                            StatusCode = 403,
-                            IsSuccess = false,
-                            Message = "Forbidden"
-                        });
+                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                            ._403_Forbidden());
                     }
-                    return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                    {
-                        StatusCode = 403,
-                        IsSuccess = false,
-                        Message = "Forbidden"
-                    });
+                    return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                            ._403_Forbidden());
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -124,29 +110,17 @@ namespace SocialMedia.Api.Controllers
                                 }
                             }   
                         }
-                        return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                        {
-                            StatusCode = 404,
-                            IsSuccess = false,
-                            Message = "Friend request not found"
-                        });
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("Friend request not found"));
                     }
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -173,29 +147,17 @@ namespace SocialMedia.Api.Controllers
                                 return Ok(response);
                             }
                         }
-                        return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                        {
-                            StatusCode = 404,
-                            IsSuccess = false,
-                            Message = "Friend request not found"
-                        });
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("Friend request not found"));
                     }
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -208,19 +170,16 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var sender = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var receiver = await GetUsetAsync(userWhoReceivedIdOrUserName);
+                    var receiver = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        userWhoReceivedIdOrUserName);
                     if (sender != null && receiver != null)
                     {
                         var friendRequest = await _friendRequestRepository.GetFriendRequestByUserAndPersonIdAsync
                             (sender.Id, receiver.Id);
                         if (friendRequest == null || sender.Id == receiver.Id)
                         {
-                            return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                            {
-                                StatusCode = 403,
-                                IsSuccess = false,
-                                Message = "Forbidden"
-                            });
+                            return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                    ._403_Forbidden());
                         }
                         else
                         {
@@ -234,21 +193,13 @@ namespace SocialMedia.Api.Controllers
                         }
                     }
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -263,12 +214,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -287,21 +234,13 @@ namespace SocialMedia.Api.Controllers
                         return Ok(response);
                     }
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -316,65 +255,31 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var routeUser = await GetUsetAsync(userIdOrUserName);
+                        var routeUser = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                            userIdOrUserName);
                         if (await _userManager.IsInRoleAsync(user, "Admin") || user.Id == routeUser.Id)
                         {
                             var response = await _friendRequestService.GetAllFriendRequestsByUserIdAsync(
                                 routeUser.Id);
                             return Ok(response);
                         }
-                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                        {
-                            StatusCode = 403,
-                            IsSuccess = false,
-                            Message = "Forbidden"
-                        });
+                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                            ._403_Forbidden());
                     }
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
         
-        private async Task<SiteUser> GetUsetAsync(string PersonIdOrUserNameOrEmail)
-        {
-            var userByName = await _userManager.FindByNameAsync(PersonIdOrUserNameOrEmail);
-            var userById = await _userManager.FindByIdAsync(PersonIdOrUserNameOrEmail);
-            var userByEmail = await _userManager.FindByEmailAsync(PersonIdOrUserNameOrEmail);
-            if (userByEmail != null)
-            {
-                return userByEmail;
-            }
-            else if (userById != null)
-            {
-                return userById;
-            }
-            else if (userByName != null)
-            {
-                return userByName;
-            }
-            return null!;
-        }
 
     }
 }

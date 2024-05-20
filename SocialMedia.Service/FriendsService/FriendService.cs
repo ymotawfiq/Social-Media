@@ -10,6 +10,7 @@ using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Service.FriendListPolicyService;
+using SocialMedia.Service.GenericReturn;
 using System.Linq;
 
 namespace SocialMedia.Service.FriendsService
@@ -35,12 +36,8 @@ namespace SocialMedia.Service.FriendsService
                 friendsDto.FriendId);
             if (existFriend != null)
             {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "You are already friends",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<Friend>
+                    ._400_BadRequest("You are already friends");
             }
             var userFriendList = await _friendsRepository.GetAllUserFriendsAsync(friendsDto.UserId);
             if (userFriendList == null || userFriendList.ToList().Count == 0)
@@ -55,13 +52,8 @@ namespace SocialMedia.Service.FriendsService
             }
             var newFriend = await _friendsRepository.AddFriendAsync(
                 ConvertFromDto.ConvertFromFriendtDto_Add(friendsDto));
-            return new ApiResponse<Friend>
-            {
-                IsSuccess = true,
-                Message = "Friend added successfully to your friend list",
-                StatusCode = 201,
-                ResponseObject = newFriend
-            };
+            return StatusCodeReturn<Friend>
+                ._201_Created("Friend added successfully to your friend list");
         }
 
         public async Task<ApiResponse<Friend>> DeleteFriendAsync(string userId, string friendId)
@@ -69,31 +61,18 @@ namespace SocialMedia.Service.FriendsService
             var isYourFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
             if (isYourFriend == null)
             {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "Friend not in your friend list",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<Friend>
+                    ._404_NotFound("Friend not in your friend list");
             }
             var deletedFriend = await _friendsRepository.DeleteFriendAsync(userId, friendId);
             if (deletedFriend == null)
             {
-                return new ApiResponse<Friend>
-                {
-                    IsSuccess = false,
-                    Message = "Can't delete friend",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<Friend>
+                    ._500_ServerError("Can't delete friend");
             }
             deletedFriend.User = null;
-            return new ApiResponse<Friend>
-            {
-                IsSuccess = true,
-                Message = "Friend deleted successfully",
-                StatusCode = 200,
-                ResponseObject = deletedFriend
-            };
+            return StatusCodeReturn<Friend>
+                ._200_Success("Friend deleted successfully", deletedFriend);
         }
 
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(string userId)
@@ -102,20 +81,11 @@ namespace SocialMedia.Service.FriendsService
             
             if (friends.ToList().Count==0)
             {
-                return new ApiResponse<IEnumerable<Friend>>
-                {
-                    IsSuccess = true,
-                    Message = "No friends found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<Friend>>
+                    ._200_Success("No friends found");
             }
-            return new ApiResponse<IEnumerable<Friend>>
-            {
-                IsSuccess = true,
-                Message = "Friends found successfully",
-                StatusCode = 200,
-                ResponseObject = friends
-            };
+            return StatusCodeReturn<IEnumerable<Friend>>
+                    ._200_Success("Friends found successfully", friends);
         }
 
         public async Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId)
@@ -123,21 +93,11 @@ namespace SocialMedia.Service.FriendsService
             var check = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
             if (check == null)
             {
-                return new ApiResponse<bool>
-                {
-                    IsSuccess = true,
-                    Message = "Not friend",
-                    StatusCode = 200,
-                    ResponseObject = false
-                };
+                return StatusCodeReturn<bool>
+                    ._200_Success("Not friend");
             }
-            return new ApiResponse<bool>
-            {
-                IsSuccess = true,
-                Message = "Friend",
-                StatusCode = 200,
-                ResponseObject = true
-            };
+            return StatusCodeReturn<bool>
+                    ._200_Success("Friend");
         }
 
         public async Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId)
@@ -150,24 +110,14 @@ namespace SocialMedia.Service.FriendsService
                 {
                     if (f.Contains(friend))
                     {
-                        return new ApiResponse<bool>
-                        {
-                            IsSuccess = true,
-                            Message = "Friend of friend",
-                            StatusCode = 200,
-                            ResponseObject = true
-                        };
+                        return StatusCodeReturn<bool>
+                    ._200_Success("Friend of friend");
                     }
                 }
             }
-            
-            return new ApiResponse<bool>
-            {
-                IsSuccess = true,
-                Message = "Not friend of friend",
-                StatusCode = 200,
-                ResponseObject = false
-            };
+
+            return StatusCodeReturn<bool>
+                    ._200_Success("Not friend of friend");
         }
     }
 }

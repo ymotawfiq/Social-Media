@@ -27,6 +27,7 @@ using SocialMedia.Service.FollowerService;
 using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
+using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
 using SocialMedia.Service.PostService;
 using SocialMedia.Service.ReactPolicyService;
@@ -121,6 +122,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserPostsRepository, UserPostsRepository>();
 builder.Services.AddScoped<IAccountPolicyService, AccountPolicyService>();
 builder.Services.AddScoped<IFriendListPolicyService, FriendListPolicyService>();
+builder.Services.AddScoped<UserManagerReturn>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();

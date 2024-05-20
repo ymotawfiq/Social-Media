@@ -4,6 +4,7 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.PostViewRepository;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {
@@ -35,21 +36,13 @@ namespace SocialMedia.Api.Controllers
                         ResponseObject = postView
                     });
                 }
-                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                {
-                    StatusCode = 404,
-                    IsSuccess = false,
-                    Message = "Post not found"
-                });
+                return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("Post not found"));
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 

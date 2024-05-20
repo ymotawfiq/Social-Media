@@ -266,7 +266,7 @@ D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.SocialMedia.Api.props
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\staticwebassets.pack.json
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\scopedcss\bundle\SocialMedia.Api.styles.css
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\SocialMedia.Api.csproj.CopyComplete
+D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\SocialMe.67C1FFFC.Up2Date
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\SocialMedia.Api.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\refint\SocialMedia.Api.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Api\obj\Debug\net8.0\SocialMedia.Api.pdb

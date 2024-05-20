@@ -9,6 +9,7 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Service.FriendsService;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Service.FriendRequestService
 {
@@ -34,12 +35,8 @@ namespace SocialMedia.Service.FriendRequestService
                 friendRequestDto.UserId, friendRequestDto.PersonId);
             if (friendRequest != null && friendRequest.IsAccepted == false)
             {
-                return new ApiResponse<FriendRequest>
-                {
-                    IsSuccess = false,
-                    Message = "Friend request already sent or check your friend list",
-                    StatusCode = 400,
-                };
+                return StatusCodeReturn<FriendRequest>
+                    ._400_BadRequest("Friend request already sent or check your friend list");
             }
             var isYouFriends = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
                 friendRequestDto.UserId, friendRequestDto.PersonId);
@@ -48,20 +45,11 @@ namespace SocialMedia.Service.FriendRequestService
                 var newFriendRequest = await _friendRequestRepository.AddFriendRequestAsync(
                 ConvertFromDto.ConvertFromFriendRequestDto_Add(friendRequestDto));
                 newFriendRequest.User = null;
-                return new ApiResponse<FriendRequest>
-                {
-                    IsSuccess = true,
-                    Message = "Friend request send successfully",
-                    StatusCode = 201,
-                    ResponseObject = newFriendRequest
-                };
+                return StatusCodeReturn<FriendRequest>
+                    ._200_Success("Friend request send successfully", newFriendRequest);
             }
-            return new ApiResponse<FriendRequest>
-            {
-                IsSuccess = false,
-                Message = "You are friends",
-                StatusCode = 400,
-            };
+            return StatusCodeReturn<FriendRequest>
+                ._400_BadRequest("You are friends");
 
         }
 
@@ -73,20 +61,12 @@ namespace SocialMedia.Service.FriendRequestService
             if (!friendRequests.ToList().Contains(friendRequest)
                 && !await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                return new ApiResponse<FriendRequest>
-                {
-                    IsSuccess = true,
-                    Message = "You haven't sent friend request to this user",
-                    StatusCode = 400,
-                };
+                return StatusCodeReturn<FriendRequest>
+                ._400_BadRequest("You haven't sent friend request to this user");
             }
             await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequestId);
-            return new ApiResponse<FriendRequest>
-            {
-                IsSuccess = true,
-                Message = "Friend request deleted successfully",
-                StatusCode = 200,
-            };
+            return StatusCodeReturn<FriendRequest>
+                    ._200_Success("Friend request deleted successfully");
         }
 
         public async Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsAsync()
@@ -94,21 +74,12 @@ namespace SocialMedia.Service.FriendRequestService
             var friendRequsts = await _friendRequestRepository.GetAllFriendRequestsAsync();
             if (friendRequsts.ToList().Count==0)
             {
-                return new ApiResponse<IEnumerable<FriendRequest>>
-                {
-                    IsSuccess = true,
-                    Message = "No friend requests found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests found");
             }
 
-            return new ApiResponse<IEnumerable<FriendRequest>>
-            {
-                IsSuccess = true,
-                Message = "Friend requests found successfully",
-                StatusCode = 200,
-                ResponseObject = friendRequsts
-            };
+            return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests found", friendRequsts);
         }
 
         public async Task<ApiResponse<IEnumerable<FriendRequest>>> 
@@ -117,21 +88,12 @@ namespace SocialMedia.Service.FriendRequestService
             var userFriendRequsts = await _friendRequestRepository.GetAllFriendRequestsByUserIdAsync(userId);
             if (userFriendRequsts.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<FriendRequest>>
-                {
-                    IsSuccess = true,
-                    Message = "No friend requests found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests found");
             }
 
-            return new ApiResponse<IEnumerable<FriendRequest>>
-            {
-                IsSuccess = true,
-                Message = "Friend requests found successfully",
-                StatusCode = 200,
-                ResponseObject = userFriendRequsts
-            };
+            return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests found", userFriendRequsts);
         }
 
         public async Task<ApiResponse<IEnumerable<FriendRequest>>> 
@@ -141,21 +103,12 @@ namespace SocialMedia.Service.FriendRequestService
             var userFriendRequsts = await _friendRequestRepository.GetAllFriendRequestsByUserIdAsync(user.Id);
             if (userFriendRequsts.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<FriendRequest>>
-                {
-                    IsSuccess = true,
-                    Message = "No friend requests found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests found");
             }
 
-            return new ApiResponse<IEnumerable<FriendRequest>>
-            {
-                IsSuccess = true,
-                Message = "Friend requests found successfully",
-                StatusCode = 200,
-                ResponseObject = userFriendRequsts
-            };
+            return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests found", userFriendRequsts);
         }
 
         public async Task<ApiResponse<FriendRequest>> GetFriendRequestByIdAsync(Guid friendRequestId)
@@ -163,20 +116,11 @@ namespace SocialMedia.Service.FriendRequestService
             var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
             if (friendRequest == null)
             {
-                return new ApiResponse<FriendRequest>
-                {
-                    IsSuccess = false,
-                    Message = "Friend request not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<FriendRequest>
+                    ._404_NotFound("Friend request not found");
             }
-            return new ApiResponse<FriendRequest>
-            {
-                IsSuccess = true,
-                Message = "Friend request found successfully",
-                StatusCode = 200,
-                ResponseObject = friendRequest
-            };
+            return StatusCodeReturn<FriendRequest>
+                ._200_Success("Friend request found successfully", friendRequest);
         }
 
         public async Task<ApiResponse<FriendRequest>> UpdateFriendRequestAsync(FriendRequestDto friendRequestDto)
@@ -191,12 +135,8 @@ namespace SocialMedia.Service.FriendRequestService
                         .DeleteFriendRequestByAsync(friendRequest.Id);
                     if (deletedFriendRequest == null)
                     {
-                        return new ApiResponse<FriendRequest>
-                        {
-                            IsSuccess = false,
-                            Message = "Can't accept driend request",
-                            StatusCode = 500
-                        };
+                        return StatusCodeReturn<FriendRequest>
+                            ._500_ServerError("Can't accept friend request");
                     }
                     var friendDto = new FriendDto
                     {
@@ -207,20 +147,12 @@ namespace SocialMedia.Service.FriendRequestService
                     var newFriend = await _friendService.AddFriendAsync(friendDto);
                     if (newFriend == null)
                     {
-                        return new ApiResponse<FriendRequest>
-                        {
-                            IsSuccess = false,
-                            Message = "Friend request can't be accepted",
-                            StatusCode = 400,
-                        };
+                        return StatusCodeReturn<FriendRequest>
+                            ._400_BadRequest("Friend request can't be accepted");
                     }
-                    
-                    return new ApiResponse<FriendRequest>
-                    {
-                        IsSuccess = true,
-                        Message = "Friend request accepted successfully",
-                        StatusCode = 201,
-                    };
+
+                    return StatusCodeReturn<FriendRequest>
+                        ._200_Success("Friend request accepted successfully");
                 }
                 else
                 {
@@ -228,21 +160,13 @@ namespace SocialMedia.Service.FriendRequestService
                         await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequest.Id);
                     if (deletedFriendRequest != null)
                     {
-                        return new ApiResponse<FriendRequest>
-                        {
-                            StatusCode = 200,
-                            Message = "Friend request deleted successfully",
-                            IsSuccess = false
-                        };
+                        return StatusCodeReturn<FriendRequest>
+                        ._200_Success("Friend request deleted successfully");
                     }
                 }
             }
-            return new ApiResponse<FriendRequest>
-            {
-                StatusCode = 500,
-                Message = "Can't accept friend request",
-                IsSuccess = false
-            };
+            return StatusCodeReturn<FriendRequest>
+                ._500_ServerError("Can't accept friend request");
             
         }
     }

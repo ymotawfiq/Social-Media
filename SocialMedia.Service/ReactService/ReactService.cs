@@ -5,6 +5,7 @@ using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Service.ReactService
 {
@@ -19,22 +20,13 @@ namespace SocialMedia.Service.ReactService
         {
             if (reactDto.ReactValue == null)
             {
-                return new ApiResponse<React>
-                {
-                    IsSuccess = false,
-                    Message = "React value must not be null",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<React>
+                    ._400_BadRequest("React value must not be null");
             }
             var newReact = await _reactRepository.AddReactAsync(
                 ConvertFromDto.ConvertFromReactDto_Add(reactDto));
-            return new ApiResponse<React>
-            {
-                StatusCode = 201,
-                IsSuccess = true,
-                Message = "React added successfully",
-                ResponseObject = newReact
-            };
+            return StatusCodeReturn<React>
+                ._201_Created("React added successfully", newReact);
         }
 
         public async Task<ApiResponse<React>> DeleteReactByIdAsync(Guid reactId)
@@ -42,21 +34,12 @@ namespace SocialMedia.Service.ReactService
             var react = await _reactRepository.GetReactByIdAsync(reactId);
             if (react == null)
             {
-                return new ApiResponse<React>
-                {
-                    IsSuccess = false,
-                    Message = "React not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<React>
+                    ._404_NotFound("React not found");
             }
             var deletedReact = await _reactRepository.DeleteReactByIdAsync(reactId);
-            return new ApiResponse<React>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "React deleted successfully",
-                ResponseObject = deletedReact
-            };
+            return StatusCodeReturn<React>
+                ._200_Success("React deleted successfully", deletedReact);
         }
 
         public async Task<ApiResponse<IEnumerable<React>>> GetAllReactsAsync()
@@ -64,21 +47,12 @@ namespace SocialMedia.Service.ReactService
             var reacts = await _reactRepository.GetAllReactsAsync();
             if (reacts.ToList().Count==0)
             {
-                return new ApiResponse<IEnumerable<React>>
-                {
-                    IsSuccess = true,
-                    Message = "No reacts found",
-                    StatusCode = 200,
-                    ResponseObject = reacts
-                };
+                return StatusCodeReturn<IEnumerable<React>>
+                    ._200_Success("No reacts found", reacts);
+                
             }
-            return new ApiResponse<IEnumerable<React>>
-            {
-                IsSuccess = true,
-                Message = "Reacts found successfully",
-                StatusCode = 200,
-                ResponseObject = reacts
-            };
+            return StatusCodeReturn<IEnumerable<React>>
+                    ._200_Success("Reacts found successfully", reacts);
         }
 
         public async Task<ApiResponse<React>> GetReactByIdAsync(Guid reactId)
@@ -86,51 +60,29 @@ namespace SocialMedia.Service.ReactService
             var react = await _reactRepository.GetReactByIdAsync(reactId);
             if (react == null)
             {
-                return new ApiResponse<React>
-                {
-                    IsSuccess = false,
-                    Message = "React not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<React>
+                    ._404_NotFound("React not found");
             }
-            return new ApiResponse<React>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "React founded successfully",
-                ResponseObject = react
-            };
+            return StatusCodeReturn<React>
+                    ._200_Success("React found successfully", react);
         }
 
         public async Task<ApiResponse<React>> UpdateReactAsync(ReactDto reactDto)
         {
             if (reactDto.ReactValue == null)
             {
-                return new ApiResponse<React>
-                {
-                    IsSuccess = false,
-                    Message = "React value must not be null",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<React>
+                    ._400_BadRequest("React value must not be null");
             }
             else if(reactDto.Id == null)
             {
-                return new ApiResponse<React>
-                {
-                    IsSuccess = false,
-                    Message = "React id must not be null",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<React>
+                    ._400_BadRequest("React id must not be null");
             }
             var updatedReact = await _reactRepository.UpdateReactAsync(
                 ConvertFromDto.ConvertFromReactDto_Update(reactDto));
-            return new ApiResponse<React>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "React updated successfully",
-                ResponseObject = updatedReact
-            };
+            return StatusCodeReturn<React>
+                    ._200_Success("React updated successfully", updatedReact);
         }
     }
 }

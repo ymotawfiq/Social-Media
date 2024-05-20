@@ -6,6 +6,7 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Service.FriendListPolicyService;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {
@@ -45,35 +46,19 @@ namespace SocialMedia.Api.Controllers
                                                                 user.Id);
                             return Ok(response);
                         }
-                        return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                        {
-                            StatusCode = 404,
-                            IsSuccess = false,
-                            Message = "Friend list policy not found"
-                        });
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("Friend list policy not found"));
                     }
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -100,42 +85,22 @@ namespace SocialMedia.Api.Controllers
                                     updateFriendListPolicyDto);
                                 return Ok(response);
                             }
-                            return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                            {
-                                StatusCode = 403,
-                                IsSuccess = false,
-                                Message = "Forbidden"
-                            });
+                            return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                        ._403_Forbidden());
                         }
-                        return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                        {
-                            StatusCode = 404,
-                            IsSuccess = false,
-                            Message = "Friend list policy not found"
-                        });
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("Friend list policy not found"));
                     }
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 

@@ -7,6 +7,7 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Service.BlockService
 {
@@ -28,12 +29,8 @@ namespace SocialMedia.Service.BlockService
                 blockDto.UserId, blockDto.BlockedUserId);
             if (isUserBlocked != null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "User already blocked",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<Block>
+                    ._400_BadRequest("User already blocked");
             }
             var isBlockedUserFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
                 blockDto.UserId, blockDto.BlockedUserId);
@@ -51,20 +48,11 @@ namespace SocialMedia.Service.BlockService
                 ConvertFromDto.ConvertFromBlockDto_BlockUnBlock(blockDto));
             if (blockedUser == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Failed to block user",
-                    StatusCode = 500
-                };
+                return StatusCodeReturn<Block>
+                    ._500_ServerError("Failed to block user");
             }
-            return new ApiResponse<Block>
-            {
-                IsSuccess = true,
-                Message = "User blocked successfully",
-                StatusCode = 200,
-                ResponseObject = blockedUser
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("User blocked successfully", blockedUser);
         }
 
         public async Task<ApiResponse<Block>> GetBlockByIdAndUserIdAsync(Guid blockId, string userId)
@@ -72,20 +60,11 @@ namespace SocialMedia.Service.BlockService
             var block = await _blockRepository.GetBlockByIdAndUserIdAsync(blockId, userId);
             if (block == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "This block is not in your block list",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<Block>
+                    ._404_NotFound("This block");
             }
-            return new ApiResponse<Block>
-            {
-                StatusCode = 200,
-                Message = "Block found successfully",
-                IsSuccess = true,
-                ResponseObject = block
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("Block found successfully", block);
         }
 
         public async Task<ApiResponse<Block>> GetBlockByUserIdAndBlockedUserIdAsync
@@ -94,20 +73,11 @@ namespace SocialMedia.Service.BlockService
             var block = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(userId, blockedUserId);
             if (block == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "User is not in your friend list",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<Block>
+                    ._400_BadRequest("User is not in your friend list");
             }
-            return new ApiResponse<Block>
-            {
-                StatusCode = 200,
-                Message = "Blocked user found successfully",
-                IsSuccess = true,
-                ResponseObject = block
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("Blocked user found successfully", block);
         }
 
         public async Task<ApiResponse<IEnumerable<Block>>> GetBlockListAsync()
@@ -115,21 +85,11 @@ namespace SocialMedia.Service.BlockService
             var blockList = await _blockRepository.GetBlockListAsync();
             if (blockList.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<Block>>
-                {
-                    IsSuccess = true,
-                    Message = "Block list empty",
-                    StatusCode = 200,
-                    ResponseObject = blockList
-                };
+                return StatusCodeReturn<IEnumerable<Block>>
+                    ._200_Success("Block list empty", blockList);
             }
-            return new ApiResponse<IEnumerable<Block>>
-            {
-                IsSuccess = true,
-                Message = "Block list found successfully",
-                StatusCode = 200,
-                ResponseObject = blockList
-            };
+            return StatusCodeReturn<IEnumerable<Block>>
+                    ._200_Success("Block list found successfully", blockList);
         }
 
         public async Task<ApiResponse<IEnumerable<Block>>> GetUserBlockListAsync(string userId)
@@ -137,21 +97,11 @@ namespace SocialMedia.Service.BlockService
             var userBlockList = await _blockRepository.GetUserBlockListAsync(userId);
             if (userBlockList.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<Block>>
-                {
-                    IsSuccess = true,
-                    Message = "No blocked users found",
-                    StatusCode = 200,
-                    ResponseObject = userBlockList
-                };
+                return StatusCodeReturn<IEnumerable<Block>>
+                    ._200_Success("No blocked users found", userBlockList);
             }
-            return new ApiResponse<IEnumerable<Block>>
-            {
-                IsSuccess = true,
-                Message = "Blocked users found successfully",
-                StatusCode = 200,
-                ResponseObject = userBlockList
-            };
+            return StatusCodeReturn<IEnumerable<Block>>
+                    ._200_Success("Blocked users found successfully", userBlockList);
         }
 
         public async Task<ApiResponse<Block>> UnBlockUserAsync(BlockDto blockDto)
@@ -160,31 +110,18 @@ namespace SocialMedia.Service.BlockService
                 blockDto.UserId, blockDto.BlockedUserId);
             if (blockedUser == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "User is not in your block list",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<Block>
+                    ._400_BadRequest("User is not in your block list");
             }
             var unblockedUser = await _blockRepository.UnBlockUserAsync(
                 ConvertFromDto.ConvertFromBlockDto_BlockUnBlock(blockDto));
             if (unblockedUser == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Unblock failed",
-                    StatusCode = 500
-                };
+                return StatusCodeReturn<Block>
+                    ._500_ServerError("Unblock failed");
             }
-            return new ApiResponse<Block>
-            {
-                IsSuccess = true,
-                Message = "User unblocked successfully",
-                StatusCode = 200,
-                ResponseObject = unblockedUser
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("User unblocked successfully", unblockedUser);
         }
 
         public async Task<ApiResponse<Block>> UnBlockUserByBlockIdAsync(Guid blockId)
@@ -192,29 +129,17 @@ namespace SocialMedia.Service.BlockService
             var block = await _blockRepository.GetBlockByIdAsync(blockId);
             if (block == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Block not found",
-                    StatusCode = 404
-                };
+                return StatusCodeReturn<Block>
+                    ._404_NotFound("Block not found");
             }
             var unblock = await _blockRepository.UnBlockUserAsync(block);
             if (unblock == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Can't unblock user",
-                    StatusCode = 500
-                };
+                return StatusCodeReturn<Block>
+                    ._500_ServerError("Can't unblock user");
             }
-            return new ApiResponse<Block>
-            {
-                IsSuccess = true,
-                Message = "Unblocked successfully",
-                StatusCode = 200
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("Unblocked successfully");
         }
 
         private async Task<ApiResponse<Block>> DeleteFromFriendListAndBlockAsync(BlockDto blockDto)
@@ -222,31 +147,18 @@ namespace SocialMedia.Service.BlockService
             var deletedUser = await _friendsRepository.DeleteFriendAsync(blockDto.UserId, blockDto.BlockedUserId);
             if (deletedUser == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Can't block user",
-                    StatusCode = 500
-                };
+                return StatusCodeReturn<Block>
+                    ._500_ServerError("Can't block user");
             }
             var blockedUser = await _blockRepository.BlockUserAsync(
                 ConvertFromDto.ConvertFromBlockDto_BlockUnBlock(blockDto));
             if (blockedUser == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Failed to block user",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<Block>
+                    ._400_BadRequest("Failed to block user");
             }
-            return new ApiResponse<Block>
-            {
-                IsSuccess = true,
-                Message = "User blocked successfully",
-                StatusCode = 200,
-                ResponseObject = blockedUser
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("User blocked successfully", blockedUser);
         }
         private async Task<ApiResponse<Block>> RemoveFriendRequestAndBlockAsync(
             BlockDto blockDto, FriendRequest friendRequest)
@@ -255,31 +167,18 @@ namespace SocialMedia.Service.BlockService
                 friendRequest.Id);
             if (deletedFriendRequest == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Can't block user",
-                    StatusCode = 500
-                };
+                return StatusCodeReturn<Block>
+                    ._500_ServerError("Can't block user");
             }
             var blockedUser = await _blockRepository.BlockUserAsync(
                 ConvertFromDto.ConvertFromBlockDto_BlockUnBlock(blockDto));
             if (blockedUser == null)
             {
-                return new ApiResponse<Block>
-                {
-                    IsSuccess = false,
-                    Message = "Can't block user",
-                    StatusCode = 500
-                };
+                return StatusCodeReturn<Block>
+                    ._500_ServerError("Can't block user");
             }
-            return new ApiResponse<Block>
-            {
-                IsSuccess = true,
-                Message = "User blocked successfully",
-                StatusCode = 200,
-                ResponseObject = blockedUser
-            };
+            return StatusCodeReturn<Block>
+                ._200_Success("User blocked successfully", blockedUser);
         }
 
 

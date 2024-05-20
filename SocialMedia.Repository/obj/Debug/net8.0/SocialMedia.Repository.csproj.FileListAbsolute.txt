@@ -9,7 +9,7 @@ D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMedia.Repository.AssemblyInfo.cs
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMedia.Repository.csproj.CoreCompileInputs.cache
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMedia.Repository.sourcelink.json
-D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMedia.Repository.csproj.CopyComplete
+D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMe.E5698BF9.Up2Date
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMedia.Repository.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\refint\SocialMedia.Repository.dll
 D:\my_source_code\C sharp\SocialMedia.Solution\SocialMedia.Repository\obj\Debug\net8.0\SocialMedia.Repository.pdb

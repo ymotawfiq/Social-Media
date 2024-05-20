@@ -18,6 +18,7 @@ using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Service.AccountPolicyService;
+using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
 using System.IdentityModel.Tokens.Jwt;
@@ -68,12 +69,7 @@ namespace SocialMedia.Api.Controllers
                 var token = HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
                 return token!;
             }
-            return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-            {
-                StatusCode = 401,
-                IsSuccess = false,
-                Message = "Unauthorized"
-            });
+            return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>._401_UnAuthorized());
         }
 
         [Authorize(Roles = "Admin")]
@@ -109,24 +105,16 @@ namespace SocialMedia.Api.Controllers
                     var message = new Message(new string[] { registerDto.Email },
                         "Confirmation Email Link", confirmationLink!);
                     _emailService.SendEmail(message);
-
-                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                    {
-                        StatusCode = 200,
-                        IsSuccess = true,
-                        Message = $"Email confirmation link sent to your email please check your inbox and confirm your email"
-                    });
+                    string msg = $"Email confirmation link sent to your email please check your inbox and confirm your email";
+                    return StatusCode(StatusCodes.Status200OK, 
+                        StatusCodeReturn<string>._200_Success(msg));
                 }
                 return Ok(tokenResponse);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -157,12 +145,8 @@ namespace SocialMedia.Api.Controllers
                         , "Confirm email link", confirmationLink!);
 
                         _emailService.SendEmail(message);
-                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                        {
-                            StatusCode = 200,
-                            IsSuccess = true,
-                            Message = "Email confirmation link resent successfully"
-                        });
+                        return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                            ._200_Success("Email confirmation link resent successfully"));
                     }
                     
                 }
@@ -170,12 +154,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -205,12 +185,8 @@ namespace SocialMedia.Api.Controllers
                             var message = new Message(new string[] { user.Email },
                                 "OTP code", token);
                             _emailService.SendEmail(message);
-                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                            {
-                                StatusCode = 200,
-                                IsSuccess = true,
-                                Message = "OTP sent successfully to your email"
-                            });
+                            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                                ._200_Success("OTP sent successfully to your email"));
                         }
                     }
                     return Ok(loginResponse);
@@ -219,12 +195,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -243,12 +215,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -260,19 +228,11 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
             {
                 await HttpContext.SignOutAsync();
-                return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
-                {
-                    Message = "Logged out successfully",
-                    IsSuccess = true,
-                    StatusCode = 200
-                });
+                return StatusCode(StatusCodes.Status400BadRequest, StatusCodeReturn<string>
+                    ._200_Success("Logged out successfully"));
             }
-            return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
-            {
-                StatusCode = 400,
-                IsSuccess = false,
-                Message = "You are not logged in"
-            });
+            return StatusCode(StatusCodes.Status400BadRequest, StatusCodeReturn<string>
+                ._400_BadRequest("You are not logged in"));
         }
 
         [Authorize(Roles ="Admin")]
@@ -301,14 +261,11 @@ namespace SocialMedia.Api.Controllers
                         }
                     });
                 }
-                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                {
-                    StatusCode = 404,
-                    IsSuccess = false,
-                    Message = "User not found"
-                });
+                return StatusCode(StatusCodes.Status404NotFound, 
+                    StatusCodeReturn<string>._404_NotFound("User not found"));
             }
-            return RedirectPermanent("/error/401");
+            return StatusCode(StatusCodes.Status401Unauthorized,
+                StatusCodeReturn<string>._401_UnAuthorized());
         }
 
         [HttpGet("Me/{userName}")]
@@ -319,12 +276,8 @@ namespace SocialMedia.Api.Controllers
                 var userByUserName = await _userManager.FindByNameAsync(userName);
                 if (userByUserName == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
                 }
                 if (HttpContext.User != null && HttpContext.User.Identity != null &&
                 HttpContext.User.Identity.Name != null)
@@ -335,47 +288,35 @@ namespace SocialMedia.Api.Controllers
                         
                         if(userByUserName.UserName == loggedInUser.UserName)
                         {
-                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<object>
+                            var Object1 = new
                             {
-                                StatusCode = 200,
-                                IsSuccess = true,
-                                Message = "User founded successfully",
-                                ResponseObject = new
-                                {
-                                    DisplayName = loggedInUser.DisplayName,
-                                    FirstName = loggedInUser.FirstName,
-                                    Email = loggedInUser.Email,
-                                    LastName = loggedInUser.LastName,
-                                    PhoneNumber = loggedInUser.PhoneNumber,
-                                    UserName = loggedInUser.UserName,
-                                    roles = await _userManager.GetRolesAsync(loggedInUser)
-                                }
-                            });
+                                DisplayName = loggedInUser.DisplayName,
+                                FirstName = loggedInUser.FirstName,
+                                Email = loggedInUser.Email,
+                                LastName = loggedInUser.LastName,
+                                PhoneNumber = loggedInUser.PhoneNumber,
+                                UserName = loggedInUser.UserName,
+                                roles = await _userManager.GetRolesAsync(loggedInUser)
+                            };
+                            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<object>
+                                ._200_Success("User found successfully", Object1));
                         }
                     }
                 }
-                return StatusCode(StatusCodes.Status200OK, new ApiResponse<object>
+                var Object = new
                 {
-                    StatusCode = 200,
-                    IsSuccess = true,
-                    Message = "User founded successfully",
-                    ResponseObject = new
-                    {
-                        DisplayName = userByUserName.DisplayName,
-                        FirstName = userByUserName.FirstName,
-                        LastName = userByUserName.LastName,
-                        UserName = userByUserName.UserName
-                    }
-                });
+                    DisplayName = userByUserName.DisplayName,
+                    FirstName = userByUserName.FirstName,
+                    LastName = userByUserName.LastName,
+                    UserName = userByUserName.UserName
+                };
+                return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<object>
+                                ._200_Success("User found successfully", Object));
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -397,12 +338,8 @@ namespace SocialMedia.Api.Controllers
                 var response = await _userManagementService.EnableTwoFactorAuthenticationAsync(user.Email!);
                 return Ok(response);
             }
-            return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-            {
-                StatusCode = 404,
-                IsSuccess = false,
-                Message = "User name not found"
-            });
+            return StatusCode(StatusCodes.Status404NotFound, 
+                StatusCodeReturn<string>._404_NotFound("User"));
         }
 
         [Authorize(Roles = "Admin,User")]
@@ -416,12 +353,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -434,13 +367,8 @@ namespace SocialMedia.Api.Controllers
                 Email = email,
                 Token = token
             };
-            return StatusCode(StatusCodes.Status200OK, new ApiResponse<ResetPasswordDto>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "Reset password object created",
-                ResponseObject = resetPasswordObject
-            });
+            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<ResetPasswordDto>
+                ._200_Success("Reset password object created", resetPasswordObject));
         }
 
         [AllowAnonymous]
@@ -465,29 +393,17 @@ namespace SocialMedia.Api.Controllers
                         var message = new Message(new string[] { response.ResponseObject.Email! },
                             "Forget password", forgerPasswordLink!);
                         _emailService.SendEmail(message);
-                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                        {
-                            StatusCode = 200,
-                            IsSuccess = true,
-                            Message = "Forget password link sent successfully to your email"
-                        });
+                        return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                            ._200_Success("Forget password link sent successfully to your email"));
                     }
                 }
-                return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
-                {
-                    StatusCode = 400,
-                    IsSuccess = false,
-                    Message = "Can't send forget password link to email please try again"
-                });
+                return StatusCode(StatusCodes.Status400BadRequest, StatusCodeReturn<string>
+                    ._400_BadRequest("Can't send forget password link to email please try again"));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -502,12 +418,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -522,13 +434,8 @@ namespace SocialMedia.Api.Controllers
                 Token = token,
                 OldEmail = oldEmail
             };
-            return StatusCode(StatusCodes.Status200OK, new ApiResponse<ResetEmailDto>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "Reset email object created",
-                ResponseObject = resetEmailObject
-            });
+            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<ResetEmailDto>
+                ._200_Success("Reset email object created", resetEmailObject));
         }
 
         [Authorize(Roles = "Admin,User")]
@@ -556,31 +463,19 @@ namespace SocialMedia.Api.Controllers
                             var message = new Message(new string[] { response.ResponseObject.OldEmail! },
                                 "Reset email", resetEmailLink!);
                             _emailService.SendEmail(message);
-                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                            {
-                                StatusCode = 200,
-                                IsSuccess = true,
-                                Message = "Email rest link sent to your email"
-                            });
+                            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                                ._200_Success("Email rest link sent to your email"));
                         }
                     }
                     return Ok(response);
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = true,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, 
+                    StatusCodeReturn<string>._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -598,19 +493,11 @@ namespace SocialMedia.Api.Controllers
                     {
                         await _userManager.ChangeEmailAsync(user, resetEmailDto.NewEmail, resetEmailDto.Token);
                         await _userManager.UpdateAsync(user);
-                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                        {
-                            StatusCode = 200,
-                            IsSuccess = true,
-                            Message = "Email changed successfully"
-                        });
+                        return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                            ._200_Success("Email changed successfully"));
                     }
-                    return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
-                    {
-                        StatusCode = 400,
-                        IsSuccess = false,
-                        Message = "Unable to reset email"
-                    });
+                    return StatusCode(StatusCodes.Status400BadRequest, StatusCodeReturn<string>
+                        ._400_BadRequest("Unable to reset email"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {
@@ -621,12 +508,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -642,7 +525,7 @@ namespace SocialMedia.Api.Controllers
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (currentUser != null)
                     {
-                        var routeUser = await GetUserByUserNameOrEmailOrIdAsync(
+                        var routeUser = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
                             updateUserPolicyDto.UserIdOrUserNameOrEmail);
                         if (routeUser != null)
                         {
@@ -674,50 +557,26 @@ namespace SocialMedia.Api.Controllers
                                     }
                                     routeUser.AccountPolicyId = accountPolicy.ResponseObject.Id;
                                     await _userManager.UpdateAsync(routeUser);
-                                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                                    {
-                                        StatusCode = 200,
-                                        IsSuccess = true,
-                                        Message = "Account policy updated successfully"
-                                    });
+                                    return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                                        ._200_Success("Account policy updated successfully"));
                                 }
-                                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                                {
-                                    StatusCode = 404,
-                                    IsSuccess = false,
-                                    Message = "Account policy not found"
-                                });
+                                return StatusCode(StatusCodes.Status404NotFound, 
+                                    StatusCodeReturn<string>._404_NotFound("Account policy"));
                             }
-                            return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                            {
-                                StatusCode = 403,
-                                IsSuccess = false,
-                                Message = "Forbidden"
-                            });
+                            return StatusCode(StatusCodes.Status403Forbidden, 
+                                StatusCodeReturn<string>._403_Forbidden());
                         }
-                        return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                        {
-                            StatusCode = 404,
-                            IsSuccess = false,
-                            Message = "User not found"
-                        });
+                        return StatusCode(StatusCodes.Status404NotFound, 
+                            StatusCodeReturn<string>._404_NotFound("User not found"));
                     }
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, 
+                    StatusCodeReturn<string>._401_UnAuthorized());
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -738,26 +597,19 @@ namespace SocialMedia.Api.Controllers
                         loggedInUser.LastName = updateAccountDto.LastName;
                         loggedInUser.DisplayName = updateAccountDto.DisplayName;
                         await _userManager.UpdateAsync(loggedInUser);
-                        return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                        {
-                            StatusCode = 200,
-                            IsSuccess = true,
-                            Message = "Account updated successfully"
-                        });
+                        return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                            ._200_Success("Account updated successfully"));
                     }
                 }
 
-                return RedirectPermanent("/error/403");
+                return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                    ._403_Forbidden());
 
             }
             catch(Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -766,24 +618,17 @@ namespace SocialMedia.Api.Controllers
         public async Task<IActionResult> UpdateAccountRolesAsync(
             [FromBody] UpdateAccountRolesDto updateAccountRolesDto)
         {
-            var user = await GetUserByUserNameOrEmailOrIdAsync(updateAccountRolesDto.UserNameOrEmail);
+            var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                updateAccountRolesDto.UserNameOrEmail);
             if (user == null)
             {
-                return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                {
-                    StatusCode = 404,
-                    IsSuccess = false,
-                    Message = "Account not found"
-                });
+                return StatusCode(StatusCodes.Status404NotFound, 
+                    StatusCodeReturn<string>._404_NotFound("User"));
             }
             await _userManagementService.AssignRolesToUserAsync(updateAccountRolesDto.Roles, user);
             await _userManager.UpdateAsync(user);
-            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-            {
-                StatusCode = 200,
-                IsSuccess = true,
-                Message = "Account roles updated successfully"
-            });
+            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                ._200_Success("Account roles updated successfully"));
         }
 
         [Authorize(Roles = "Admin,User")]
@@ -796,7 +641,8 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await GetUserByUserNameOrEmailOrIdAsync(userNameOrEmail);
+                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        userNameOrEmail);
                     if (user != null && user.Email != null && loggedInUser != null)
                     {
                         if (user.Email == loggedInUser.Email)
@@ -807,42 +653,22 @@ namespace SocialMedia.Api.Controllers
                                 $"delete-account?userNameOrEmail={userNameOrEmail}&token={token}";
                             var message = new Message(new string[] { user.Email }, "Delete account", url);
                             _emailService.SendEmail(message);
-                            return StatusCode(StatusCodes.Status200OK, new ApiResponse<string>
-                            {
-                                StatusCode = 200,
-                                IsSuccess = true,
-                                Message = "Delete account email sent successfully to your email"
-                            });
+                            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                                ._200_Success("Delete account email sent successfully to your email"));
                         }
-                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                        {
-                            StatusCode = 403,
-                            IsSuccess = false,
-                            Message = "Forbidden"
-                        });
+                        return StatusCode(StatusCodes.Status403Forbidden, 
+                            StatusCodeReturn<string>._403_Forbidden());
                     }
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, 
+                    StatusCodeReturn<string>._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
@@ -854,19 +680,16 @@ namespace SocialMedia.Api.Controllers
                 bool checkToken = new JwtSecurityTokenHandler().CanReadToken(token);
                 if (!checkToken)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new ApiResponse<string>
-                    {
-                        StatusCode = 400,
-                        IsSuccess = false,
-                        Message = "Can't read token"
-                    });
+                    return StatusCode(StatusCodes.Status400BadRequest, StatusCodeReturn<string>
+                        ._400_BadRequest("Can't read token"));
                 }
                 var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
                 var userEmail = GetEmailFromJwtPayload(jwtToken);
                 if (userEmail != null && !userEmail.ToString().IsNullOrEmpty())
                 {
                     var userByToken = await _userManager.FindByEmailAsync(userEmail);
-                    var user = await GetUserByUserNameOrEmailOrIdAsync(userNameOrEmail);
+                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        userNameOrEmail);
                     if (userByToken != null && user != null)
                     {
                         if (userByToken.UserName == user.UserName)
@@ -878,46 +701,18 @@ namespace SocialMedia.Api.Controllers
 
                 }
 
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized,
+                    StatusCodeReturn<string>._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
 
 
         #region Private Methods
-
-        private async Task<SiteUser> GetUserByUserNameOrEmailOrIdAsync(string userNameOrEmailOrId)
-        {
-            var userById = await _userManager.FindByIdAsync(userNameOrEmailOrId);
-            var userByEmail = await _userManager.FindByEmailAsync(userNameOrEmailOrId);
-            var userByName = await _userManager.FindByNameAsync(userNameOrEmailOrId);
-            if (userByName != null)
-            {
-                return userByName;
-            }
-            else if (userByEmail != null)
-            {
-                return userByEmail;
-            }
-            else if (userById != null)
-            {
-                return userById;
-            }
-            return null!;
-        }
 
         private object DecodeJwt(JwtSecurityToken token)
         {

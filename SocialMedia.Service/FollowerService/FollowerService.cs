@@ -7,6 +7,7 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.FollowerRepository;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Service.FollowerService
 {
@@ -30,21 +31,13 @@ namespace SocialMedia.Service.FollowerService
                     user!.Id, follower!.Id);
                 if (isFollowing != null)
                 {
-                    return new ApiResponse<Follower>
-                    {
-                        IsSuccess = false,
-                        Message = "You already following this person",
-                        StatusCode = 400
-                    };
+                    return StatusCodeReturn<Follower>
+                        ._400_BadRequest("You already following this person");
                 }
                 var follow = await _followerRepository.FollowAsync(
                     ConvertFromDto.ConvertFromFollowerDto_Add(followersDto));
-                return new ApiResponse<Follower>
-                {
-                    IsSuccess = true,
-                    Message = "Followed successfully",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<Follower>
+                    ._200_Success("Followed successfully");
             }
             catch (Exception)
             {
@@ -57,54 +50,30 @@ namespace SocialMedia.Service.FollowerService
             var followers = await _followerRepository.GetAllFollowers(userId);
             if (followers.ToList().Count==0)
             {
-                return new ApiResponse<IEnumerable<Follower>>
-                {
-                    IsSuccess = true,
-                    Message = "No followers found",
-                    StatusCode = 200
-                };
+                return StatusCodeReturn<IEnumerable<Follower>>
+                    ._200_Success("No followers found", followers);
             }
-            return new ApiResponse<IEnumerable<Follower>>
-            {
-                IsSuccess = true,
-                Message = "Followers found successfully",
-                StatusCode = 200,
-                ResponseObject = followers
-            };
+            return StatusCodeReturn<IEnumerable<Follower>>
+                    ._200_Success("Followers found successfully", followers);
         }
 
         public async Task<ApiResponse<Follower>> UnfollowAsync(string userId, string followerId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            var follower = await _userManager.FindByIdAsync(followerId);
 
             if(userId == followerId)
             {
-                return new ApiResponse<Follower>
-                {
-                    StatusCode = 403,
-                    IsSuccess = false,
-                    Message = "Forbidden"
-                };
+                return StatusCodeReturn<Follower>
+                    ._403_Forbidden("You can't follow yourself");
             }
             var isFollowed = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(userId, followerId);
             if (isFollowed == null)
             {
-                return new ApiResponse<Follower>
-                {
-                    IsSuccess = false,
-                    Message = "You are not following this person",
-                    StatusCode = 400
-                };
+                return StatusCodeReturn<Follower>
+                    ._400_BadRequest("You are not following this person");
             }
             var unfollow = await _followerRepository.UnfollowAsync(userId, followerId);
-            return new ApiResponse<Follower>
-            {
-                IsSuccess = true,
-                Message = "Unfollowed successfully",
-                StatusCode = 200,
-                ResponseObject = unfollow
-            };
+            return StatusCodeReturn<Follower>
+                ._200_Success("Unfollowed successfully", unfollow);
         }
     }
 }

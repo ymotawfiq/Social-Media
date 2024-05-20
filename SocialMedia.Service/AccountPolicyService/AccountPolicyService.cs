@@ -5,6 +5,7 @@ using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Repository.AccountPolicyRepository;
+using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
 
 namespace SocialMedia.Service.AccountPolicyService
@@ -32,28 +33,15 @@ namespace SocialMedia.Service.AccountPolicyService
                     addAccountPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
                     var accountPolicy = await _accountPolicyRepository.AddAccountPolicyAsync(
                         ConvertFromDto.ConvertFromAccountPolicyDto_Add(addAccountPolicyDto));
-                    return new ApiResponse<AccountPolicy>
-                    {
-                        IsSuccess = true,
-                        Message = "Account policy added successfully",
-                        StatusCode = 201,
-                        ResponseObject = accountPolicy
-                    };
+                    return StatusCodeReturn<AccountPolicy>
+                        ._201_Created("Account policy added successfully", accountPolicy);
                 }
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = false,
-                    Message = "Account policy already exists",
-                    StatusCode = 400,
-                };
+                return StatusCodeReturn<AccountPolicy>
+                    ._400_BadRequest("Account policy already exists");
                 
             }
-            return new ApiResponse<AccountPolicy>
-            {
-                IsSuccess = false,
-                Message = "Policy not found",
-                StatusCode = 404,
-            };
+            return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Policy not found"); ;
         }
 
         public async Task<ApiResponse<AccountPolicy>> DeleteAccountPolicyByPolicyAsync(string policyIdOrName)
@@ -69,27 +57,14 @@ namespace SocialMedia.Service.AccountPolicyService
                     {
                         var deletedAccountPolicy = await _accountPolicyRepository
                             .DeleteAccountPolicyByIdAsync(accoountPolicy.Id);
-                        return new ApiResponse<AccountPolicy>
-                        {
-                            IsSuccess = true,
-                            Message = "Account policy deleted successfully",
-                            StatusCode = 200,
-                            ResponseObject = deletedAccountPolicy
-                        };
+                        return StatusCodeReturn<AccountPolicy>
+                            ._200_Success("Account policy deleted successfully", deletedAccountPolicy);
                     }
-                    return new ApiResponse<AccountPolicy>
-                    {
-                        IsSuccess = false,
-                        Message = "Account policy not found",
-                        StatusCode = 404,
-                    };
+                    return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
                 }
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404,
-                };
+                return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Policy not found");
             }
             catch (Exception)
             {
@@ -105,20 +80,11 @@ namespace SocialMedia.Service.AccountPolicyService
             {
                 var deletedAccountPolicy = await _accountPolicyRepository
                     .DeleteAccountPolicyByIdAsync(accountPolicyId);
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = true,
-                    Message = "Account policy deleted successfully",
-                    StatusCode = 200,
-                    ResponseObject = deletedAccountPolicy
-                };
+                return StatusCodeReturn<AccountPolicy>
+                    ._200_Success("Account policy deleted successfully", deletedAccountPolicy);
             }
-            return new ApiResponse<AccountPolicy>
-            {
-                IsSuccess = false,
-                Message = "Account policy not found",
-                StatusCode = 404,
-            };
+            return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
         }
 
         public async Task<ApiResponse<AccountPolicy>> DeleteAccountPolicyByPolicyIdAsync(string policyId)
@@ -129,20 +95,11 @@ namespace SocialMedia.Service.AccountPolicyService
             {
                 var deletedAccountPolicy = await _accountPolicyRepository
                     .DeleteAccountPolicyByPolicyIdAsync(policyId);
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = true,
-                    Message = "Account policy deleted successfully",
-                    StatusCode = 200,
-                    ResponseObject = deletedAccountPolicy
-                };
+                return StatusCodeReturn<AccountPolicy>
+                    ._200_Success("Account policy deleted successfully", deletedAccountPolicy);
             }
-            return new ApiResponse<AccountPolicy>
-            {
-                IsSuccess = false,
-                Message = "Account policy not found",
-                StatusCode = 404,
-            };
+            return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
         }
 
         public async Task<ApiResponse<IEnumerable<AccountPolicy>>> GetAccountPoliciesAsync()
@@ -150,21 +107,11 @@ namespace SocialMedia.Service.AccountPolicyService
             var accountPolicies = await _accountPolicyRepository.GetAccountPoliciesAsync();
             if (accountPolicies.ToList().Count == 0)
             {
-                return new ApiResponse<IEnumerable<AccountPolicy>>
-                {
-                    IsSuccess = true,
-                    Message = "No account policies found",
-                    StatusCode = 200,
-                    ResponseObject = accountPolicies
-                };
+                return StatusCodeReturn<IEnumerable<AccountPolicy>>
+                    ._200_Success("No account policies found", accountPolicies);
             }
-            return new ApiResponse<IEnumerable<AccountPolicy>>
-            {
-                IsSuccess = true,
-                Message = "Account policies found successfully",
-                StatusCode = 200,
-                ResponseObject = accountPolicies
-            };
+            return StatusCodeReturn<IEnumerable<AccountPolicy>>
+                    ._200_Success("Account policies found successfully", accountPolicies);
         }
 
         public async Task<ApiResponse<AccountPolicy>> GetAccountPolicyByPolicyAsync(string policyIdOrName)
@@ -178,27 +125,14 @@ namespace SocialMedia.Service.AccountPolicyService
                         .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
                     if (accoountPolicy != null)
                     {
-                        return new ApiResponse<AccountPolicy>
-                        {
-                            IsSuccess = true,
-                            Message = "Account policy found successfully",
-                            StatusCode = 200,
-                            ResponseObject = accoountPolicy
-                        };
+                        return StatusCodeReturn<AccountPolicy>
+                            ._200_Success("Account policies found successfully", accoountPolicy);
                     }
-                    return new ApiResponse<AccountPolicy>
-                    {
-                        IsSuccess = false,
-                        Message = "Account policy not found",
-                        StatusCode = 404,
-                    };
+                    return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
                 }
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404,
-                };
+                return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Policy not found");
             }
             catch (Exception)
             {
@@ -212,20 +146,11 @@ namespace SocialMedia.Service.AccountPolicyService
                     accountPolicyId);
             if (accountPolicy != null)
             {
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = true,
-                    Message = "Account policy found successfully",
-                    StatusCode = 200,
-                    ResponseObject = accountPolicy
-                };
+                return StatusCodeReturn<AccountPolicy>
+                    ._200_Success("Account policy found successfully", accountPolicy);
             }
-            return new ApiResponse<AccountPolicy>
-            {
-                IsSuccess = false,
-                Message = "Account policy not found",
-                StatusCode = 404,
-            };
+            return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
         }
 
         public async Task<ApiResponse<AccountPolicy>> GetAccountPolicyByPolicyIdAsync(string policyId)
@@ -234,20 +159,11 @@ namespace SocialMedia.Service.AccountPolicyService
                 policyId);
             if (accountPolicy != null)
             {
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = true,
-                    Message = "Account policy found successfully",
-                    StatusCode = 200,
-                    ResponseObject = accountPolicy
-                };
+                return StatusCodeReturn<AccountPolicy>
+                    ._200_Success("Account policy found successfully", accountPolicy);
             }
-            return new ApiResponse<AccountPolicy>
-            {
-                IsSuccess = false,
-                Message = "Account policy not found",
-                StatusCode = 404,
-            };
+            return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
         }
 
         public async Task<ApiResponse<AccountPolicy>> 
@@ -268,35 +184,18 @@ namespace SocialMedia.Service.AccountPolicyService
                         updateAccountPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
                         var updatedAccountPolicy = await _accountPolicyRepository.UpdateAccountPolicyAsync(
                             ConvertFromDto.ConvertFromAccountPolicyDto_Update(updateAccountPolicyDto));
-                        return new ApiResponse<AccountPolicy>
-                        {
-                            IsSuccess = true,
-                            Message = "Account policy updated successfully",
-                            StatusCode = 200,
-                            ResponseObject = updatedAccountPolicy
-                        };
+                        return StatusCodeReturn<AccountPolicy>
+                    ._200_Success("Account policy updated successfully", updatedAccountPolicy);
                     }
-                    return new ApiResponse<AccountPolicy>
-                    {
-                        IsSuccess = false,
-                        Message = "Account policy already exists",
-                        StatusCode = 400,
-                    };
+                    return StatusCodeReturn<AccountPolicy>
+                        ._400_BadRequest("Account policy already exists");
                 }
-                return new ApiResponse<AccountPolicy>
-                {
-                    IsSuccess = false,
-                    Message = "Policy not found",
-                    StatusCode = 404,
-                };
+                return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Policy not found");
             }
-            
-            return new ApiResponse<AccountPolicy>
-            {
-                IsSuccess = false,
-                Message = "Account policy not found",
-                StatusCode = 404,
-            };
+
+            return StatusCodeReturn<AccountPolicy>
+                        ._404_NotFound("Account policy not found");
         }
 
 

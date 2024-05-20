@@ -5,6 +5,7 @@ using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Service.BlockService;
+using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {
@@ -97,19 +98,11 @@ namespace SocialMedia.Api.Controllers
                             var response = await _blockService.UnBlockUserAsync(blockDto);
                             return Ok(response);
                         }
-                        return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse<string>
-                        {
-                            StatusCode = 403,
-                            IsSuccess = false,
-                            Message = "Forbidden"
-                        });
+                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                            ._403_Forbidden());
                     }
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User you want to block not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User you want to block not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
                 {
@@ -120,12 +113,8 @@ namespace SocialMedia.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
