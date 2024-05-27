@@ -87,7 +87,8 @@ namespace SocialMedia.Repository.PolicyRepository
             try
             {
                 policyName = policyName.ToUpper();
-                return (await _dbContext.Policies.Where(e => e.PolicyType == policyName).FirstOrDefaultAsync())!;
+                return (await _dbContext.Policies.Where(e => e.PolicyType == policyName.ToUpper())
+                    .FirstOrDefaultAsync())!;
             }
             catch(Exception)
             {

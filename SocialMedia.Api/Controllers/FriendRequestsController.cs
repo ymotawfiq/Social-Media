@@ -21,14 +21,16 @@ namespace SocialMedia.Api.Controllers
         private readonly UserManager<SiteUser> _userManager;
         private readonly IFriendRequestRepository _friendRequestRepository;
         private readonly IBlockRepository _blockRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public FriendRequestsController(IFriendRequestService _friendRequestService,
             UserManager<SiteUser> _userManager, IFriendRequestRepository _friendRequestRepository,
-            IBlockRepository _blockRepository)
+            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
         {
             this._friendRequestService = _friendRequestService;
             this._userManager = _userManager;
             this._friendRequestRepository = _friendRequestRepository;
             this._blockRepository = _blockRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
 
         [HttpPost("sendFriendRequest")]
@@ -40,7 +42,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var friendRequestPerson = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var friendRequestPerson = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         addFriendRequestDto.PersonIdOrUserNameOrEmail);
                     if (user != null && friendRequestPerson!=null)
                     {
@@ -105,7 +107,8 @@ namespace SocialMedia.Api.Controllers
                                 if (await _userManager.IsInRoleAsync(user, "Admin")
                                     || user.Id == friendRequestDto.PersonId)
                                 {
-                                    var response = await _friendRequestService.UpdateFriendRequestAsync(friendRequestDto);
+                                    var response = await _friendRequestService
+                                        .UpdateFriendRequestAsync(friendRequestDto);
                                     return Ok(response);
                                 }
                             }   
@@ -135,7 +138,8 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
+                        var friendRequest = await _friendRequestRepository
+                            .GetFriendRequestByIdAsync(friendRequestId);
                         if (friendRequest != null)
                         {
                             if (await _userManager.IsInRoleAsync(user, "Admin")
@@ -170,7 +174,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var sender = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var receiver = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var receiver = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userWhoReceivedIdOrUserName);
                     if (sender != null && receiver != null)
                     {
@@ -255,7 +259,7 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var routeUser = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                             userIdOrUserName);
                         if (await _userManager.IsInRoleAsync(user, "Admin") || user.Id == routeUser.Id)
                         {

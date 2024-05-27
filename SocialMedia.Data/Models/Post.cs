@@ -1,5 +1,7 @@
 ﻿
 
+using SocialMedia.Data.Models.Authentication;
+
 namespace SocialMedia.Data.Models
 {
     public class Post

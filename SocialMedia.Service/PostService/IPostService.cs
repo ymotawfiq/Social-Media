@@ -28,5 +28,7 @@ namespace SocialMedia.Service.PostService
         Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync
             (SiteUser user, UpdatePostCommentPolicyDto updatePostCommentPolicyDto);
 
+        Task<ApiResponse<bool>> MakePostsFriendsOnlyAsync(SiteUser user);
+
     }
 }

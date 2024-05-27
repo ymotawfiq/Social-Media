@@ -173,6 +173,24 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("AccountPolicies");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.AccountPostsPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("PostPolicies");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Property<string>("Id")
@@ -182,9 +200,16 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("AccountPolicyId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)")
-                        .HasColumnName("User Account Policy Id");
+                        .HasColumnName("Account Policy Id");
+
+                    b.Property<string>("AccountPostPolicyId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Account post Policy Id");
+
+                    b.Property<string>("CommentPolicyId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Comment Policy Id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -209,11 +234,12 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("First Name");
 
+                    b.Property<string>("FriendListPolicyId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Friend list Policy Id");
+
                     b.Property<bool>("IsFriendListPrivate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true)
-                        .HasColumnName("Is Friend List Private");
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -243,6 +269,10 @@ namespace SocialMedia.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ReactPolicyId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("React Policy Id");
+
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -265,8 +295,14 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasIndex("AccountPolicyId");
 
+                    b.HasIndex("AccountPostPolicyId");
+
+                    b.HasIndex("CommentPolicyId");
+
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("FriendListPolicyId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -275,6 +311,8 @@ namespace SocialMedia.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("ReactPolicyId");
 
                     b.HasIndex("UserName")
                         .IsUnique();
@@ -379,16 +417,9 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("Policy Id");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("User Id");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("PolicyId");
-
-                    b.HasIndex("UserId")
+                    b.HasIndex("PolicyId")
                         .IsUnique();
 
                     b.ToTable("FriendListPolicies");
@@ -652,15 +683,48 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Policy");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.AccountPostsPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("PostPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.AccountPolicy", "AccountPolicy")
                         .WithMany("Users")
-                        .HasForeignKey("AccountPolicyId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("AccountPolicyId");
+
+                    b.HasOne("SocialMedia.Data.Models.AccountPostsPolicy", "PostPolicy")
+                        .WithMany("Users")
+                        .HasForeignKey("AccountPostPolicyId");
+
+                    b.HasOne("SocialMedia.Data.Models.CommentPolicy", "CommentPolicy")
+                        .WithMany("Users")
+                        .HasForeignKey("CommentPolicyId");
+
+                    b.HasOne("SocialMedia.Data.Models.FriendListPolicy", "FriendListPolicy")
+                        .WithMany("Users")
+                        .HasForeignKey("FriendListPolicyId");
+
+                    b.HasOne("SocialMedia.Data.Models.ReactPolicy", "ReactPolicy")
+                        .WithMany("Users")
+                        .HasForeignKey("ReactPolicyId");
 
                     b.Navigation("AccountPolicy");
+
+                    b.Navigation("CommentPolicy");
+
+                    b.Navigation("FriendListPolicy");
+
+                    b.Navigation("PostPolicy");
+
+                    b.Navigation("ReactPolicy");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
@@ -715,15 +779,7 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("FriendListPolicies")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Policy");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
@@ -821,13 +877,16 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.AccountPostsPolicy", b =>
+                {
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Navigation("Blocks");
 
                     b.Navigation("Followers");
-
-                    b.Navigation("FriendListPolicies");
 
                     b.Navigation("FriendRequests");
 
@@ -839,6 +898,13 @@ namespace SocialMedia.Data.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.CommentPolicy", b =>
                 {
                     b.Navigation("Posts");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.FriendListPolicy", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
@@ -848,6 +914,8 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("CommentPolicies");
 
                     b.Navigation("FriendListPolicies");
+
+                    b.Navigation("PostPolicies");
 
                     b.Navigation("Posts");
 
@@ -866,6 +934,8 @@ namespace SocialMedia.Data.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.ReactPolicy", b =>
                 {
                     b.Navigation("Posts");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

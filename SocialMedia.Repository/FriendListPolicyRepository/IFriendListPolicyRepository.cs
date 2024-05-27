@@ -8,8 +8,10 @@ namespace SocialMedia.Repository.FriendListPolicyRepository
     {
         Task<FriendListPolicy> AddFriendListPolicyAsync(FriendListPolicy friendListPolicy);
         Task<FriendListPolicy> UpdateFriendListPolicyAsync(FriendListPolicy friendListPolicy);
-        Task<FriendListPolicy> GetFriendListPolicyByUserIdAsync(string userId);
         Task<FriendListPolicy> GetFriendListPolicyByIdAsync(string id);
+        Task<FriendListPolicy> DeleteFriendListPolicyByIdAsync(string id);
+        Task<FriendListPolicy> GetFriendListPolicyByPolicyIdAsync(string policyId);
+        Task<IEnumerable<FriendListPolicy>> GetFriendListPoliciesAsync();
         Task SaveChangesAsync();
 
     }

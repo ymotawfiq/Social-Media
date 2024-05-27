@@ -58,6 +58,16 @@ namespace SocialMedia.Service.GenericReturn
             };
         }
 
+        public static ApiResponse<T> _404_NotFound()
+        {
+            return new ApiResponse<T>
+            {
+                IsSuccess = false,
+                Message = "Page not found",
+                StatusCode = 404
+            };
+        }
+
         public static ApiResponse<T> _403_Forbidden()
         {
             return new ApiResponse<T>

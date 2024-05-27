@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models;
-using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Service.FriendsService;
@@ -20,12 +16,14 @@ namespace SocialMedia.Api.Controllers
         private readonly IFriendService _friendService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IBlockRepository _blockRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public FriendController(IFriendService _friendService, UserManager<SiteUser> _userManager,
-            IBlockRepository _blockRepository)
+            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
         {
             this._friendService = _friendService;
             this._userManager = _userManager;
             this._blockRepository = _blockRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
 
 
@@ -98,7 +96,7 @@ namespace SocialMedia.Api.Controllers
                         && HttpContext.User.Identity.Name != null)
                     {
                         var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                        var routeUser = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                             friendIdOrUserNameOrEmail);
                         if (user != null && routeUser != null)
                         {

@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\Images\\Post_Images\\8be680ca-bb04-4961-bd35-0066175f81ab_images5.jpg",
+      "PackagePath": "staticwebassets\\Images\\Post_Images\\8be680ca-bb04-4961-bd35-0066175f81ab_images5.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.SocialMedia.Api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.SocialMedia.Api.props",
+      "PackagePath": "build\\SocialMedia.Api.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.SocialMedia.Api.props",
+      "PackagePath": "buildMultiTargeting\\SocialMedia.Api.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.SocialMedia.Api.props",
+      "PackagePath": "buildTransitive\\SocialMedia.Api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

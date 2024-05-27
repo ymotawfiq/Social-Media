@@ -11,6 +11,7 @@ namespace SocialMedia.Service.CommentPolicyService
         Task<ApiResponse<CommentPolicy>> UpdateCommentPolicyAsync(CommentPolicyDto commentPolicyDto);
         Task<ApiResponse<CommentPolicy>> DeleteCommentPolicyByIdAsync(string commentPolicyId);
         Task<ApiResponse<CommentPolicy>> GetCommentPolicyByIdAsync(string commentPolicyId);
+        Task<ApiResponse<CommentPolicy>> GetCommentPolicyAsync(string commentPolicyIdOrPolicyName);
         Task<ApiResponse<IEnumerable<CommentPolicy>>> GetCommentPoliciesAsync();
     }
 }

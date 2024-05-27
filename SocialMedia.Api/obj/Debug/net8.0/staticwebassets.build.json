@@ -1,11 +1,39 @@
 {
   "Version": 1,
-  "Hash": "+b+scJpQdXUs1AMX6UKZXxGv4WJBMO+oVCWaMH0u3NI=",
+  "Hash": "gCEYGdaLUgtjfDFIiT71BiAUDIcbg6k2Yjs902ilRQE=",
   "Source": "SocialMedia.Api",
   "BasePath": "_content/SocialMedia.Api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "SocialMedia.Api\\wwwroot",
+      "Source": "SocialMedia.Api",
+      "ContentRoot": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\",
+      "BasePath": "_content/SocialMedia.Api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\Images\\Post_Images\\8be680ca-bb04-4961-bd35-0066175f81ab_images5.jpg",
+      "SourceId": "SocialMedia.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\",
+      "BasePath": "_content/SocialMedia.Api",
+      "RelativePath": "Images/Post_Images/8be680ca-bb04-4961-bd35-0066175f81ab_images5.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Images\\Post_Images\\8be680ca-bb04-4961-bd35-0066175f81ab_images5.jpg"
+    }
+  ]
 }

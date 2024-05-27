@@ -28,13 +28,8 @@ namespace SocialMedia.Api.Controllers
                 if (post != null)
                 {
                     var postView = await _postViewRepository.GetPostViewByPostIdAsync(postId);
-                    return StatusCode(StatusCodes.Status200OK, new ApiResponse<PostView>
-                    {
-                        StatusCode = 200,
-                        IsSuccess = true,
-                        Message = "Post views found successfully",
-                        ResponseObject = postView
-                    });
+                    return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<PostView>
+                        ._200_Success("Post views found successfully", postView));
                 }
                 return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                     ._404_NotFound("Post not found"));

@@ -17,11 +17,18 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.Email).IsRequired().HasColumnName("Email");
             builder.Property(e => e.UserName).IsRequired().HasColumnName("User Name");
             builder.Property(e => e.DisplayName).IsRequired().HasColumnName("Display Name");
-            builder.Property(e => e.IsFriendListPrivate).IsRequired()
-                .HasColumnName("Is Friend List Private").HasDefaultValue(true);
-            builder.HasOne(e => e.AccountPolicy).WithMany(e => e.Users).HasForeignKey(e => e.AccountPolicyId)
-                .OnDelete(DeleteBehavior.NoAction);
-            builder.Property(e => e.AccountPolicyId).IsRequired().HasColumnName("User Account Policy Id");
+            builder.HasOne(e => e.AccountPolicy).WithMany(e => e.Users).HasForeignKey(e => e.AccountPolicyId);
+            builder.HasOne(e => e.ReactPolicy).WithMany(e => e.Users).HasForeignKey(e => e.ReactPolicyId);
+            builder.HasOne(e => e.CommentPolicy).WithMany(e => e.Users).HasForeignKey(e => e.CommentPolicyId);
+            builder.HasOne(e => e.CommentPolicy).WithMany(e => e.Users).HasForeignKey(e => e.CommentPolicyId);
+            builder.HasOne(e => e.PostPolicy).WithMany(e => e.Users).HasForeignKey(e => e.AccountPostPolicyId);
+            builder.HasOne(e => e.FriendListPolicy).WithMany(e => e.Users)
+                .HasForeignKey(e => e.FriendListPolicyId);
+            builder.Property(e => e.AccountPolicyId).HasColumnName("Account Policy Id");
+            builder.Property(e => e.ReactPolicyId).HasColumnName("React Policy Id");
+            builder.Property(e => e.CommentPolicyId).HasColumnName("Comment Policy Id");
+            builder.Property(e => e.FriendListPolicyId).HasColumnName("Friend list Policy Id");
+            builder.Property(e => e.AccountPostPolicyId).HasColumnName("Account post Policy Id");
         }
     }
 }

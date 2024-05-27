@@ -15,6 +15,8 @@ namespace SocialMedia.Repository.PostRepository
         Task<Post> UpdatePostPolicyAsync(SiteUser user, Post post);
         Task<Post> UpdatePostReactPolicyAsync(SiteUser user, Post post);
         Task<Post> UpdatePostCommentPolicyAsync(SiteUser user, Post post);
+        Task<Post> UpdatePostPoliciesAsync(Post post, string policyId, string reactPolicyId,
+            string commentPolicyId);
         Task<PostDto> DeletePostAsync(SiteUser user, string postId);
         Task<PostDto> GetPostByIdAsync(SiteUser user, string postId);
         Task<Post> GetPostByIdAsync(string postId);

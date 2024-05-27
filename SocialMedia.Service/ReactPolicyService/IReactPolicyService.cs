@@ -12,6 +12,7 @@ namespace SocialMedia.Service.ReactPolicyService
         Task<ApiResponse<ReactPolicy>> UpdateReactPolicyAsync(ReactPolicyDto reactPolicyDto);
         Task<ApiResponse<ReactPolicy>> DeleteReactPolicyByIdAsync(string reactPolicyId);
         Task<ApiResponse<ReactPolicy>> GetReactPolicyByIdAsync(string reactPolicyId);
+        Task<ApiResponse<ReactPolicy>> GetReactPolicyAsync(string reactPolicyIdOrPolicyName);
         Task<ApiResponse<IEnumerable<ReactPolicy>>> GetReactPoliciesAsync();
     }
 }

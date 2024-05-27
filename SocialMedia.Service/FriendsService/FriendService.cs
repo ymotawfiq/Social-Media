@@ -5,29 +5,20 @@ using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.FriendListPolicyRepository;
-using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.GenericReturn;
-using System.Linq;
 
 namespace SocialMedia.Service.FriendsService
 {
     public class FriendService : IFriendService
     {
         private readonly IFriendsRepository _friendsRepository;
-        private readonly UserManager<SiteUser> _userManager;
-        private readonly IFriendRequestRepository _friendRequestRepository;
         private readonly IFriendListPolicyService _friendListPolicyService;
         public FriendService(IFriendsRepository _friendsRepository,
-            UserManager<SiteUser> _userManager, IFriendRequestRepository _friendRequestRepository,
             IFriendListPolicyService _friendListPolicyService)
         {
             this._friendsRepository = _friendsRepository;
-            this._userManager = _userManager;
-            this._friendRequestRepository = _friendRequestRepository;
             this._friendListPolicyService = _friendListPolicyService;
         }
         public async Task<ApiResponse<Friend>> AddFriendAsync(FriendDto friendsDto)
@@ -40,20 +31,10 @@ namespace SocialMedia.Service.FriendsService
                     ._400_BadRequest("You are already friends");
             }
             var userFriendList = await _friendsRepository.GetAllUserFriendsAsync(friendsDto.UserId);
-            if (userFriendList == null || userFriendList.ToList().Count == 0)
-            {
-                await _friendListPolicyService.AddFriendListPolicyAsync(
-                    new AddFriendListPolicyDto
-                    {
-                        PolicyIdOrName = "PUBLIC",
-                        UserIdOrNameOrEmail = friendsDto.UserId
-                    }
-                    );
-            }
             var newFriend = await _friendsRepository.AddFriendAsync(
                 ConvertFromDto.ConvertFromFriendtDto_Add(friendsDto));
             return StatusCodeReturn<Friend>
-                ._201_Created("Friend added successfully to your friend list");
+                ._201_Created("Friend added successfully to your friend list", newFriend);
         }
 
         public async Task<ApiResponse<Friend>> DeleteFriendAsync(string userId, string friendId)

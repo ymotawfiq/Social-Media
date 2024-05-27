@@ -12,5 +12,10 @@ namespace SocialMedia.Service.FriendListPolicyService
             AddFriendListPolicyDto addFriendListPolicyDto);
         Task<ApiResponse<FriendListPolicy>> UpdateFriendListPolicyAsync(
             UpdateFriendListPolicyDto updateFriendListPolicyDto);
+        Task<ApiResponse<FriendListPolicy>> GetFriendListPolicyAsync(
+            string friendListPolicyIdOrPolicyName);
+        Task<ApiResponse<IEnumerable<FriendListPolicy>>> GetFriendListPoliciesAsync();
+        Task<ApiResponse<FriendListPolicy>> DeleteFriendListPolicyAsync(
+            string friendListPolicyIdOrPolicyName);
     }
 }

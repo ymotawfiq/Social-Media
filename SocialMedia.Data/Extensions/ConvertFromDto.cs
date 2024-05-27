@@ -247,8 +247,8 @@ namespace SocialMedia.Data.Extensions
         {
             return new FriendListPolicy
             {
-                UserId = updateFriendListPolicyDto.UserIdOrUserIdOrNameOrEmail,
                 PolicyId = updateFriendListPolicyDto.PolicyIdOrName,
+                Id = updateFriendListPolicyDto.Id
             };
         }
 
@@ -259,10 +259,18 @@ namespace SocialMedia.Data.Extensions
             {
                 Id = Guid.NewGuid().ToString(),
                 PolicyId = addFriendListPolicyDto.PolicyIdOrName,
-                UserId = addFriendListPolicyDto.UserIdOrNameOrEmail
             };
         }
 
+        public static AccountPostsPolicy ConvertAccountPostsPolicyDto_Add
+            (AddAccountPostsPolicyDto addAccountPostsPolicyDto)
+        {
+            return new AccountPostsPolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = addAccountPostsPolicyDto.PolicyIdOrName
+            };
+        }
 
 
 

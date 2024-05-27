@@ -1,18 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Data;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.CommentPolicyRepository;
-using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.BlockService;
-using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PostService;
 
@@ -25,24 +18,20 @@ namespace SocialMedia.Api.Controllers
         private readonly IPostService _postService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IPostRepository _postRepository;
-        private readonly IPolicyRepository _policyRepository;
-        private readonly ApplicationDbContext _dbContext;
         private readonly IUserPostsRepository _userPostsRepository;
-        private readonly IFriendService _friendService;
         private readonly IBlockService _blockService;
+        private readonly UserManagerReturn _userManagerReturn;
         public PostController(IPostService _postService, UserManager<SiteUser> _userManager,
-            IPostRepository _postRepository, IPolicyRepository _policyRepository,
-            ApplicationDbContext _dbContext, IUserPostsRepository _userPostsRepository,
-            IFriendService _friendService, IBlockService _blockService)
+            IPostRepository _postRepository,
+            IUserPostsRepository _userPostsRepository, IBlockService _blockService, 
+             UserManagerReturn _userManagerReturn)
         {
             this._postService = _postService;
             this._userManager = _userManager;
             this._postRepository = _postRepository;
-            this._policyRepository = _policyRepository;
-            this._dbContext = _dbContext;
             this._userPostsRepository = _userPostsRepository;
-            this._friendService = _friendService;
             this._blockService = _blockService;
+            this._userManagerReturn = _userManagerReturn;
         }
 
         [HttpPost("post")]
@@ -157,7 +146,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var routeUser = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userIdOrUserName);
                     if (currentUser != null && routeUser != null)
                     {

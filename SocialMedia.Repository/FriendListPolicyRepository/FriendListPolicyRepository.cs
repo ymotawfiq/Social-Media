@@ -27,6 +27,26 @@ namespace SocialMedia.Repository.FriendListPolicyRepository
             }
         }
 
+        public async Task<FriendListPolicy> DeleteFriendListPolicyByIdAsync(string id)
+        {
+            var friendListPolicy = await GetFriendListPolicyByIdAsync(id);
+            _dbContext.FriendListPolicies.Remove(friendListPolicy);
+            await SaveChangesAsync();
+            return friendListPolicy;
+        }
+
+        public async Task<IEnumerable<FriendListPolicy>> GetFriendListPoliciesAsync()
+        {
+            try
+            {
+                return await _dbContext.FriendListPolicies.ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<FriendListPolicy> GetFriendListPolicyByIdAsync(string id)
         {
             try
@@ -40,18 +60,12 @@ namespace SocialMedia.Repository.FriendListPolicyRepository
             }
         }
 
-        public async Task<FriendListPolicy> GetFriendListPolicyByUserIdAsync(string userId)
+        public async Task<FriendListPolicy> GetFriendListPolicyByPolicyIdAsync(string policyId)
         {
-            try
-            {
-                return (await _dbContext.FriendListPolicies.Where(e => e.UserId == userId)
-                    .FirstOrDefaultAsync())!;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return (await _dbContext.FriendListPolicies.Where(e => e.PolicyId == policyId)
+                .FirstOrDefaultAsync())!;
         }
+
 
         public async Task SaveChangesAsync()
         {
@@ -62,7 +76,8 @@ namespace SocialMedia.Repository.FriendListPolicyRepository
         {
             try
             {
-                var oldFriendListPolicy = await GetFriendListPolicyByUserIdAsync(friendListPolicy.UserId);
+                var oldFriendListPolicy = await GetFriendListPolicyByIdAsync
+                    (friendListPolicy.Id);
                 oldFriendListPolicy.PolicyId = friendListPolicy.PolicyId;
                 _dbContext.FriendListPolicies.Update(oldFriendListPolicy);
                 await SaveChangesAsync();

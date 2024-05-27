@@ -8,6 +8,7 @@ using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
 using SocialMedia.Repository.AccountPolicyRepository;
+using SocialMedia.Repository.AccountPostsPolicyRepository;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FollowerRepository;
@@ -21,6 +22,7 @@ using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
 using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.AccountPolicyService;
+using SocialMedia.Service.AccountPostsPolicyService;
 using SocialMedia.Service.BlockService;
 using SocialMedia.Service.CommentPolicyService;
 using SocialMedia.Service.FollowerService;
@@ -44,7 +46,6 @@ var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(op =>
 {
     op.UseSqlServer(connection);
-    op.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
 
@@ -123,6 +124,7 @@ builder.Services.AddScoped<IUserPostsRepository, UserPostsRepository>();
 builder.Services.AddScoped<IAccountPolicyService, AccountPolicyService>();
 builder.Services.AddScoped<IFriendListPolicyService, FriendListPolicyService>();
 builder.Services.AddScoped<UserManagerReturn>();
+builder.Services.AddScoped<IAccountPostsPolicyService, AccountPostsPolicyService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -136,6 +138,7 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IAccountPolicyRepository, AccountPolicyRepository>();
 builder.Services.AddScoped<IPostViewRepository, PostViewRepository>();
 builder.Services.AddScoped<IFriendListPolicyRepository, FriendListPolicyRepository>();
+builder.Services.AddScoped<IAccountPostsPolicyRepository, AccountPostsPolicyRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

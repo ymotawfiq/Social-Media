@@ -20,12 +20,14 @@ namespace SocialMedia.Api.Controllers
         private readonly IFollowerService _followerService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IBlockRepository _blockRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public FollowersController(IFollowerService _followerService, UserManager<SiteUser> _userManager,
-            IBlockRepository _blockRepository)
+            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
         {
             this._followerService = _followerService;
             this._userManager = _userManager;
             this._blockRepository = _blockRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
 
 
@@ -38,7 +40,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         followDto.UserIdOrUserNameOrEmail);
                     if(follower!=null && user != null)
                     {
@@ -80,9 +82,9 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userIdOrUserNameOrEmail);
-                var follower = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                var follower = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         followerIdOrUserNameOrEmail);
                 if (user!=null && follower != null)
                 {
@@ -124,28 +126,16 @@ namespace SocialMedia.Api.Controllers
                         var response = await _followerService.GetAllFollowers(user!.Id);
                         return Ok(response);
                     }
-                    return StatusCode(StatusCodes.Status404NotFound, new ApiResponse<string>
-                    {
-                        StatusCode = 404,
-                        IsSuccess = false,
-                        Message = "User not found"
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse<string>
-                {
-                    StatusCode = 401,
-                    IsSuccess = false,
-                    Message = "Unauthorized"
-                });
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<string>
-                {
-                    StatusCode = 500,
-                    IsSuccess = false,
-                    Message = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
             }
         }
 
@@ -159,7 +149,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name!=null)
                 {
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userIdOrName);
                     if (currentUser != null && user!=null)
                     {
@@ -194,7 +184,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userIdOrUserNameOrEmail); 
                     if (user != null && follower!=null)
                     {

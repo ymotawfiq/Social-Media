@@ -15,10 +15,13 @@ namespace SocialMedia.Api.Controllers
     {
         private readonly IBlockService _blockService;
         private readonly UserManager<SiteUser> _userManager;
-        public BlockController(IBlockService _blockService, UserManager<SiteUser> _userManager)
+        private readonly UserManagerReturn _userManagerReturn;
+        public BlockController(IBlockService _blockService, UserManager<SiteUser> _userManager,
+            UserManagerReturn _userManagerReturn)
         {
             this._blockService = _blockService;
             this._userManager = _userManager;
+            this._userManagerReturn = _userManagerReturn;
         }
 
 
@@ -31,7 +34,8 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var blockedUser = await GetUserAsync(blockUserDto.UserIdOrUserNameOrEmail);
+                    var blockedUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync
+                        (blockUserDto.UserIdOrUserNameOrEmail);
                     if (user != null && blockedUser != null)
                     {
                         if (user.Id != blockedUser.Id)
@@ -85,7 +89,8 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var blockedUser = await GetUserAsync(blockUserDto.UserIdOrUserNameOrEmail);
+                    var blockedUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync
+                        (blockUserDto.UserIdOrUserNameOrEmail);
                     if (user != null && blockedUser != null)
                     {
                         if (user.Id != blockedUser.Id)
@@ -157,25 +162,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        private async Task<SiteUser> GetUserAsync(string UserIdOrUserNameOrEmail)
-        {
-            var userById = await _userManager.FindByIdAsync(UserIdOrUserNameOrEmail);
-            var userByEmail = await _userManager.FindByEmailAsync(UserIdOrUserNameOrEmail);
-            var userByUserName = await _userManager.FindByNameAsync(UserIdOrUserNameOrEmail);
-            if (userById != null)
-            {
-                return userById;
-            }
-            else if (userByEmail != null)
-            {
-                return userByEmail;
-            }
-            if (userByUserName != null)
-            {
-                return userByUserName;
-            }
-            return null!;
-        }
+
 
 
     }

@@ -59,7 +59,7 @@ namespace SocialMedia.Repository.UserPostsRepository
 
         public async Task<UserPosts> GetUserPostByIdAsync(string userPostId)
         {
-            return (await _dbContext.UserPosts.Where(e => e.Id == userPostId).FirstOrDefaultAsync())!;
+            return (await _dbContext.UserPosts.Where(e => e.PostId == userPostId).FirstOrDefaultAsync())!;
         }
 
         public async Task<UserPosts> GetUserPostByPostIdAsync(string postId)

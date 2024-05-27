@@ -3,20 +3,16 @@
   "WorkspaceRootPath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\reactscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\reactscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\postservice\\postservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\postservice\\postservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\reactpolicycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\reactpolicycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.repository\\commentpolicyrepository\\commentpolicyrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|solutionrelative:socialmedia.repository\\commentpolicyrepository\\commentpolicyrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\postviewcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\postviewcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\genericreturn\\statuscodereturn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\genericreturn\\statuscodereturn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.repository\\postrepository\\postrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|solutionrelative:socialmedia.repository\\postrepository\\postrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,54 +30,41 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ReactsController.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\ReactsController.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\ReactsController.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\ReactsController.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Controllers\\ReactsController.cs",
-              "ViewState": "AQIAAEQAAAAAAAAAAAAcwFQAAAAPAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-20T19:48:49.991Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ReactPolicyController.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\ReactPolicyController.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\ReactPolicyController.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\ReactPolicyController.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Controllers\\ReactPolicyController.cs",
-              "ViewState": "AQIAAEoAAAAAAAAAAAAcwGEAAAAxAAAA",
+              "Title": "CommentPolicyRepository.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\CommentPolicyRepository\\CommentPolicyRepository.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Repository\\CommentPolicyRepository\\CommentPolicyRepository.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\CommentPolicyRepository\\CommentPolicyRepository.cs",
+              "RelativeToolTip": "SocialMedia.Repository\\CommentPolicyRepository\\CommentPolicyRepository.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAACIAAABDAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-20T19:48:19.588Z",
+              "WhenOpened": "2024-05-27T19:38:42.954Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "PostViewController.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\PostViewController.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\PostViewController.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\PostViewController.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Controllers\\PostViewController.cs",
-              "ViewState": "AQIAAAcAAAAAAAAAAAAAACcAAAAiAAAA",
+              "Title": "PostRepository.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "RelativeToolTip": "SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "ViewState": "AQIAANEAAAAAAAAAAAAkwOkAAAAQAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-20T19:47:46.189Z",
+              "WhenOpened": "2024-05-27T19:21:51.486Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "StatusCodeReturn.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GenericReturn\\StatusCodeReturn.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Service\\GenericReturn\\StatusCodeReturn.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GenericReturn\\StatusCodeReturn.cs",
-              "RelativeToolTip": "SocialMedia.Service\\GenericReturn\\StatusCodeReturn.cs",
-              "ViewState": "AQIAAFQAAAAAAAAAAAAYwHQAAAAgAAAA",
+              "DocumentIndex": 0,
+              "Title": "PostService.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\PostService\\PostService.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Service\\PostService\\PostService.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\PostService\\PostService.cs",
+              "RelativeToolTip": "SocialMedia.Service\\PostService\\PostService.cs",
+              "ViewState": "AQIAAMgBAAAAAAAAAAAqwP0BAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-20T17:23:26.769Z",
+              "WhenOpened": "2024-05-27T17:53:19.646Z",
               "EditorCaption": ""
             }
           ]

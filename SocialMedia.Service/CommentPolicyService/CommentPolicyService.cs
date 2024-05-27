@@ -27,11 +27,12 @@ namespace SocialMedia.Service.CommentPolicyService
                 return StatusCodeReturn<CommentPolicy>
                     ._404_NotFound("Policy not found");
             }
-            var reactPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(commentPolicyDto.PolicyId);
-            if (reactPolicy != null)
+            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync
+                (commentPolicyDto.PolicyId);
+            if (commentPolicy != null)
             {
                 return StatusCodeReturn<CommentPolicy>
-                    ._400_BadRequest("Comment policy already exists");
+                    ._403_Forbidden("Comment policy already exists");
             }
             var newComentPolicy = await _commentPolicyRepository.AddCommentPolicyAsync(
                 ConvertFromDto.ConvertFromCommentPolicyDto_Add(commentPolicyDto));
@@ -77,7 +78,8 @@ namespace SocialMedia.Service.CommentPolicyService
                     ._200_Success("Comment policies found successfully", commentPolicies);
         }
 
-        public async Task<ApiResponse<CommentPolicy>> UpdateCommentPolicyAsync(CommentPolicyDto commentPolicyDto)
+        public async Task<ApiResponse<CommentPolicy>> UpdateCommentPolicyAsync
+            (CommentPolicyDto commentPolicyDto)
         {
             if (commentPolicyDto.Id == null)
             {
@@ -90,16 +92,56 @@ namespace SocialMedia.Service.CommentPolicyService
                 return StatusCodeReturn<CommentPolicy>
                     ._404_NotFound("Policy not found");
             }
-            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(commentPolicyDto.PolicyId);
+            var commentPolicy = await _commentPolicyRepository
+                .GetCommentPolicyByPolicyIdAsync(commentPolicyDto.PolicyId);
             if (commentPolicy == null)
             {
                 return StatusCodeReturn<CommentPolicy>
                     ._404_NotFound("Comment policy not found");
             }
+            var existCommentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(
+                commentPolicyDto.PolicyId);
+            if (existCommentPolicy != null)
+            {
+                return StatusCodeReturn<CommentPolicy>._403_Forbidden("Comment policy already exists");
+            }
             var updatedComentPolicy = await _commentPolicyRepository.UpdateCommentPolicyAsync(
                 ConvertFromDto.ConvertFromCommentPolicyDto_Update(commentPolicyDto));
             return StatusCodeReturn<CommentPolicy>
                 ._200_Success("Comment policy updated successfully", updatedComentPolicy);
+        }
+
+        public async Task<ApiResponse<CommentPolicy>> GetCommentPolicyAsync(string commentPolicyIdOrPolicyName)
+        {
+            var policy = await _policyRepository.GetPolicyByNameAsync(commentPolicyIdOrPolicyName);
+            CommentPolicy commentPolicy = null!;
+            if (policy != null)
+            {
+                commentPolicy = await _commentPolicyRepository
+                .GetCommentPolicyByPolicyIdAsync(policy.Id);
+                if (commentPolicy != null)
+                {
+                    return StatusCodeReturn<CommentPolicy>._200_Success(
+                        "Comment policy found successfully", commentPolicy);
+                }
+                return StatusCodeReturn<CommentPolicy>._404_NotFound("Comment policy not found");
+            }
+            commentPolicy = await _commentPolicyRepository
+                .GetCommentPolicyByIdAsync(commentPolicyIdOrPolicyName);
+            if (commentPolicy != null)
+            {
+                return StatusCodeReturn<CommentPolicy>._200_Success(
+                        "Comment policy found successfully", commentPolicy);
+            }
+            Guid _;
+            bool isValid = Guid.TryParse(commentPolicyIdOrPolicyName, out _);
+            if (isValid)
+            {
+                return StatusCodeReturn<CommentPolicy>._404_NotFound(
+                        "Comment policy not found");
+            }
+            return StatusCodeReturn<CommentPolicy>._404_NotFound(
+                        "Policy not found");
         }
     }
 }

@@ -183,7 +183,7 @@ namespace SocialMedia.Repository.PostRepository
             {
                 var oldPost = await _dbContext.Posts.Where(e => e.Id == post.Id).FirstOrDefaultAsync()!;
                 oldPost!.PolicyId = post.PolicyId;
-                _dbContext.Posts.Update(oldPost);
+                //_dbContext.Posts.Update(oldPost);
                 await SaveChangesAsync();
                 return oldPost;
             }
@@ -199,7 +199,7 @@ namespace SocialMedia.Repository.PostRepository
             {
                 var oldPost = await _dbContext.Posts.Where(e => e.Id == post.Id).FirstOrDefaultAsync()!;
                 oldPost!.ReactPolicyId = post.ReactPolicyId;
-                _dbContext.Posts.Update(oldPost);
+                //_dbContext.Posts.Update(oldPost);
                 await SaveChangesAsync();
                 return oldPost;
             }
@@ -215,7 +215,26 @@ namespace SocialMedia.Repository.PostRepository
             {
                 var oldPost = await _dbContext.Posts.Where(e => e.Id == post.Id).FirstOrDefaultAsync()!;
                 oldPost!.CommentPolicyId = post.CommentPolicyId;
-                _dbContext.Posts.Update(oldPost);
+                //_dbContext.Posts.Update(oldPost);
+                await SaveChangesAsync();
+                return oldPost;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Post> UpdatePostPoliciesAsync(Post post, string policyId, string reactPolicyId,
+            string commentPolicyId)
+        {
+            try
+            {
+                var oldPost = await _dbContext.Posts.Where(e => e.Id == post.Id).FirstOrDefaultAsync()!;
+                oldPost!.CommentPolicyId = commentPolicyId;
+                oldPost!.ReactPolicyId = reactPolicyId;
+                oldPost!.PolicyId = policyId;
+                //_dbContext.Posts.Update(oldPost);
                 await SaveChangesAsync();
                 return oldPost;
             }

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.ReactService;
 

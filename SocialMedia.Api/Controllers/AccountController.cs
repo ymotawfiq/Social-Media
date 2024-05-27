@@ -37,6 +37,7 @@ namespace SocialMedia.Api.Controllers
         private readonly IPostRepository _postRepository;
         private readonly IReactPolicyRepository _reactPolicyRepository;
         private readonly ICommentPolicyRepository _commentPolicyRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public AccountController
             (
             IUserManagement _userManagementService,
@@ -46,7 +47,8 @@ namespace SocialMedia.Api.Controllers
             IPolicyRepository _policyRepository,
             IPostRepository _postRepository,
             IReactPolicyRepository _reactPolicyRepository,
-            ICommentPolicyRepository _commentPolicyRepository
+            ICommentPolicyRepository _commentPolicyRepository,
+            UserManagerReturn _userManagerReturn
             )
         {
             this._userManagementService = _userManagementService;
@@ -57,6 +59,7 @@ namespace SocialMedia.Api.Controllers
             this._postRepository = _postRepository;
             this._reactPolicyRepository = _reactPolicyRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
 
         [Authorize(Roles ="Admin")]
@@ -525,7 +528,7 @@ namespace SocialMedia.Api.Controllers
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (currentUser != null)
                     {
-                        var routeUser = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                             updateUserPolicyDto.UserIdOrUserNameOrEmail);
                         if (routeUser != null)
                         {
@@ -618,7 +621,7 @@ namespace SocialMedia.Api.Controllers
         public async Task<IActionResult> UpdateAccountRolesAsync(
             [FromBody] UpdateAccountRolesDto updateAccountRolesDto)
         {
-            var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+            var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                 updateAccountRolesDto.UserNameOrEmail);
             if (user == null)
             {
@@ -631,6 +634,119 @@ namespace SocialMedia.Api.Controllers
                 ._200_Success("Account roles updated successfully"));
         }
 
+
+        [HttpPut("updateAccountGenericPolicy")]
+        public async Task<IActionResult> UpdateAccountPolicyAsync([FromBody] string policyIdOrName)
+        {
+            try
+            {
+                if(HttpContext.User!=null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _userManagementService.UpdateAccountPolicyAsync(
+                            user, policyIdOrName);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("updateAccountGenericReactPolicy")]
+        public async Task<IActionResult> UpdateAccountReactPolicyAsync([FromBody] string policyIdOrName)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _userManagementService.UpdateAccountReactPolicyAsync(
+                            user, policyIdOrName);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("updateAccountGenericPostsPolicy")]
+        public async Task<IActionResult> UpdateAccountPostsPolicyAsync([FromBody] string policyIdOrName)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _userManagementService.UpdateAccountPostsPolicyAsync(
+                            user, policyIdOrName);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("updateAccountGenericCommentPolicy")]
+        public async Task<IActionResult> UpdateAccountCommentPolicyAsync([FromBody] string policyIdOrName)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _userManagementService.UpdateAccountCommentPolicyAsync(
+                            user, policyIdOrName);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
+            }
+        }
+
         [Authorize(Roles = "Admin,User")]
         [HttpDelete("deleteAccountLink")]
         public async Task<IActionResult> DeleteAccount1Async(string userNameOrEmail)
@@ -641,7 +757,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var loggedInUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userNameOrEmail);
                     if (user != null && user.Email != null && loggedInUser != null)
                     {
@@ -688,7 +804,7 @@ namespace SocialMedia.Api.Controllers
                 if (userEmail != null && !userEmail.ToString().IsNullOrEmpty())
                 {
                     var userByToken = await _userManager.FindByEmailAsync(userEmail);
-                    var user = await new UserManagerReturn().GetUserByUserNameOrEmailOrIdAsync(
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userNameOrEmail);
                     if (userByToken != null && user != null)
                     {

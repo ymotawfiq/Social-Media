@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Service.CommentPolicyService;
 using SocialMedia.Service.GenericReturn;
 
@@ -13,7 +12,8 @@ namespace SocialMedia.Api.Controllers
     public class CommentPolicyController : ControllerBase
     {
         private readonly ICommentPolicyService _commentPolicyService;
-        public CommentPolicyController(ICommentPolicyService _commentPolicyService)
+        public CommentPolicyController(ICommentPolicyService _commentPolicyService,
+            UserManagerReturn _userManagerReturn)
         {
             this._commentPolicyService = _commentPolicyService;
         }

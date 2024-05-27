@@ -1,5 +1,6 @@
 ﻿
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
 using SocialMedia.Data.DTOs;
@@ -8,6 +9,7 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.AccountPolicyRepository;
+using SocialMedia.Repository.AccountPostsPolicyRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
@@ -18,7 +20,6 @@ using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
-using SocialMedia.Service.ReactPolicyService;
 
 namespace SocialMedia.Service.PostService
 {
@@ -32,9 +33,9 @@ namespace SocialMedia.Service.PostService
         private readonly IFriendService _friendService;
         private readonly IPolicyService _policyService;
         private readonly IUserPostsRepository _userPostsRepository;
-        private readonly IReactPolicyService _reactPolicyService;
-        private readonly IAccountPolicyRepository _accountPolicyRepository;
+        private readonly IAccountPostsPolicyRepository _accountPostsPolicyRepository;
         private readonly IPostViewRepository _postViewRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         
 
         public PostService(IPostRepository _postRepository,
@@ -42,8 +43,8 @@ namespace SocialMedia.Service.PostService
             IReactPolicyRepository _reactPolicyRepository, IPolicyRepository _policyRepository,
             IFriendsRepository _friendsRepository, IFriendService _friendService,
             IUserPostsRepository _userPostsRepository, IPolicyService _policyService,
-            IReactPolicyService _reactPolicyService, IAccountPolicyRepository _accountPolicyRepository,
-            IPostViewRepository _postViewRepository)
+            IAccountPostsPolicyRepository _accountPostsPolicyRepository,
+            IPostViewRepository _postViewRepository, IWebHostEnvironment _webHostEnvironment)
         {
             this._postRepository = _postRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
@@ -53,38 +54,30 @@ namespace SocialMedia.Service.PostService
             this._friendService = _friendService;
             this._userPostsRepository = _userPostsRepository;
             this._policyService = _policyService;
-            this._reactPolicyService = _reactPolicyService;
-            this._accountPolicyRepository = _accountPolicyRepository;
+            this._accountPostsPolicyRepository = _accountPostsPolicyRepository;
             this._postViewRepository = _postViewRepository;
+            this._webHostEnvironment = _webHostEnvironment;
         }
         public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, CreatePostDto createPostDto)
         {
-            var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByIdAsync(user.AccountPolicyId);
-            var policy = await _policyRepository.GetPolicyByIdAsync(accountPolicy.PolicyId);
+            var accountPostsPolicy = await _accountPostsPolicyRepository
+                .GetAccountPostPolicyByIdAsync(user.AccountPostPolicyId!);
+            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(user.ReactPolicyId!);
+            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByIdAsync
+                (user.CommentPolicyId!);
+            var policy = await _policyRepository.GetPolicyByIdAsync(accountPostsPolicy.PolicyId);
+
             if (policy == null)
-            {
-                return StatusCodeReturn<PostDto>
-                    ._404_NotFound("Policy not found");
-            }
-            if (policy.PolicyType == "PUBLIC")
             {
                 policy = await _policyRepository.GetPolicyByNameAsync("public");
             }
-            else if (policy.PolicyType == "PRIVATE")
-            {
-                policy = await _policyRepository.GetPolicyByNameAsync("friends only");
-            }
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
             if (reactPolicy == null)
             {
-                return StatusCodeReturn<PostDto>
-                    ._404_NotFound("React policy not found");
+                reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
             }
-            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
             if (commentPolicy == null)
             {
-                return StatusCodeReturn<PostDto>
-                    ._404_NotFound("Comment policy not found");
+                commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
             }
             var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, policy, reactPolicy,
                 commentPolicy);
@@ -453,11 +446,41 @@ namespace SocialMedia.Service.PostService
                 ._404_NotFound("Post not found for this user");
         }
 
+        public async Task<ApiResponse<bool>> MakePostsFriendsOnlyAsync(SiteUser user)
+        {
+            var userPosts = await _postRepository.GetUserPostsAsync(user);
+            if (userPosts != null)
+            {
+                await UpdatePostsToFriendsOnlyAsync(user, userPosts);
+                return StatusCodeReturn<bool>
+                    ._200_Success("Posts policy updated successfully", true);
+            }
+            return StatusCodeReturn<bool>
+                ._404_NotFound("No posts found for this user");
+        }
 
+        private async Task<ApiResponse<bool>> UpdatePostsToFriendsOnlyAsync(SiteUser user
+            , IEnumerable<PostDto> posts)
+        {
+            var policy = await _policyRepository.GetPolicyByNameAsync("friends only");
+            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
+            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
+            foreach(var postDto in posts)
+            {
+                postDto.PolicyId = policy.Id;
+                postDto.ReactPolicyId = reactPolicy.Id;
+                postDto.CommentPolicyId = commentPolicy.Id;
+                var post = ConvertFromPostDto(postDto);
+                await _postRepository.UpdatePostPoliciesAsync(post, policy.Id, reactPolicy.Id,
+                    commentPolicy.Id);
+            }
+            return StatusCodeReturn<bool>
+                ._200_Success("Posts policy updated successfully", true);
+        }
 
         private string SavePostImages(IFormFile image)
         {
-            var path = @"D:\my_source_code\C sharp\SocialMedia.Solution\ImageStorageTest\PostsImages";
+            var path = Path.Combine(_webHostEnvironment.ContentRootPath, @"wwwroot\Images\Post_Images");
             var uniqueFileName = Guid.NewGuid().ToString() + "_" + image.FileName;
             if (!System.IO.Directory.Exists(path))
             {
@@ -474,8 +497,8 @@ namespace SocialMedia.Service.PostService
 
         private bool DeletePostImage(string imageUrl)
         {
-            var folder = @"D:\my_source_code\C sharp\SocialMedia.Solution\ImageStorageTest\PostsImages\";
-            var file = Path.Combine(folder, $"{imageUrl}");
+            var path = Path.Combine(_webHostEnvironment.ContentRootPath, @"wwwroot\Images\Post_Images\");
+            var file = Path.Combine(path, $"{imageUrl}");
             if (System.IO.File.Exists(file))
             {
                 System.IO.File.Delete(file);
@@ -497,5 +520,6 @@ namespace SocialMedia.Service.PostService
             };
         }
 
+        
     }
 }
