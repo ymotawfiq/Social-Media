@@ -49,7 +49,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpGet("getReactById/{reactId}")]
-        public async Task<IActionResult> GetReactByIdAsync([FromRoute] Guid reactId)
+        public async Task<IActionResult> GetReactByIdAsync([FromRoute] string reactId)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpDelete("deleteReactById/{reactId}")]
-        public async Task<IActionResult> DeleteReactByIdAsync([FromRoute] Guid reactId)
+        public async Task<IActionResult> DeleteReactByIdAsync([FromRoute] string reactId)
         {
             try
             {

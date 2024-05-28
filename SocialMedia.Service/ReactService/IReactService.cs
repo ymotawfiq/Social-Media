@@ -9,8 +9,8 @@ namespace SocialMedia.Service.ReactService
     {
         Task<ApiResponse<React>> AddReactAsync(ReactDto reactDto);
         Task<ApiResponse<React>> UpdateReactAsync(ReactDto reactDto);
-        Task<ApiResponse<React>> DeleteReactByIdAsync(Guid reactId);
-        Task<ApiResponse<React>> GetReactByIdAsync(Guid reactId);
+        Task<ApiResponse<React>> DeleteReactByIdAsync(string reactId);
+        Task<ApiResponse<React>> GetReactByIdAsync(string reactId);
         Task<ApiResponse<IEnumerable<React>>> GetAllReactsAsync();
     }
 }

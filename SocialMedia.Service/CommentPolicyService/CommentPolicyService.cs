@@ -6,6 +6,7 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.PolicyService;
 
 namespace SocialMedia.Service.CommentPolicyService
 {
@@ -13,11 +14,13 @@ namespace SocialMedia.Service.CommentPolicyService
     {
         private readonly ICommentPolicyRepository _commentPolicyRepository;
         private readonly IPolicyRepository _policyRepository;
+        private readonly IPolicyService _policyService;
         public CommentPolicyService(ICommentPolicyRepository _commentPolicyRepository,
-            IPolicyRepository _policyRepository)
+            IPolicyRepository _policyRepository, IPolicyService _policyService)
         {
             this._commentPolicyRepository = _commentPolicyRepository;
             this._policyRepository = _policyRepository;
+            this._policyService = _policyService;
         }
         public async Task<ApiResponse<CommentPolicy>> AddCommentPolicyAsync(CommentPolicyDto commentPolicyDto)
         {

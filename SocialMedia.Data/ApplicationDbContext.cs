@@ -50,7 +50,11 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new AccountPolicyConfigurations())
                    .ApplyConfiguration(new PostViewConfigurations())
                    .ApplyConfiguration(new FriendListPolicyConfigurations())
-                   .ApplyConfiguration(new PostPolicyConfigurations());
+                   .ApplyConfiguration(new PostPolicyConfigurations())
+                   .ApplyConfiguration(new SavedPostsConfigurations())
+                   .ApplyConfiguration(new UserSavedPostsFoldersConfigurations())
+                   .ApplyConfiguration(new SpecialPostReactsConfigurations())
+                   .ApplyConfiguration(new SpecialCommentReactsConfigurations());
         }
 
 
@@ -69,5 +73,9 @@ namespace SocialMedia.Data
         public DbSet<PostView> PostViews { get; set; }
         public DbSet<FriendListPolicy> FriendListPolicies { get; set; }
         public DbSet<AccountPostsPolicy> PostPolicies { get; set; }
+        public DbSet<SavedPosts> SavedPosts { get; set; }
+        public DbSet<UserSavedPostsFolders> UserSavedPostsFolders { get; set; }
+        public DbSet<SpecialPostReacts> SpecialPostReacts { get; set; }
+        public DbSet<SpecialCommentReacts> SpecialCommentReacts { get; set; }
     }
 }

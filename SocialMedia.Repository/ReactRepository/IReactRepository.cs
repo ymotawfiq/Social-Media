@@ -8,8 +8,8 @@ namespace SocialMedia.Repository.ReactRepository
     {
         Task<React> AddReactAsync(React react);
         Task<React> UpdateReactAsync(React react);
-        Task<React> DeleteReactByIdAsync(Guid reactId);
-        Task<React> GetReactByIdAsync(Guid reactId);
+        Task<React> DeleteReactByIdAsync(string reactId);
+        Task<React> GetReactByIdAsync(string reactId);
         Task<IEnumerable<React>> GetAllReactsAsync();
         Task SaveChangesAsync();
     }

@@ -29,7 +29,7 @@ namespace SocialMedia.Service.ReactService
                 ._201_Created("React added successfully", newReact);
         }
 
-        public async Task<ApiResponse<React>> DeleteReactByIdAsync(Guid reactId)
+        public async Task<ApiResponse<React>> DeleteReactByIdAsync(string reactId)
         {
             var react = await _reactRepository.GetReactByIdAsync(reactId);
             if (react == null)
@@ -55,7 +55,7 @@ namespace SocialMedia.Service.ReactService
                     ._200_Success("Reacts found successfully", reacts);
         }
 
-        public async Task<ApiResponse<React>> GetReactByIdAsync(Guid reactId)
+        public async Task<ApiResponse<React>> GetReactByIdAsync(string reactId)
         {
             var react = await _reactRepository.GetReactByIdAsync(reactId);
             if (react == null)

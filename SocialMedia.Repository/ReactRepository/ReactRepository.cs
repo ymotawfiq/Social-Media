@@ -27,7 +27,7 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
-        public async Task<React> DeleteReactByIdAsync(Guid reactId)
+        public async Task<React> DeleteReactByIdAsync(string reactId)
         {
             try
             {
@@ -54,11 +54,11 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
-        public async Task<React> GetReactByIdAsync(Guid reactId)
+        public async Task<React> GetReactByIdAsync(string reactId)
         {
             try
             {
-                return await _dbContext.Reacts.Where(e => e.Id == reactId).FirstOrDefaultAsync();
+                return (await _dbContext.Reacts.Where(e => e.Id == reactId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {

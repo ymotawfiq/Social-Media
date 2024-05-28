@@ -20,7 +20,11 @@ using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Repository.SavePostsRepository;
+using SocialMedia.Repository.SpecialCommentReactsRepository;
+using SocialMedia.Repository.SpecialPostsReactsRepository;
 using SocialMedia.Repository.UserPostsRepository;
+using SocialMedia.Repository.UserSavedPostsFoldersRepository;
 using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.AccountPostsPolicyService;
 using SocialMedia.Service.BlockService;
@@ -34,8 +38,12 @@ using SocialMedia.Service.PolicyService;
 using SocialMedia.Service.PostService;
 using SocialMedia.Service.ReactPolicyService;
 using SocialMedia.Service.ReactService;
+using SocialMedia.Service.SavedPostsService;
 using SocialMedia.Service.SendEmailService;
+using SocialMedia.Service.SpecialCommentReactsService;
+using SocialMedia.Service.SpecialPostReactService;
 using SocialMedia.Service.UserAccountService;
+using SocialMedia.Service.UserSavedPostsFoldersService;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -125,6 +133,10 @@ builder.Services.AddScoped<IAccountPolicyService, AccountPolicyService>();
 builder.Services.AddScoped<IFriendListPolicyService, FriendListPolicyService>();
 builder.Services.AddScoped<UserManagerReturn>();
 builder.Services.AddScoped<IAccountPostsPolicyService, AccountPostsPolicyService>();
+builder.Services.AddScoped<IUserSavedPostsFolderService, UserSavedPostsFolderService>();
+builder.Services.AddScoped<ISavedPostsService, SavedPostsService>();
+builder.Services.AddScoped<ISpecialPostReactService, SpecialPostReactsService>();
+builder.Services.AddScoped<ISpecialCommentReactsService, SpecialCommentReactsService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -139,6 +151,10 @@ builder.Services.AddScoped<IAccountPolicyRepository, AccountPolicyRepository>();
 builder.Services.AddScoped<IPostViewRepository, PostViewRepository>();
 builder.Services.AddScoped<IFriendListPolicyRepository, FriendListPolicyRepository>();
 builder.Services.AddScoped<IAccountPostsPolicyRepository, AccountPostsPolicyRepository>();
+builder.Services.AddScoped<IUserSavedPostsFoldersRepository, UserSavedPostsFoldersRepository>();
+builder.Services.AddScoped<ISavePostsRepository, SavePostsRepository>();
+builder.Services.AddScoped<ISpecialPostsReactsRepository, SpecialPostsReactsRepository>();
+builder.Services.AddScoped<ISpecialCommentReactsRepository, SpecialCommentReactsRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

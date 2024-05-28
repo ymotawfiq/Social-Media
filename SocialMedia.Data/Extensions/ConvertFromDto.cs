@@ -11,6 +11,7 @@ namespace SocialMedia.Data.Extensions
         {
             return new React
             {
+                Id = Guid.NewGuid().ToString(),
                 ReactValue = reactDto.ReactValue
             };
         }
@@ -23,7 +24,7 @@ namespace SocialMedia.Data.Extensions
             }
             return new React
             {
-                Id = new Guid(reactDto.Id),
+                Id = reactDto.Id,
                 ReactValue = reactDto.ReactValue
             };
         }
@@ -272,7 +273,45 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+        public static SpecialPostReacts ConvertSpecialPostReactsDto_Add(
+            AddSpecialPostsReactsDto addSpecialPostsReactsDto)
+        {
+            return new SpecialPostReacts
+            {
+                Id = Guid.NewGuid().ToString(),
+                ReactId = addSpecialPostsReactsDto.ReactId
+            };
+        }
 
+        public static SpecialPostReacts ConvertSpecialPostReactsDto_Update(
+            UpdateSpecialPostsReactsDto updateSpecialPostsReactsDto)
+        {
+            return new SpecialPostReacts
+            {
+                Id = updateSpecialPostsReactsDto.Id,
+                ReactId = updateSpecialPostsReactsDto.ReactId
+            };
+        }
+
+        public static SpecialCommentReacts ConvertSpecialCommentReactsDto_Add(
+                AddSpecialCommentReactsDto addSpecialCommentReactsDto)
+        {
+            return new SpecialCommentReacts
+            {
+                Id = Guid.NewGuid().ToString(),
+                ReactId = addSpecialCommentReactsDto.ReactId
+            };
+        }
+
+        public static SpecialCommentReacts ConvertSpecialCommentReactsDto_Update(
+            UpdateSpecialCommentReactsDto updateSpecialCommentReactsDto)
+        {
+            return new SpecialCommentReacts
+            {
+                Id = updateSpecialCommentReactsDto.Id,
+                ReactId = updateSpecialCommentReactsDto.ReactId
+            };
+        }
 
     }
 }
