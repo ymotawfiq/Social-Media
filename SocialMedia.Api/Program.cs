@@ -16,6 +16,8 @@ using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
+using SocialMedia.Repository.PostCommentsRepository;
+using SocialMedia.Repository.PostReactsRepository;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
@@ -35,6 +37,8 @@ using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
+using SocialMedia.Service.PostCommentService;
+using SocialMedia.Service.PostReactsService;
 using SocialMedia.Service.PostService;
 using SocialMedia.Service.ReactPolicyService;
 using SocialMedia.Service.ReactService;
@@ -137,6 +141,8 @@ builder.Services.AddScoped<IUserSavedPostsFolderService, UserSavedPostsFolderSer
 builder.Services.AddScoped<ISavedPostsService, SavedPostsService>();
 builder.Services.AddScoped<ISpecialPostReactService, SpecialPostReactsService>();
 builder.Services.AddScoped<ISpecialCommentReactsService, SpecialCommentReactsService>();
+builder.Services.AddScoped<IPostReactsService, PostReactsService>();
+builder.Services.AddScoped<IPostCommentService, PostCommentService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -155,6 +161,8 @@ builder.Services.AddScoped<IUserSavedPostsFoldersRepository, UserSavedPostsFolde
 builder.Services.AddScoped<ISavePostsRepository, SavePostsRepository>();
 builder.Services.AddScoped<ISpecialPostsReactsRepository, SpecialPostsReactsRepository>();
 builder.Services.AddScoped<ISpecialCommentReactsRepository, SpecialCommentReactsRepository>();
+builder.Services.AddScoped<IPostReactsRepository, PostReactsRepository>();
+builder.Services.AddScoped<IPostCommentsRepository, PostCommentsRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

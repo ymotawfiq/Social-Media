@@ -2,6 +2,7 @@
 
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models;
+using SocialMedia.Data.Models.Authentication;
 
 namespace SocialMedia.Data.Extensions
 {
@@ -310,6 +311,31 @@ namespace SocialMedia.Data.Extensions
             {
                 Id = updateSpecialCommentReactsDto.Id,
                 ReactId = updateSpecialCommentReactsDto.ReactId
+            };
+        }
+
+        public static PostReacts ConvertFromPostReactsDto_Add(AddPostReactDto addPostReactDto, SiteUser user)
+        {
+            return new PostReacts
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = addPostReactDto.PostId,
+                ReactId = addPostReactDto.ReactId,
+                UserId = user.Id
+            };
+        }
+
+
+        public static PostComments ConvertFromPostCommentDto_Add(AddPostCommentDto addPostCommentDto, 
+            SiteUser user, string imageUniqueName)
+        {
+            return new PostComments
+            {
+                CommentImage = imageUniqueName,
+                Id = Guid.NewGuid().ToString(),
+                PostId = addPostCommentDto.PostId,
+                UserId = user.Id,
+                Comment = addPostCommentDto.Comment
             };
         }
 

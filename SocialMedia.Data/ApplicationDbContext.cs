@@ -54,7 +54,9 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new SavedPostsConfigurations())
                    .ApplyConfiguration(new UserSavedPostsFoldersConfigurations())
                    .ApplyConfiguration(new SpecialPostReactsConfigurations())
-                   .ApplyConfiguration(new SpecialCommentReactsConfigurations());
+                   .ApplyConfiguration(new SpecialCommentReactsConfigurations())
+                   .ApplyConfiguration(new PostReactsConfigurations())
+                   .ApplyConfiguration(new PostCommentsConfigurations());
         }
 
 
@@ -77,5 +79,7 @@ namespace SocialMedia.Data
         public DbSet<UserSavedPostsFolders> UserSavedPostsFolders { get; set; }
         public DbSet<SpecialPostReacts> SpecialPostReacts { get; set; }
         public DbSet<SpecialCommentReacts> SpecialCommentReacts { get; set; }
+        public DbSet<PostReacts> PostReacts { get; set; }
+        public DbSet<PostComments> PostComments { get; set; }
     }
 }

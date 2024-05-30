@@ -516,6 +516,42 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.PostComments", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CommentImage")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PostId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Post Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentImage")
+                        .IsUnique()
+                        .HasFilter("[CommentImage] IS NOT NULL");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PostComments");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.PostImages", b =>
                 {
                     b.Property<string>("Id")
@@ -536,6 +572,37 @@ namespace SocialMedia.Data.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("PostImages");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.PostReacts", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PostId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Post Id");
+
+                    b.Property<string>("ReactId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("React Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("ReactId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PostReacts");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostView", b =>
@@ -909,6 +976,25 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("ReactPolicy");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.PostComments", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                        .WithMany("PostComments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("PostComments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.PostImages", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Post", "Post")
@@ -918,6 +1004,33 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.PostReacts", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                        .WithMany("PostReacts")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.React", "React")
+                        .WithMany("PostReacts")
+                        .HasForeignKey("ReactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("PostReacts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("React");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostView", b =>
@@ -1041,6 +1154,10 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("Friends");
 
+                    b.Navigation("PostComments");
+
+                    b.Navigation("PostReacts");
+
                     b.Navigation("SavedPosts");
 
                     b.Navigation("UserPosts");
@@ -1077,7 +1194,11 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
                 {
+                    b.Navigation("PostComments");
+
                     b.Navigation("PostImages");
+
+                    b.Navigation("PostReacts");
 
                     b.Navigation("PostViews");
 
@@ -1088,6 +1209,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
                 {
+                    b.Navigation("PostReacts");
+
                     b.Navigation("SpecialCommentReacts");
 
                     b.Navigation("SpecialPostReacts");

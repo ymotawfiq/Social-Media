@@ -20,5 +20,7 @@ namespace SocialMedia.Data.Models
         public List<PostImages>? PostImages { get; set; }
         public List<PostView>? PostViews { get; set; }
         public List<SavedPosts>? SavedPosts { get; set; }
+        public List<PostReacts>? PostReacts { get; set; }
+        public List<PostComments>? PostComments { get; set; }
     }
 }
