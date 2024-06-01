@@ -242,5 +242,32 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+
+        [HttpGet("getCurrentUserPostComments/{postId}")]
+        public async Task<IActionResult> GetCurrentUserPostCommentsByPostIdAsync([FromRoute] string postId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _postCommentService.GetPostCommentsByPostIdAndUserIdAsync(
+                            postId, user.Id);
+                        return Ok(response);
+                    }
+                }
+                var response1 = await _postCommentService.GetPostCommentsByPostIdAsync(postId);
+                return Ok(response1);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
     }
 }

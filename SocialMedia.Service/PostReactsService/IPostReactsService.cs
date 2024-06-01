@@ -15,8 +15,9 @@ namespace SocialMedia.Service.PostReactsService
         Task<ApiResponse<PostReacts>> GetPostReactByIdAsync(SiteUser user, string Id);
         Task<ApiResponse<PostReacts>> GetPostReactByUserIdAndPostIdAsync(string userId, string postId);
         Task<ApiResponse<PostReacts>> DeletePostReactByUserIdAndPostIdAsync(string userId, string postId);
-        Task<ApiResponse<PostReacts>> DeletePostReactByIdAsync(string Id);
+        Task<ApiResponse<PostReacts>> DeletePostReactByIdAsync(string Id, SiteUser user);
         Task<ApiResponse<IEnumerable<PostReacts>>> GetPostReactsByPostIdAsync(string postId, SiteUser user);
         Task<ApiResponse<IEnumerable<PostReacts>>> GetPostReactsByPostIdAsync(string postId);
+        Task<ApiResponse<IEnumerable<PostReacts>>> GetPostReactsByUserIdAsync(string userId);
     }
 }

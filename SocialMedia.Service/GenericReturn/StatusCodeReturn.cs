@@ -48,6 +48,17 @@ namespace SocialMedia.Service.GenericReturn
             };
         }
 
+        public static ApiResponse<T> _404_NotFound(string msg, T o)
+        {
+            return new ApiResponse<T>
+            {
+                IsSuccess = false,
+                Message = msg,
+                StatusCode = 404,
+                ResponseObject = o
+            };
+        }
+
         public static ApiResponse<T> _404_NotFound(string msg)
         {
             return new ApiResponse<T>
@@ -65,6 +76,17 @@ namespace SocialMedia.Service.GenericReturn
                 IsSuccess = false,
                 Message = "Page not found",
                 StatusCode = 404
+            };
+        }
+
+        public static ApiResponse<T> _403_Forbidden(string msg, T o)
+        {
+            return new ApiResponse<T>
+            {
+                IsSuccess = false,
+                Message = msg,
+                StatusCode = 404,
+                ResponseObject = o
             };
         }
 

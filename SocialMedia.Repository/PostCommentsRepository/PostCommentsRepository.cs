@@ -13,7 +13,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<PostComments> AddPostCommentAsync(PostComments postComments)
+        public async Task<PostComment> AddPostCommentAsync(PostComment postComments)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<PostComments> DeletePostCommentByIdAsync(string postCommentId)
+        public async Task<PostComment> DeletePostCommentByIdAsync(string postCommentId)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<PostComments> DeletePostCommentByPostIdAndUserIdAsync(string postId, string userId)
+        public async Task<PostComment> DeletePostCommentByPostIdAndUserIdAsync(string postId, string userId)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<PostComments> DeletePostCommentImageAsync(string postId, string userId)
+        public async Task<PostComment> DeletePostCommentImageAsync(string postId, string userId)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<PostComments> DeletePostCommentImageAsync(string postCommentId)
+        public async Task<PostComment> DeletePostCommentImageAsync(string postCommentId)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<PostComments> GetPostCommentByIdAsync(string postCommentId)
+        public async Task<PostComment> GetPostCommentByIdAsync(string postCommentId)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<PostComments> GetPostCommentByPostIdAndUserIdAsync(string postId, string userId)
+        public async Task<PostComment> GetPostCommentByPostIdAndUserIdAsync(string postId, string userId)
         {
             try
             {
@@ -113,7 +113,21 @@ namespace SocialMedia.Repository.PostCommentsRepository
             }
         }
 
-        public async Task<IEnumerable<PostComments>> GetPostCommentsByPostIdAsync(string postId)
+        public async Task<IEnumerable<PostComment>> GetPostCommentsByPostIdAndUserIdAsync(
+            string postId, string userId)
+        {
+            try
+            {
+                return await _dbContext.PostComments.Where(e => e.PostId == postId)
+                    .Where(e => e.UserId == userId).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<PostComment>> GetPostCommentsByPostIdAsync(string postId)
         {
             try
             {
@@ -132,7 +146,7 @@ namespace SocialMedia.Repository.PostCommentsRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<PostComments> UpdatePostCommentAsync(PostComments postComments)
+        public async Task<PostComment> UpdatePostCommentAsync(PostComment postComments)
         {
             try
             {

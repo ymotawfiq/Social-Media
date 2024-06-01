@@ -16,6 +16,7 @@ using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
+using SocialMedia.Repository.PostCommentReplayRepository;
 using SocialMedia.Repository.PostCommentsRepository;
 using SocialMedia.Repository.PostReactsRepository;
 using SocialMedia.Repository.PostRepository;
@@ -37,6 +38,7 @@ using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
+using SocialMedia.Service.PostCommentReplayService;
 using SocialMedia.Service.PostCommentService;
 using SocialMedia.Service.PostReactsService;
 using SocialMedia.Service.PostService;
@@ -143,6 +145,7 @@ builder.Services.AddScoped<ISpecialPostReactService, SpecialPostReactsService>()
 builder.Services.AddScoped<ISpecialCommentReactsService, SpecialCommentReactsService>();
 builder.Services.AddScoped<IPostReactsService, PostReactsService>();
 builder.Services.AddScoped<IPostCommentService, PostCommentService>();
+builder.Services.AddScoped<IPostCommentReplayService, PostCommentReplayService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -163,6 +166,7 @@ builder.Services.AddScoped<ISpecialPostsReactsRepository, SpecialPostsReactsRepo
 builder.Services.AddScoped<ISpecialCommentReactsRepository, SpecialCommentReactsRepository>();
 builder.Services.AddScoped<IPostReactsRepository, PostReactsRepository>();
 builder.Services.AddScoped<IPostCommentsRepository, PostCommentsRepository>();
+builder.Services.AddScoped<IPostCommentReplayRepository, PostCommentReplayRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

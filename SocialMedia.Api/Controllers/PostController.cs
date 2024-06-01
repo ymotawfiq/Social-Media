@@ -180,6 +180,31 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpGet("posts")]
+        public async Task<IActionResult> GetUserPostsAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (currentUser != null)
+                    {
+                        var response = await _postService.GetUserPostsAsync(currentUser);
+                        return Ok(response);
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
 
         [HttpPut("updatePost")]
         public async Task<IActionResult> UpdatePostAsync([FromForm] UpdatePostDto updatePostDto)

@@ -320,16 +320,16 @@ namespace SocialMedia.Data.Extensions
             {
                 Id = Guid.NewGuid().ToString(),
                 PostId = addPostReactDto.PostId,
-                ReactId = addPostReactDto.ReactId,
+                SpecialPostReactId = addPostReactDto.ReactId,
                 UserId = user.Id
             };
         }
 
 
-        public static PostComments ConvertFromPostCommentDto_Add(AddPostCommentDto addPostCommentDto, 
+        public static PostComment ConvertFromPostCommentDto_Add(AddPostCommentDto addPostCommentDto, 
             SiteUser user, string imageUniqueName)
         {
-            return new PostComments
+            return new PostComment
             {
                 CommentImage = imageUniqueName,
                 Id = Guid.NewGuid().ToString(),
@@ -338,6 +338,37 @@ namespace SocialMedia.Data.Extensions
                 Comment = addPostCommentDto.Comment
             };
         }
+
+
+        public static PostCommentReplay ConvertFromPostCommentReplayDto_Add(
+            AddPostCommentReplayDto addPostCommentReplay, SiteUser user, string imageUniqueName)
+        {
+            return new PostCommentReplay
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostCommentId = addPostCommentReplay.PostCommentId,
+                Replay = addPostCommentReplay.Replay,
+                UserId = user.Id,
+                ReplayImage = imageUniqueName
+            };
+        }
+
+        public static PostCommentReplay ConvertFromCommentReplayToReplayDto_Add(
+            AddReplayToReplayCommentDto replayToReplayCommentDto, SiteUser user,
+            string imageUniqueName, string commentId)
+        {
+            return new PostCommentReplay
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostCommentId = commentId,
+                Replay = replayToReplayCommentDto.Replay,
+                UserId = user.Id,
+                ReplayImage = imageUniqueName,
+                PostCommentReplayId = replayToReplayCommentDto.CommentReplayId
+            };
+        }
+
+
 
     }
 }

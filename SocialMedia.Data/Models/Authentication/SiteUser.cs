@@ -30,6 +30,8 @@ namespace SocialMedia.Data.Models.Authentication
         public List<SavedPosts>? SavedPosts { get; set; }
         public List<UserSavedPostsFolders>? UserSavedPostsFolders { get; set; }
         public List<PostReacts>? PostReacts { get; set; }
-        public List<PostComments>? PostComments { get; set; }
+        public List<PostComment>? PostComments { get; set; }
+        public List<PostCommentReplay>? PostCommentReplays { get; set; }
+
     }
 }

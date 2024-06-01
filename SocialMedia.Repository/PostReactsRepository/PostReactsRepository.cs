@@ -97,6 +97,20 @@ namespace SocialMedia.Repository.PostReactsRepository
             }
         }
 
+        public async Task<IEnumerable<PostReacts>> GetPostReactsByUserIdAsync(string userId)
+        {
+            try
+            {
+                return from p in await _dbContext.PostReacts.ToListAsync()
+                       where p.UserId == userId
+                       select p;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
@@ -107,7 +121,7 @@ namespace SocialMedia.Repository.PostReactsRepository
             try
             {
                 var oldPostReact = await GetPostReactByIdAsync(postReacts.Id);
-                oldPostReact.ReactId = postReacts.ReactId;
+                oldPostReact.SpecialPostReactId = postReacts.SpecialPostReactId;
                 await SaveChangesAsync();
                 return oldPostReact;
             }

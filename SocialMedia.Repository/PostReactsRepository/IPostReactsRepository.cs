@@ -13,6 +13,7 @@ namespace SocialMedia.Repository.PostReactsRepository
         Task<PostReacts> DeletePostReactByUserIdAndPostIdAsync(string userId, string postId);
         Task<PostReacts> DeletePostReactByIdAsync(string Id);
         Task<IEnumerable<PostReacts>> GetPostReactsByPostIdAsync(string postId);
+        Task<IEnumerable<PostReacts>> GetPostReactsByUserIdAsync(string userId);
         Task SaveChangesAsync();
     }
 }

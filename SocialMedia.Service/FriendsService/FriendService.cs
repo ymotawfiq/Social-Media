@@ -1,6 +1,5 @@
 ﻿
 
-using Microsoft.AspNetCore.Identity;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
@@ -33,6 +32,7 @@ namespace SocialMedia.Service.FriendsService
             var userFriendList = await _friendsRepository.GetAllUserFriendsAsync(friendsDto.UserId);
             var newFriend = await _friendsRepository.AddFriendAsync(
                 ConvertFromDto.ConvertFromFriendtDto_Add(friendsDto));
+            newFriend.User = null;
             return StatusCodeReturn<Friend>
                 ._201_Created("Friend added successfully to your friend list", newFriend);
         }
@@ -59,7 +59,10 @@ namespace SocialMedia.Service.FriendsService
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(string userId)
         {
             var friends = await _friendsRepository.GetAllUserFriendsAsync(userId);
-            
+            foreach(var friend in friends)
+            {
+                friend.User = null;
+            }
             if (friends.ToList().Count==0)
             {
                 return StatusCodeReturn<IEnumerable<Friend>>
@@ -75,10 +78,10 @@ namespace SocialMedia.Service.FriendsService
             if (check == null)
             {
                 return StatusCodeReturn<bool>
-                    ._200_Success("Not friend");
+                    ._404_NotFound("Not friend", false);
             }
             return StatusCodeReturn<bool>
-                    ._200_Success("Friend");
+                    ._200_Success("Friend", true);
         }
 
         public async Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId)
@@ -92,13 +95,13 @@ namespace SocialMedia.Service.FriendsService
                     if (f.Contains(friend))
                     {
                         return StatusCodeReturn<bool>
-                    ._200_Success("Friend of friend");
+                            ._200_Success("Friend of friend", true);
                     }
                 }
             }
 
             return StatusCodeReturn<bool>
-                    ._200_Success("Not friend of friend");
+                    ._404_NotFound("Not friend of friend", false);
         }
     }
 }

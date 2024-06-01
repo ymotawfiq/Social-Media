@@ -56,7 +56,8 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new SpecialPostReactsConfigurations())
                    .ApplyConfiguration(new SpecialCommentReactsConfigurations())
                    .ApplyConfiguration(new PostReactsConfigurations())
-                   .ApplyConfiguration(new PostCommentsConfigurations());
+                   .ApplyConfiguration(new PostCommentsConfigurations())
+                   .ApplyConfiguration(new PostCommentReplayConfigurations());
         }
 
 
@@ -80,6 +81,7 @@ namespace SocialMedia.Data
         public DbSet<SpecialPostReacts> SpecialPostReacts { get; set; }
         public DbSet<SpecialCommentReacts> SpecialCommentReacts { get; set; }
         public DbSet<PostReacts> PostReacts { get; set; }
-        public DbSet<PostComments> PostComments { get; set; }
+        public DbSet<PostComment> PostComments { get; set; }
+        public DbSet<PostCommentReplay> PostCommentReplay { get; set; }
     }
 }

@@ -5,9 +5,9 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PostCommentsConfigurations : IEntityTypeConfiguration<PostComments>
+    public class PostCommentsConfigurations : IEntityTypeConfiguration<PostComment>
     {
-        public void Configure(EntityTypeBuilder<PostComments> builder)
+        public void Configure(EntityTypeBuilder<PostComment> builder)
         {
             builder.HasKey(e => e.Id);
             builder.HasOne(e => e.Post).WithMany(e => e.PostComments).HasForeignKey(e => e.PostId);

@@ -6,10 +6,14 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.BlockRepository;
+using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostReactsRepository;
 using SocialMedia.Repository.PostRepository;
+using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Repository.SpecialPostsReactsRepository;
 using SocialMedia.Repository.UserPostsRepository;
+using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Service.PostReactsService
@@ -21,16 +25,25 @@ namespace SocialMedia.Service.PostReactsService
         private readonly IReactRepository _reactRepository;
         private readonly IBlockRepository _blockRepository;
         private readonly IUserPostsRepository _userPostsRepository;
+        private readonly IReactPolicyRepository _reactPolicyRepository;
+        private readonly IPolicyRepository _policyRepository;
+        private readonly IFriendService _friendService;
+        private readonly ISpecialPostsReactsRepository _specialPostsReactsRepository;
         public PostReactsService(IPostReactsRepository _postReactsRepository,
-            IPostRepository _postRepository,
+            IPostRepository _postRepository, IReactPolicyRepository _reactPolicyRepository, 
             IReactRepository _reactRepository, IBlockRepository _blockRepository,
-            IUserPostsRepository _userPostsRepository)
+            IUserPostsRepository _userPostsRepository, IPolicyRepository _policyRepository,
+            IFriendService _friendService, ISpecialPostsReactsRepository _specialPostsReactsRepository)
         {
             this._postReactsRepository = _postReactsRepository;
             this._postRepository = _postRepository;
             this._reactRepository = _reactRepository;
             this._blockRepository = _blockRepository;
             this._userPostsRepository = _userPostsRepository;
+            this._reactPolicyRepository = _reactPolicyRepository;
+            this._policyRepository = _policyRepository;
+            this._friendService = _friendService;
+            this._specialPostsReactsRepository = _specialPostsReactsRepository;
         }
         public async Task<ApiResponse<PostReacts>> AddPostReactAsync(AddPostReactDto addPostReactDto,
             SiteUser user)
@@ -45,26 +58,34 @@ namespace SocialMedia.Service.PostReactsService
                     user.Id, userPost.UserId);
                     if (isBlockedUser != null)
                     {
-                        var react = await _reactRepository.GetReactByIdAsync(addPostReactDto.ReactId);
-                        if (react != null)
+                        var postReact = await _specialPostsReactsRepository.GetSpecialPostReactsByReactIdAsync(
+                            addPostReactDto.ReactId);
+                        if (postReact != null)
                         {
-                            var existPostReact = await _postReactsRepository
-                                .GetPostReactByUserIdAndPostIdAsync(user.Id, addPostReactDto.PostId);
-                            if (existPostReact == null)
+                            var checkPolicy = await CheckPolicyAsync(userPost.UserId, user.Id, post.Id);
+                            if (checkPolicy.IsSuccess)
                             {
-                                var newPostReact = await _postReactsRepository.AddPostReactAsync(
-                                ConvertFromDto.ConvertFromPostReactsDto_Add(addPostReactDto, user));
+                                var existPostReact = await _postReactsRepository
+                                .GetPostReactByUserIdAndPostIdAsync(user.Id, addPostReactDto.PostId);
+                                if (existPostReact == null)
+                                {
+                                    addPostReactDto.ReactId = postReact.Id;
+                                    var newPostReact = await _postReactsRepository.AddPostReactAsync(
+                                    ConvertFromDto.ConvertFromPostReactsDto_Add(addPostReactDto, user));
+                                    return StatusCodeReturn<PostReacts>
+                                        ._201_Created("Post react added successfully", newPostReact);
+                                }
                                 return StatusCodeReturn<PostReacts>
-                                    ._201_Created("Post react added successfully", newPostReact);
+                                        ._403_Forbidden("Post react already exists");
                             }
                             return StatusCodeReturn<PostReacts>
-                                    ._403_Forbidden("Post react already exists");
+                                ._403_Forbidden();
                         }
                         return StatusCodeReturn<PostReacts>
                             ._404_NotFound("React not found");
                     }
                     return StatusCodeReturn<PostReacts>
-                    ._403_Forbidden();
+                        ._403_Forbidden();
                 }
                 return StatusCodeReturn<PostReacts>
                     ._404_NotFound("User post not found");
@@ -73,14 +94,32 @@ namespace SocialMedia.Service.PostReactsService
                     ._404_NotFound("Post not found");
         }
 
-        public async Task<ApiResponse<PostReacts>> DeletePostReactByIdAsync(string Id)
+        public async Task<ApiResponse<PostReacts>> DeletePostReactByIdAsync(string Id, SiteUser user)
         {
             var postReact = await _postReactsRepository.GetPostReactByIdAsync(Id);
             if (postReact != null)
             {
-                await _postReactsRepository.DeletePostReactByIdAsync(Id);
+                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postReact.PostId);
+                if (userPost != null)
+                {
+                    var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                    user.Id, userPost.UserId);
+                    if (isBlocked == null)
+                    {
+                        if (user.Id == postReact.UserId)
+                        {
+                            await _postReactsRepository.DeletePostReactByIdAsync(Id);
+                            return StatusCodeReturn<PostReacts>
+                                ._200_Success("Post react deleted successfully");
+                        }
+                        return StatusCodeReturn<PostReacts>
+                            ._403_Forbidden();
+                    }
+                    return StatusCodeReturn<PostReacts>
+                            ._403_Forbidden();
+                }
                 return StatusCodeReturn<PostReacts>
-                    ._200_Success("Post react deleted successfully");
+                    ._404_NotFound("User post not found");
             }
             return StatusCodeReturn<PostReacts>
                     ._404_NotFound("Post react not found");
@@ -89,21 +128,33 @@ namespace SocialMedia.Service.PostReactsService
         public async Task<ApiResponse<PostReacts>> DeletePostReactByUserIdAndPostIdAsync(string userId,
             string postId)
         {
-            var post = await _postRepository.GetPostByIdAsync(postId);
-            if (post != null)
+            var postReact = await _postReactsRepository.GetPostReactByUserIdAndPostIdAsync(userId, postId);
+            if (postReact != null)
             {
-                var postReact = await _postReactsRepository.GetPostReactByUserIdAndPostIdAsync(userId, postId);
-                if (postReact != null)
+                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postReact.PostId);
+                if (userPost != null)
                 {
-                    await _postReactsRepository.DeletePostReactByUserIdAndPostIdAsync(userId, postId);
+                    var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                    userId, userPost.UserId);
+                    if (isBlocked == null)
+                    {
+                        if (userId == postReact.UserId)
+                        {
+                            await _postReactsRepository.DeletePostReactByIdAsync(postReact.Id);
+                            return StatusCodeReturn<PostReacts>
+                                ._200_Success("Post react deleted successfully");
+                        }
+                        return StatusCodeReturn<PostReacts>
+                            ._403_Forbidden();
+                    }
                     return StatusCodeReturn<PostReacts>
-                        ._200_Success("Post react deleted successfully", postReact);
+                            ._403_Forbidden();
                 }
                 return StatusCodeReturn<PostReacts>
-                    ._404_NotFound("Post react not found");
+                    ._404_NotFound("User post not found");
             }
             return StatusCodeReturn<PostReacts>
-                    ._404_NotFound("Post not found");
+                    ._404_NotFound("Post react not found");
         }
 
         public async Task<ApiResponse<PostReacts>> GetPostReactByIdAsync(SiteUser user, string Id)
@@ -214,6 +265,18 @@ namespace SocialMedia.Service.PostReactsService
                     ._200_Success("Post reacts found successfully", postReact);
         }
 
+        public async Task<ApiResponse<IEnumerable<PostReacts>>> GetPostReactsByUserIdAsync(string userId)
+        {
+            var postReact = await _postReactsRepository.GetPostReactsByUserIdAsync(userId);
+            if (postReact.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<PostReacts>>
+                    ._200_Success("No post reacts found", postReact);
+            }
+            return StatusCodeReturn<IEnumerable<PostReacts>>
+                    ._200_Success("Post reacts found successfully", postReact);
+        }
+
         public async Task<ApiResponse<PostReacts>> UpdatePostReactAsync(UpdatePostReactDto updatePostReactDto,
             SiteUser user)
         {
@@ -223,16 +286,22 @@ namespace SocialMedia.Service.PostReactsService
                 var post = await _postRepository.GetPostByIdAsync(updatePostReactDto.PostId);
                 if (post != null)
                 {
-                    var react = await _reactRepository.GetReactByIdAsync(updatePostReactDto.ReactId);
+                    var react = await _specialPostsReactsRepository.GetSpecialPostReactsByReactIdAsync(
+                        updatePostReactDto.ReactId);
                     if (react != null)
                     {
-                        postReact.ReactId = updatePostReactDto.ReactId;
-                        postReact = await _postReactsRepository.UpdatePostReactAsync(postReact);
+                        if(postReact.UserId == user.Id)
+                        {
+                            postReact.SpecialPostReactId = react.Id;
+                            postReact = await _postReactsRepository.UpdatePostReactAsync(postReact);
+                            return StatusCodeReturn<PostReacts>
+                                ._200_Success("Post react updated successfully", postReact);
+                        }
                         return StatusCodeReturn<PostReacts>
-                            ._200_Success("Post react updated successfully", postReact);
+                            ._403_Forbidden();
                     }
                     return StatusCodeReturn<PostReacts>
-                        ._404_NotFound("React not found");
+                        ._404_NotFound("Special post react not found");
                 }
                 return StatusCodeReturn<PostReacts>
                         ._404_NotFound("Post not found");
@@ -240,6 +309,57 @@ namespace SocialMedia.Service.PostReactsService
             return StatusCodeReturn<PostReacts>
                         ._404_NotFound("Post react not found");
         }
-        
+
+        private async Task<ApiResponse<PostReacts>> CheckPolicyAsync(string userId,
+            string userWhoWantsToReactId, string postId)
+        {
+            var post = await _postRepository.GetPostByIdAsync(postId);
+            if (post != null)
+            {
+                var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(
+                    post.ReactPolicyId);
+                if (reactPolicy != null)
+                {
+                    var policy = await _policyRepository.GetPolicyByIdAsync(reactPolicy.PolicyId);
+                    if (policy != null)
+                    {
+                        if (policy.PolicyType == "PRIVATE")
+                        {
+                            return StatusCodeReturn<PostReacts>
+                                ._403_Forbidden();
+                        }
+                        else if (policy.PolicyType == "FRIENDS ONLY")
+                        {
+                            var isFriend = await _friendService.IsUserFriendAsync(userId,
+                                userWhoWantsToReactId);
+                            if (isFriend == null || !isFriend!.ResponseObject)
+                            {
+                                return StatusCodeReturn<PostReacts>
+                                ._403_Forbidden();
+                            }
+                        }
+                        else if (policy.PolicyType == "FRIENDS OF FRIENDS")
+                        {
+                            var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(userId,
+                                userWhoWantsToReactId);
+                            if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
+                            {
+                                return StatusCodeReturn<PostReacts>
+                                ._403_Forbidden();
+                            }
+                        }
+                        return StatusCodeReturn<PostReacts>
+                            ._200_Success("You can react", new PostReacts { });
+                    }
+                    return StatusCodeReturn<PostReacts>
+                        ._404_NotFound("Policy not found");
+                }
+                return StatusCodeReturn<PostReacts>
+                        ._404_NotFound("React policy not found");
+            }
+            return StatusCodeReturn<PostReacts>
+                        ._404_NotFound("Post not found");
+        } 
+
     }
 }
