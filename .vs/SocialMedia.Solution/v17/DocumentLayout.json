@@ -18,24 +18,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "PostCommentReplayController.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
-              "ViewState": "AQIAAB0BAAAAAAAAAAAkwEcBAAAsAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-01T16:05:25.475Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -45,9 +32,22 @@
               "RelativeDocumentMoniker": "SocialMedia.Service\\PostCommentReplayService\\PostCommentReplayService.cs",
               "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\PostCommentReplayService\\PostCommentReplayService.cs",
               "RelativeToolTip": "SocialMedia.Service\\PostCommentReplayService\\PostCommentReplayService.cs",
-              "ViewState": "AQIAAMQBAAAAAAAAAAAYwOMBAAAVAAAA",
+              "ViewState": "AQIAAF8AAAAAAAAAAAAgwJUAAAAQAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-01T09:17:05.061Z",
+              "WhenOpened": "2024-06-02T08:40:45.593Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PostCommentReplayController.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Controllers\\PostCommentReplayController.cs",
+              "ViewState": "AQIAAHMAAAAAAAAAAAAcwEkBAAAsAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-01T16:05:25.475Z",
               "EditorCaption": ""
             }
           ]

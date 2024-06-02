@@ -157,8 +157,9 @@ namespace SocialMedia.Api.Controllers
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                         ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
-                        ._401_UnAuthorized());
+                var response1 = await _postCommentReplayService.GetCommentReplayByIdAsync(
+                            commentReplayId);
+                return Ok(response1);
             }
             catch (Exception ex)
             {
@@ -186,8 +187,9 @@ namespace SocialMedia.Api.Controllers
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                         ._404_NotFound("User not found"));
                 }
-                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
-                        ._401_UnAuthorized());
+                var response1 = await _postCommentReplayService.GetReplayToReplayByIdAsync(
+                            replayId);
+                return Ok(response1);
             }
             catch (Exception ex)
             {

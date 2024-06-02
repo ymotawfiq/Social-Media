@@ -16,6 +16,7 @@ namespace SocialMedia.Service.PostCommentReplayService
             string commentReplayById, SiteUser user);
         Task<ApiResponse<PostCommentReplay>> GetCommentReplayByIdAsync(
             string commentReplayById, SiteUser user);
+        Task<ApiResponse<PostCommentReplay>> GetCommentReplayByIdAsync(string commentReplayById);
         Task<ApiResponse<PostCommentReplay>> AddReplayToReplayAsync(
             AddReplayToReplayCommentDto addReplayToReplayCommentDto, SiteUser user);
         Task<ApiResponse<PostCommentReplay>> UpdateReplayToReplayAsync(
@@ -26,6 +27,7 @@ namespace SocialMedia.Service.PostCommentReplayService
             string commentReplayToReplayById, SiteUser user);
         Task<ApiResponse<PostCommentReplay>> GetReplayToReplayByIdAsync(
             string commentReplayToReplayById, SiteUser user);
+        Task<ApiResponse<PostCommentReplay>> GetReplayToReplayByIdAsync(string commentReplayToReplayById);
         Task<ApiResponse<IEnumerable<PostCommentReplay>>> GetCommentReplaysByCommentIdAsync(
             string commentId, SiteUser user);
         Task<ApiResponse<IEnumerable<PostCommentReplay>>> GetCommentReplaysByCommentIdAsync(string commentId);

@@ -16,6 +16,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.UserId).IsRequired().HasColumnName("User Id");
             builder.Property(e => e.PostId).IsRequired().HasColumnName("Post Id");
             builder.HasIndex(e => e.PostId).IsUnique();
+            builder.HasIndex(e => new { e.UserId, e.PostId }).IsUnique();
         }
     }
 }

@@ -74,7 +74,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                                     .AddPostCommentReplayAsync(ConvertFromDto
                                     .ConvertFromPostCommentReplayDto_Add(addPostCommentReplayDto,
                                     user, SavePostImages(addPostCommentReplayDto.ReplayImage!)));
-                                newCommentReplay.User = null;
+                                MakeUnnesseryObjectsInReplaysNull(newCommentReplay);
                                 return StatusCodeReturn<PostCommentReplay>
                                     ._201_Created("Replayed successfully", newCommentReplay);
                             }
@@ -108,6 +108,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                         ConvertFromDto.ConvertFromCommentReplayToReplayDto_Add(addReplayToReplayCommentDto,
                         user, SavePostImages(addReplayToReplayCommentDto.ReplayImage!),
                         isAbleToReplay.ResponseObject!.PostCommentId));
+                    MakeUnnesseryObjectsInReplaysNull(newCommentReplay);
                     return StatusCodeReturn<PostCommentReplay>
                         ._201_Created("Replayed successfully", newCommentReplay);
                 }
@@ -128,7 +129,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                 if (isAbleToDelete.IsSuccess)
                 {
                     await _postCommentReplayRepository.DeletePostCommentReplayByIdAsync(commentReplayById);
-                    commentReplay.User = null;
+                    MakeUnnesseryObjectsInReplaysNull(commentReplay);
                     return StatusCodeReturn<PostCommentReplay>
                         ._200_Success("Comment replay deleted successfully", commentReplay);
                 }
@@ -150,7 +151,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                 {
                     await _postCommentReplayRepository.DeletePostCommentReplayByIdAsync(
                         commentReplayToReplayById);
-                    commentReplay.User = null;
+                    MakeUnnesseryObjectsInReplaysNull(commentReplay);
                     return StatusCodeReturn<PostCommentReplay>
                         ._200_Success("Comment replay deleted successfully", commentReplay);
                 }
@@ -171,7 +172,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                 if (isAbleToDelete.IsSuccess)
                 {
                     DeletePostImage(replay.ReplayImage!);
-                    replay.ReplayImage = null;
+                    MakeUnnesseryObjectsInReplaysNull(replay);
                     return StatusCodeReturn<PostCommentReplay>
                         ._200_Success("Comment replay image deleted successfully");
                 }
@@ -184,18 +185,95 @@ namespace SocialMedia.Service.PostCommentReplayService
         public async Task<ApiResponse<PostCommentReplay>> GetCommentReplayByIdAsync(
             string commentReplayById, SiteUser user)
         {
-            var commentReplay = await _postCommentReplayRepository.GetPostCommentReplayByIdAsync(
-                commentReplayById);
-            if (commentReplay != null)
+            var replay = await _postCommentReplayRepository.GetPostCommentReplayByIdAsync(commentReplayById);
+            if (replay != null)
             {
-                commentReplay.User = null;
+                var comment = await _postCommentsRepository.GetPostCommentByIdAsync(replay.PostCommentId);
+                if (comment != null)
+                {
+                    var isAble = await CheckAbilityToGetCommentReplayAsync(comment, user);
+                    if (isAble.IsSuccess)
+                    {
+                        MakeUnnesseryObjectsInReplaysNull(replay);
+                        return StatusCodeReturn<PostCommentReplay>
+                            ._200_Success("Comment replay found successfully", replay);
+                    }
+                    return StatusCodeReturn<PostCommentReplay>
+                        ._403_Forbidden();
+                }
                 return StatusCodeReturn<PostCommentReplay>
-                    ._200_Success("Comment replay found successfully", commentReplay);
+                                ._404_NotFound("Comment not found");
+            }
+            return StatusCodeReturn<PostCommentReplay>
+                                ._404_NotFound("Comment replay not found");
+        }
+
+
+        public async Task<ApiResponse<PostCommentReplay>> GetReplayToReplayByIdAsync(
+            string commentReplayToReplayById, SiteUser user)
+        {
+            var replay = await _postCommentReplayRepository.GetPostCommentReplayByIdAsync(
+                commentReplayToReplayById);
+            if (replay != null)
+            {
+                var comment = await _postCommentsRepository.GetPostCommentByIdAsync(replay.PostCommentId);
+                if (comment != null)
+                {
+                    var isAble = await CheckAbilityToGetCommentReplayAsync(comment, user);
+                    if (isAble.IsSuccess)
+                    {
+                        MakeUnnesseryObjectsInReplaysNull(replay);
+                        return StatusCodeReturn<PostCommentReplay>
+                            ._200_Success("Comment replay found successfully", replay);
+                    }
+                    return StatusCodeReturn<PostCommentReplay>
+                        ._403_Forbidden();
+                }
+                return StatusCodeReturn<PostCommentReplay>
+                    ._404_NotFound("Comment not found");
             }
             return StatusCodeReturn<PostCommentReplay>
                     ._404_NotFound("Comment replay not found");
         }
 
+        public async Task<ApiResponse<PostCommentReplay>> GetCommentReplayByIdAsync(string commentReplayById)
+        {
+            var replay = await _postCommentReplayRepository.GetPostCommentReplayByIdAsync(
+                commentReplayById);
+            if (replay != null)
+            {
+                var isAble = await CheckIfPostPolicyIsPublicAsync(replay);
+                if (isAble.IsSuccess)
+                {
+                    MakeUnnesseryObjectsInReplaysNull(replay);
+                    return StatusCodeReturn<PostCommentReplay>
+                        ._200_Success("Replay found successfully", replay);
+                }
+                return isAble;
+            }
+            return StatusCodeReturn<PostCommentReplay>
+                ._404_NotFound("Replay not found");
+        }
+
+        public async Task<ApiResponse<PostCommentReplay>> GetReplayToReplayByIdAsync(
+            string commentReplayToReplayById)
+        {
+            var replay = await _postCommentReplayRepository.GetPostCommentReplayByIdAsync(
+                commentReplayToReplayById);
+            if (replay != null)
+            {
+                var isAble = await CheckIfPostPolicyIsPublicAsync(replay);
+                if (isAble.IsSuccess)
+                {
+                    MakeUnnesseryObjectsInReplaysNull(replay);
+                    return StatusCodeReturn<PostCommentReplay>
+                        ._200_Success("Replay found successfully", replay);
+                }
+                return isAble;
+            }
+            return StatusCodeReturn<PostCommentReplay>
+                ._404_NotFound("Replay not found");
+        }
 
         public async Task<ApiResponse<IEnumerable<PostCommentReplay>>> GetCommentReplaysByCommentIdAsync(
             string commentId)
@@ -213,6 +291,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                         {
                             var replays = await _postCommentReplayRepository.GetPostCommentReplaysAsync(
                                 commentId);
+                            MakeUnnesseryObjectsInReplaysNull(replays);
                             if (replays.ToList().Count == 0)
                             {
                                 return StatusCodeReturn<IEnumerable<PostCommentReplay>>
@@ -249,6 +328,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                     {
                         var replays = await _postCommentReplayRepository.GetPostCommentReplaysAsync(
                             commentId);
+                        MakeUnnesseryObjectsInReplaysNull(replays);
                         if (replays.ToList().Count == 0)
                         {
                             return StatusCodeReturn<IEnumerable<PostCommentReplay>>
@@ -287,6 +367,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                             {
                                 var replays = await _postCommentReplayRepository.GetReplaysOfReplayAsync(
                                     replayId);
+                                MakeUnnesseryObjectsInReplaysNull(replays);
                                 if (replays.ToList().Count == 0)
                                 {
                                     return StatusCodeReturn<IEnumerable<PostCommentReplay>>
@@ -328,6 +409,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                         {
                             var replays = await _postCommentReplayRepository.GetReplaysOfReplayAsync(
                                 replayId);
+                            MakeUnnesseryObjectsInReplaysNull(replays);
                             if (replays.ToList().Count == 0)
                             {
                                 return StatusCodeReturn<IEnumerable<PostCommentReplay>>
@@ -349,20 +431,7 @@ namespace SocialMedia.Service.PostCommentReplayService
 
         }
 
-        public async Task<ApiResponse<PostCommentReplay>> GetReplayToReplayByIdAsync(
-            string commentReplayToReplayById, SiteUser user)
-        {
-            var commentReplay = await _postCommentReplayRepository.GetPostCommentReplayByIdAsync(
-                commentReplayToReplayById);
-            if (commentReplay != null)
-            {
-                commentReplay.User = null;
-                return StatusCodeReturn<PostCommentReplay>
-                    ._200_Success("Comment replay found successfully", commentReplay);
-            }
-            return StatusCodeReturn<PostCommentReplay>
-                    ._404_NotFound("Comment replay not found");
-        }
+
 
         public async Task<ApiResponse<PostCommentReplay>> UpdateCommentReplayAsync(
             UpdatePostCommentReplayDto updatePostCommentReplayDto, SiteUser user)
@@ -383,7 +452,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                     }
                     replay = await _postCommentReplayRepository
                         .UpdatePostCommentReplayAsync(replay);
-                    replay.User = null;
+                    MakeUnnesseryObjectsInReplaysNull(replay);
                     return StatusCodeReturn<PostCommentReplay>
                         ._200_Success("Replay updated successfully", replay);
                 }
@@ -412,7 +481,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                     }
                     replay = await _postCommentReplayRepository
                         .UpdatePostCommentReplayAsync(replay);
-                    replay.User = null;
+                    MakeUnnesseryObjectsInReplaysNull(replay);
                     return StatusCodeReturn<PostCommentReplay>
                         ._200_Success("Replay updated successfully", replay);
                 }
@@ -424,10 +493,65 @@ namespace SocialMedia.Service.PostCommentReplayService
 
 
 
+        #region Private
+
+        private async Task<ApiResponse<PostCommentReplay>> CheckIfPostPolicyIsPublicAsync(
+            PostCommentReplay replay)
+        {
+            var comment = await _postCommentsRepository.GetPostCommentByIdAsync(replay.PostCommentId);
+            if (comment != null)
+            {
+                var post = await _postRepository.GetPostByIdAsync(comment.PostId);
+                if (post != null)
+                {
+                    var policy = await _policyRepository.GetPolicyByNameAsync("public");
+                    if (policy != null)
+                    {
+                        if(post.PolicyId == policy.Id)
+                        {
+                            return StatusCodeReturn<PostCommentReplay>
+                                ._200_Success("Able");
+                        }
+                        return StatusCodeReturn<PostCommentReplay>
+                            ._403_Forbidden();
+                    }
+                    return StatusCodeReturn<PostCommentReplay>
+                        ._404_NotFound("Policy not found");
+                }
+                return StatusCodeReturn<PostCommentReplay>
+                        ._404_NotFound("Post not found");
+            }
+            return StatusCodeReturn<PostCommentReplay>
+                        ._404_NotFound("Comment not found");
+        }
+
+        private async Task<ApiResponse<bool>> CheckAbilityToGetCommentReplayAsync(
+            PostComment comment, SiteUser user)
+        {
+            var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(comment.PostId);
+            if (userPost != null)
+            {
+                var isBlockedByPostPublisher = await _blockRepository
+                    .GetBlockByUserIdAndBlockedUserIdAsync(userPost.UserId, user.Id);
+                var isBlockedByCommentPublisher = await _blockRepository
+                    .GetBlockByUserIdAndBlockedUserIdAsync(userPost.UserId, comment.UserId);
+                if (isBlockedByCommentPublisher == null && isBlockedByPostPublisher == null)
+                {
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Able", true);
+                }
+                return StatusCodeReturn<bool>
+                    ._403_Forbidden();
+            }
+            return StatusCodeReturn<bool>
+                ._404_NotFound("User post not found", false);
+        }
+
+
         private async Task<ApiResponse<PostCommentReplay>> CheckPolicyAsync(Post post, SiteUser user)
         {
             var policy = await _policyRepository.GetPolicyByIdAsync(post.PolicyId);
-            
+
             if (policy != null)
             {
                 var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
@@ -458,54 +582,21 @@ namespace SocialMedia.Service.PostCommentReplayService
                 var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
                 if (userPost != null)
                 {
-                    if (policy.PolicyType == "PRIVATE")
+                    var isAblePolicy = await CheckUserPolicyAsync(user.Id, userPost.UserId, policy);
+                    if (isAblePolicy.IsSuccess)
                     {
-                        return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                            ._403_Forbidden();
-                    }
-                    else if (policy.PolicyType == "FRIENDS ONLY")
-                    {
-                        var isFriend = await _friendService.IsUserFriendAsync(user.Id, userPost.UserId);
-                        if (isFriend == null || !isFriend!.ResponseObject)
+                        var isBlockedByPostPublisher = await _blockRepository
+                                .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, userPost.UserId);
+                        var isBlockedByCommentPublisher = await _blockRepository
+                            .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, replay.UserId);
+                        if (isBlockedByCommentPublisher == null && isBlockedByPostPublisher == null)
                         {
                             return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                            ._403_Forbidden("Friends only");
+                            ._200_Success("You can get replays");
                         }
                     }
-                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                    {
-                        var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(
-                            user.Id, userPost.UserId);
-                        if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
-                        {
-                            return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                            ._403_Forbidden("Friends of friends only");
-                        }
-                    }
-                    var isBlockedByPostPublisher = await _blockRepository
-                        .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, userPost.UserId);
-                    var isBlockedByCommentPublisher = await _blockRepository
-                        .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, replay.UserId);
-                    if (isBlockedByCommentPublisher == null && isBlockedByPostPublisher == null)
-                    {
-                        return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                        ._200_Success("You can get replays");
-                    }
-                    //var isAblePolicy = await CheckUserPolicyAsync(user.Id, userPost.Id, policy);
-                    //if (isAblePolicy.IsSuccess)
-                    //{
-                    //    var isBlockedByPostPublisher = await _blockRepository
-                    //            .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, userPost.UserId);
-                    //    var isBlockedByCommentPublisher = await _blockRepository
-                    //        .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, replay.UserId);
-                    //    if (isBlockedByCommentPublisher == null && isBlockedByPostPublisher == null)
-                    //    {
-                    //        return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                    //        ._200_Success("You can get replays");
-                    //    }
-                    //}
-                    //return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                    //        ._403_Forbidden("Forbidden user policy");
+                    return StatusCodeReturn<IEnumerable<PostCommentReplay>>
+                            ._403_Forbidden("Forbidden user policy");
                 }
                 return StatusCodeReturn<IEnumerable<PostCommentReplay>>
                         ._404_NotFound("User post not found");
@@ -513,6 +604,43 @@ namespace SocialMedia.Service.PostCommentReplayService
             return StatusCodeReturn<IEnumerable<PostCommentReplay>>
                         ._404_NotFound("Policy not found");
         }
+
+        private async Task<ApiResponse<bool>> CheckUserPolicyAsync(
+                string userId, string friendId, Policy policy)
+        {
+            if(userId == friendId)
+            {
+                return StatusCodeReturn<bool>
+                ._200_Success("Able", true);
+            }
+            else if (policy.PolicyType == "PRIVATE")
+            {
+                return StatusCodeReturn<bool>
+                    ._403_Forbidden();
+            }
+            else if (policy.PolicyType == "FRIENDS ONLY")
+            {
+                var isFriend = await _friendService.IsUserFriendAsync(userId, friendId);
+                if (isFriend == null || !isFriend.IsSuccess)
+                {
+                    return StatusCodeReturn<bool>
+                    ._403_Forbidden("Friends only", false);
+                }
+            }
+            else if (policy.PolicyType == "FRIENDS OF FRIENDS")
+            {
+                var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(
+                    userId, friendId);
+                if (isFriendOfFriend == null || !isFriendOfFriend.IsSuccess)
+                {
+                    return StatusCodeReturn<bool>
+                    ._403_Forbidden("Friends of friends only", false);
+                }
+            }
+            return StatusCodeReturn<bool>
+                ._200_Success("Able", true);
+        }
+
 
         private async Task<ApiResponse<IEnumerable<PostCommentReplay>>> CheckPolicyToGetReplaysAsync(
             Post post, SiteUser user, PostComment comment)
@@ -524,39 +652,21 @@ namespace SocialMedia.Service.PostCommentReplayService
                 var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
                 if (userPost != null)
                 {
-                    if (policy.PolicyType == "PRIVATE")
+                    var isAblePolicy = await CheckUserPolicyAsync(user.Id, userPost.UserId, policy);
+                    if (isAblePolicy.IsSuccess)
                     {
-                        return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                            ._403_Forbidden();
-                    }
-                    else if (policy.PolicyType == "FRIENDS ONLY")
-                    {
-                        var isFriend = await _friendService.IsUserFriendAsync(user.Id, userPost.UserId);
-                        if (isFriend == null || !isFriend!.ResponseObject)
-                        {
-                            return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                            ._403_Forbidden("Friends only");
-                        }
-                    }
-                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                    {
-                        var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(
-                            user.Id, userPost.UserId);
-                        if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
-                        {
-                            return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                            ._403_Forbidden("Friends of friends only");
-                        }
-                    }
-                    var isBlockedByPostPublisher = await _blockRepository
+                        var isBlockedByPostPublisher = await _blockRepository
                                 .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, userPost.UserId);
-                    var isBlockedByCommentPublisher = await _blockRepository
-                        .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, comment.UserId);
-                    if (isBlockedByCommentPublisher == null && isBlockedByPostPublisher == null)
-                    {
-                        return StatusCodeReturn<IEnumerable<PostCommentReplay>>
-                        ._200_Success("You can get replays");
+                        var isBlockedByCommentPublisher = await _blockRepository
+                            .GetBlockByUserIdAndBlockedUserIdAsync(user.Id, comment.UserId);
+                        if (isBlockedByCommentPublisher == null && isBlockedByPostPublisher == null)
+                        {
+                            return StatusCodeReturn<IEnumerable<PostCommentReplay>>
+                            ._200_Success("You can get replays");
+                        }
                     }
+                    return StatusCodeReturn<IEnumerable<PostCommentReplay>>
+                                ._403_Forbidden();
                 }
                 return StatusCodeReturn<IEnumerable<PostCommentReplay>>
                         ._404_NotFound("User post not found");
@@ -653,11 +763,17 @@ namespace SocialMedia.Service.PostCommentReplayService
                             var policy = await _policyRepository.GetPolicyByIdAsync(post.PolicyId);
                             if (policy != null)
                             {
-                                if (comment.UserId == user.Id)
+                                var checkPolicy = await CheckUserPolicyAsync(user.Id, userPost.UserId, policy);
+                                if (checkPolicy.IsSuccess)
                                 {
+                                    if (replay.UserId == user.Id)
+                                    {
+                                        return StatusCodeReturn<PostCommentReplay>
+                                        ._200_Success("You can update or delete comment replay",
+                                                new PostCommentReplay { });
+                                    }
                                     return StatusCodeReturn<PostCommentReplay>
-                                    ._200_Success("You can update or delete comment replay",
-                                            new PostCommentReplay { });
+                                                ._403_Forbidden();
                                 }
                                 return StatusCodeReturn<PostCommentReplay>
                                                 ._403_Forbidden();
@@ -720,37 +836,28 @@ namespace SocialMedia.Service.PostCommentReplayService
         }
 
 
-        private async Task<ApiResponse<bool>> CheckUserPolicyAsync(
-            string userId, string friendId, Policy policy)
+        private void MakeUnnesseryObjectsInReplaysNull(IEnumerable<PostCommentReplay> replays)
         {
-            if (policy.PolicyType == "PRIVATE")
+            foreach (var r in replays)
             {
-                return StatusCodeReturn<bool>
-                    ._403_Forbidden();
+                r.User = null;
+                r.PostCommentReplays = null;
+                r.PostComment = null;
+                r.PostCommentReplayChildReplay = null;
             }
-            else if (policy.PolicyType == "FRIENDS ONLY")
-            {
-                var isFriend = await _friendService.IsUserFriendAsync(userId, friendId);
-                if (isFriend == null || !isFriend!.ResponseObject)
-                {
-                    return StatusCodeReturn<bool>
-                    ._403_Forbidden("Friends only", false);
-                }
-            }
-            else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-            {
-                var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(
-                    userId, friendId);
-                if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
-                {
-                    return StatusCodeReturn<bool>
-                    ._403_Forbidden("Friends of friends only", false);
-                }
-            }
-            return StatusCodeReturn<bool>
-                ._200_Success("Able", true);
         }
 
+        private void MakeUnnesseryObjectsInReplaysNull(PostCommentReplay replay)
+        {
+
+            replay.User = null;
+            replay.PostCommentReplays = null;
+            replay.PostComment = null;
+            replay.PostCommentReplayChildReplay = null;
+            
+        }
+
+        #endregion
 
     }
 }

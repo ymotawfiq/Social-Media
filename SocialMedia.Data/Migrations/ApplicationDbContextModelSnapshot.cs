@@ -328,7 +328,7 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<string>("BlockedUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("Blocked User Id");
 
                     b.Property<string>("UserId")
@@ -338,7 +338,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "BlockedUserId")
+                        .IsUnique();
 
                     b.ToTable("Blocks");
                 });
@@ -791,7 +792,8 @@ namespace SocialMedia.Data.Migrations
                     b.HasIndex("PostId")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "PostId")
+                        .IsUnique();
 
                     b.ToTable("UserPosts");
                 });

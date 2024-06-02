@@ -14,6 +14,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.HasOne(e => e.User).WithMany(e => e.Blocks).HasForeignKey(e => e.UserId);
             builder.Property(e => e.UserId).IsRequired().HasColumnName("User Id");
             builder.Property(e => e.BlockedUserId).IsRequired().HasColumnName("Blocked User Id");
+            builder.HasIndex(e => new { e.UserId, e.BlockedUserId }).IsUnique();
         }
     }
 }
