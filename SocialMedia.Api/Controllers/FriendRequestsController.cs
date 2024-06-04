@@ -20,16 +20,14 @@ namespace SocialMedia.Api.Controllers
         private readonly IFriendRequestService _friendRequestService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IFriendRequestRepository _friendRequestRepository;
-        private readonly IBlockRepository _blockRepository;
         private readonly UserManagerReturn _userManagerReturn;
         public FriendRequestsController(IFriendRequestService _friendRequestService,
             UserManager<SiteUser> _userManager, IFriendRequestRepository _friendRequestRepository,
-            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
+             UserManagerReturn _userManagerReturn)
         {
             this._friendRequestService = _friendRequestService;
             this._userManager = _userManager;
             this._friendRequestRepository = _friendRequestRepository;
-            this._blockRepository = _blockRepository;
             this._userManagerReturn = _userManagerReturn;
         }
 
@@ -49,14 +47,9 @@ namespace SocialMedia.Api.Controllers
                     {
                         if (user.Id != friendRequestPerson.Id)
                         {
-                            var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                                user.Id, friendRequestPerson.Id);
-                            if (isBlocked == null)
-                            {
-                                var response = await _friendRequestService.AddFriendRequestAsync
-                                    (addFriendRequestDto, user);
-                                return Ok(response);
-                            }
+                            var response = await _friendRequestService.AddFriendRequestAsync
+                                (addFriendRequestDto, user);
+                            return Ok(response);
                             
                         }
                         return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
@@ -76,8 +69,8 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("updateFriendRequest")]
-        public async Task<IActionResult> UpdateFriendRequestAsync
-            ([FromBody] UpdateFriendRequestDto updateFriendRequestDto)
+        public async Task<IActionResult> UpdateFriendRequestAsync(
+            [FromBody] UpdateFriendRequestDto updateFriendRequestDto)
         {
             try
             {

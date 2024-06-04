@@ -38,13 +38,8 @@ namespace SocialMedia.Api.Controllers
                         (addBlockDto.UserIdOrUserNameOrEmail);
                     if (user != null && blockedUser != null)
                     {
-                        if (user.Id != blockedUser.Id)
-                        {
                             var response = await _blockService.BlockUserAsync(addBlockDto, user);
                             return Ok(response);
-                        }
-                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                            ._403_Forbidden());
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                         ._404_NotFound("User you want to block not found"));
@@ -72,13 +67,8 @@ namespace SocialMedia.Api.Controllers
                         (updateBlockDto.UserIdOrUserNameOrEmail);
                     if (user != null && blockedUser != null)
                     {
-                        if (user.Id != blockedUser.Id)
-                        {
-                            var response = await _blockService.UnBlockUserAsync(updateBlockDto, user);
-                            return Ok(response);
-                        }
-                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                            ._403_Forbidden());
+                        var response = await _blockService.UnBlockUserAsync(updateBlockDto, user);
+                        return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                         ._404_NotFound("User you want to block not found"));

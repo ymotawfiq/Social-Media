@@ -19,14 +19,12 @@ namespace SocialMedia.Api.Controllers
 
         private readonly IFollowerService _followerService;
         private readonly UserManager<SiteUser> _userManager;
-        private readonly IBlockRepository _blockRepository;
         private readonly UserManagerReturn _userManagerReturn;
         public FollowersController(IFollowerService _followerService, UserManager<SiteUser> _userManager,
-            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
+            UserManagerReturn _userManagerReturn)
         {
             this._followerService = _followerService;
             this._userManager = _userManager;
-            this._blockRepository = _blockRepository;
             this._userManagerReturn = _userManagerReturn;
         }
 
@@ -46,13 +44,8 @@ namespace SocialMedia.Api.Controllers
                     {
                         if (user.Id != follower.Id)
                         {
-                            var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                                user.Id, follower.Id);
-                            if (isBlocked == null)
-                            {
-                                var response = await _followerService.FollowAsync(followDto, follower);
-                                return Ok(response);
-                            }
+                            var response = await _followerService.FollowAsync(followDto, follower);
+                            return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
                             ._403_Forbidden());
@@ -141,15 +134,10 @@ namespace SocialMedia.Api.Controllers
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userIdOrName);
-                    if (currentUser != null && user!=null)
+                    if (currentUser != null && user != null)
                     {
-                        var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                            user.Id, currentUser.Id);
-                        if (isBlocked == null)
-                        {
-                            var response = await _followerService.GetAllFollowers(user.Id);
-                            return Ok(response);
-                        }
+                        var response = await _followerService.GetAllFollowers(user.Id);
+                        return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
                     ._403_Forbidden());
@@ -180,13 +168,9 @@ namespace SocialMedia.Api.Controllers
                     {
                         if(user.Id != follower.Id)
                         {
-                            var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                                user.Id, follower.Id);
-                            if (isBlocked == null)
-                            {
-                                var response = await _followerService.UnfollowAsync(unFollowDto, follower);
-                                return Ok(response);
-                            }      
+                            var response = await _followerService.UnfollowAsync(unFollowDto, follower);
+                            return Ok(response);
+                              
                         }
                         return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
                             ._403_Forbidden());

@@ -1,11 +1,11 @@
 ﻿
 
-using Microsoft.AspNetCore.Identity;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FollowerRepository;
 using SocialMedia.Service.GenericReturn;
 
@@ -14,25 +14,28 @@ namespace SocialMedia.Service.FollowerService
     public class FollowerService : IFollowerService
     {
         private readonly IFollowerRepository _followerRepository;
-        private readonly UserManager<SiteUser> _userManager;
         private readonly UserManagerReturn _userManagerReturn;
+        private readonly IBlockRepository _blockRepository;
         public FollowerService(IFollowerRepository _followerRepository,
-            UserManager<SiteUser> _userManager, UserManagerReturn _userManagerReturn)
+            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
         {
             this._followerRepository = _followerRepository;
-            this._userManager = _userManager;
             this._userManagerReturn = _userManagerReturn;
+            this._blockRepository = _blockRepository;
         }
         public async Task<ApiResponse<Follower>> FollowAsync(FollowDto followDto, SiteUser user)
         {
-            try
+            var followedPerson = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                followDto.UserIdOrUserNameOrEmail);
+            if (followedPerson != null)
             {
-                var followedPerson = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                    followDto.UserIdOrUserNameOrEmail);
-                if (followedPerson != null)
+                followDto.UserIdOrUserNameOrEmail = followedPerson.Id;
+                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                    user.Id, followedPerson.Id);
+                if (isBlocked == null)
                 {
                     var isFollowing = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
-                    user.Id, followedPerson.Id);
+                            user.Id, followedPerson.Id);
                     if (isFollowing == null)
                     {
                         followDto.UserIdOrUserNameOrEmail = followedPerson.Id;
@@ -44,27 +47,32 @@ namespace SocialMedia.Service.FollowerService
                     return StatusCodeReturn<Follower>
                         ._403_Forbidden("You already following this person");
                 }
-
                 return StatusCodeReturn<Follower>
-                        ._404_NotFound("User you want to follow not found");
+                        ._403_Forbidden();
+            }
 
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<Follower>
+                    ._404_NotFound("User you want to follow not found");
+
         }
 
         public async Task<ApiResponse<Follower>> FollowAsync(SiteUser user, SiteUser follower)
         {
-            var follow = await _followerRepository.FollowAsync(new Follower
+            var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                    user.Id, follower.Id);
+            if (isBlocked == null)
             {
-                Id = Guid.NewGuid().ToString(),
-                FollowerId = follower.Id,
-                UserId = user.Id
-            }); ;
+                var follow = await _followerRepository.FollowAsync(new Follower
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FollowerId = follower.Id,
+                    UserId = user.Id
+                });
+                return StatusCodeReturn<Follower>
+                    ._200_Success("Followed successfully", follow);
+            }
             return StatusCodeReturn<Follower>
-                ._200_Success("Followed successfully", follow);
+                        ._403_Forbidden();
         }
 
         public async Task<ApiResponse<IEnumerable<Follower>>> GetAllFollowers(string userId)
@@ -85,16 +93,23 @@ namespace SocialMedia.Service.FollowerService
                 unFollowDto.UserIdOrUserNameOrEmail);
             if (followedPerson != null)
             {
-                var isFollowed = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
-                user.Id, followedPerson.Id);
-                if (isFollowed != null)
+                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                    user.Id, followedPerson.Id);
+                if (isBlocked == null)
                 {
-                    var unfollow = await _followerRepository.UnfollowAsync(user.Id, followedPerson.Id);
+                    var isFollowed = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
+                user.Id, followedPerson.Id);
+                    if (isFollowed != null)
+                    {
+                        var unfollow = await _followerRepository.UnfollowAsync(user.Id, followedPerson.Id);
+                        return StatusCodeReturn<Follower>
+                            ._200_Success("Unfollowed successfully", unfollow);
+                    }
                     return StatusCodeReturn<Follower>
-                        ._200_Success("Unfollowed successfully", unfollow);
+                        ._403_Forbidden("You are not following this person");
                 }
                 return StatusCodeReturn<Follower>
-                    ._403_Forbidden("You are not following this person");
+                        ._403_Forbidden();
             }
 
             return StatusCodeReturn<Follower>

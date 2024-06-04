@@ -43,8 +43,7 @@ namespace SocialMedia.Service.SpecialPostReactService
 
         public async Task<ApiResponse<SpecialPostReacts>> DeleteSpecialPostReactsByIdAsync(string Id)
         {
-            var postReact = await _specialPostsReactsRepository.GetSpecialPostReactsByIdAsync(
-                Id);
+            var postReact = await _specialPostsReactsRepository.GetSpecialPostReactsByIdAsync(Id);
             if (postReact != null)
             {
                 await _specialPostsReactsRepository.DeleteSpecialPostReactsByIdAsync(Id);

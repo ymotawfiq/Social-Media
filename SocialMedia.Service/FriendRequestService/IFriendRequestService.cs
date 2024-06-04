@@ -13,7 +13,7 @@ namespace SocialMedia.Service.FriendRequestService
             AddFriendRequestDto addFriendRequestDto, SiteUser user);
         Task<ApiResponse<FriendRequest>> UpdateFriendRequestAsync(
             UpdateFriendRequestDto updateFriendRequestDto);
-        Task<ApiResponse<FriendRequest>> GetFriendRequestByIdAsync(string friendRequestId);
+        Task<ApiResponse<FriendRequest>> GetFriendRequestByIdAsync(string friendRequestId, SiteUser user);
         Task<ApiResponse<FriendRequest>> DeleteFriendRequestByAsync(SiteUser user, string friendRequestId);
         Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsAsync();
         Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsByUserIdAsync(string userId);

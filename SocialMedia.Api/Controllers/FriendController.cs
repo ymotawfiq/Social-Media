@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 
@@ -15,14 +13,12 @@ namespace SocialMedia.Api.Controllers
 
         private readonly IFriendService _friendService;
         private readonly UserManager<SiteUser> _userManager;
-        private readonly IBlockRepository _blockRepository;
         private readonly UserManagerReturn _userManagerReturn;
-        public FriendController(IFriendService _friendService, UserManager<SiteUser> _userManager,
-            IBlockRepository _blockRepository, UserManagerReturn _userManagerReturn)
+        public FriendController(IFriendService _friendService, UserManager<SiteUser> _userManager
+            , UserManagerReturn _userManagerReturn)
         {
             this._friendService = _friendService;
             this._userManager = _userManager;
-            this._blockRepository = _blockRepository;
             this._userManagerReturn = _userManagerReturn;
         }
 
@@ -39,12 +35,9 @@ namespace SocialMedia.Api.Controllers
                     var userByUserName = await _userManager.FindByNameAsync(userName);
                     if (user != null && userByUserName != null)
                     {
-                        if(await _userManager.IsInRoleAsync(user, "Admin")
-                            || user.Id == userByUserName.Id || !userByUserName.IsFriendListPrivate)
-                        {
-                            var response = await _friendService.GetAllUserFriendsAsync(userByUserName.Id);
-                            return Ok(response);
-                        }
+                        var response = await _friendService.GetAllUserFriendsAsync(user,
+                            userByUserName);
+                        return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
                     ._403_Forbidden());
@@ -70,11 +63,9 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var response = await _friendService.GetAllUserFriendsAsync(user.Id);
+                        var response = await _friendService.GetAllUserFriendsAsync(user);
                         return Ok(response);
                     }
-                    return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                    ._403_Forbidden());
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
@@ -100,18 +91,8 @@ namespace SocialMedia.Api.Controllers
                             friendIdOrUserNameOrEmail);
                         if (user != null && routeUser != null)
                         {
-                            if (user.Id != routeUser.Id)
-                            {
-                                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                                user.Id, routeUser.Id);
-                                if (isBlocked == null)
-                                {
-                                    var response = await _friendService.DeleteFriendAsync(user.Id, routeUser.Id);
-                                    return Ok(response);
-                                }
-                            }
-                            return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                                ._403_Forbidden());
+                            var response = await _friendService.DeleteFriendAsync(user.Id, routeUser.Id);
+                            return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status406NotAcceptable, StatusCodeReturn<string>
                             ._406_NotAcceptable());
