@@ -19,11 +19,11 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("add-react")]
-        public async Task<IActionResult> AddReactAsync([FromBody] ReactDto reactDto)
+        public async Task<IActionResult> AddReactAsync([FromBody] AddReactDto addReactDto)
         {
             try
             {
-                var response = await _reactService.AddReactAsync(reactDto);
+                var response = await _reactService.AddReactAsync(addReactDto);
                 return Ok(response);
             }
             catch(Exception ex)
@@ -34,11 +34,11 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("update-react")]
-        public async Task<IActionResult> UpdateReactAsync([FromBody] ReactDto reactDto)
+        public async Task<IActionResult> UpdateReactAsync([FromBody] UpdateReactDto updateReactDto)
         {
             try
             {
-                var response = await _reactService.UpdateReactAsync(reactDto);
+                var response = await _reactService.UpdateReactAsync(updateReactDto);
                 return Ok(response);
             }
             catch (Exception ex)

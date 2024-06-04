@@ -32,7 +32,7 @@ namespace SocialMedia.Repository.FriendRequestRepository
             }
         }
 
-        public async Task<FriendRequest> DeleteFriendRequestByAsync(Guid friendRequestId)
+        public async Task<FriendRequest> DeleteFriendRequestByAsync(string friendRequestId)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace SocialMedia.Repository.FriendRequestRepository
             }
         }
 
-        public async Task<FriendRequest> GetFriendRequestByIdAsync(Guid friendRequestId)
+        public async Task<FriendRequest> GetFriendRequestByIdAsync(string friendRequestId)
         {
             try
             {

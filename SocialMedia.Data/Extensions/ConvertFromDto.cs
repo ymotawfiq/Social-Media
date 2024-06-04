@@ -8,159 +8,143 @@ namespace SocialMedia.Data.Extensions
 {
     public static class ConvertFromDto
     {
-        public static React ConvertFromReactDto_Add(ReactDto reactDto)
+        public static React ConvertFromReactDto_Add(AddReactDto addReactDto)
         {
             return new React
             {
                 Id = Guid.NewGuid().ToString(),
-                ReactValue = reactDto.ReactValue
+                ReactValue = addReactDto.ReactValue
             };
         }
 
-        public static React ConvertFromReactDto_Update(ReactDto reactDto)
+        public static React ConvertFromReactDto_Update(UpdateReactDto updateReactDto)
         {
-            if (reactDto.Id == null)
-            {
-                throw new NullReferenceException("React id must not be null");
-            }
             return new React
             {
-                Id = reactDto.Id,
-                ReactValue = reactDto.ReactValue
+                Id = updateReactDto.Id,
+                ReactValue = updateReactDto.ReactValue
             };
         }
 
-        public static FriendRequest ConvertFromFriendRequestDto_Add(FriendRequestDto friendRequestDto)
+        public static FriendRequest ConvertFromFriendRequestDto_Add(
+            AddFriendRequestDto addFriendRequestDto, SiteUser userWhoReceived)
         {
             return new FriendRequest
             {
+                Id = Guid.NewGuid().ToString(),
                 IsAccepted = false,
-                UserWhoReceivedId = friendRequestDto.PersonId,
-                UserWhoSendId = friendRequestDto.UserId
+                UserWhoReceivedId = userWhoReceived.Id,
+                UserWhoSendId = addFriendRequestDto.PersonIdOrUserNameOrEmail
             };
         }
 
-        public static FriendRequest ConvertFromFriendRequestDto_Update(FriendRequestDto friendRequestDto)
+        public static FriendRequest ConvertFromFriendRequestDto_Update(
+            UpdateFriendRequestDto updateFriendRequestDto, SiteUser userWhoSent, SiteUser userWhoReceived)
         {
-            if (friendRequestDto.Id == null)
-            {
-                throw new NullReferenceException("Friend request id must not be null");
-            }
             return new FriendRequest
             {
-                Id = new Guid(friendRequestDto.Id),
-                IsAccepted = friendRequestDto.IsAccepted,
-                UserWhoReceivedId = friendRequestDto.PersonId,
-                UserWhoSendId = friendRequestDto.UserId
+                Id = updateFriendRequestDto.FriendRequestId,
+                IsAccepted = updateFriendRequestDto.IsAccepted,
+                UserWhoReceivedId = userWhoReceived.Id,
+                UserWhoSendId = userWhoSent.Id
             };
         }
 
-        public static Friend ConvertFromFriendtDto_Add(FriendDto friendsDto)
+        public static Friend ConvertFromFriendtDto_Add(AddFriendDto addFriendDto)
         {
             return new Friend
             {
-                FriendId =friendsDto.FriendId,
-                UserId = friendsDto.UserId
+                Id = Guid.NewGuid().ToString(),
+                FriendId =addFriendDto.FriendId,
+                UserId = addFriendDto.UserId
             };
         }
 
-        public static Follower ConvertFromFollowerDto_Add(FollowerDto followersDto)
+        public static Follower ConvertFromFollowerDto_Add(FollowDto followDto, SiteUser user)
         {
             return new Follower
             {
-                UserId = followersDto.UserId,
-                FollowerId = followersDto.FollowerId
+                UserId = followDto.UserIdOrUserNameOrEmail,
+                FollowerId = user.Id,
+                Id = Guid.NewGuid().ToString()
             };
         }
 
-        public static Block ConvertFromBlockDto_BlockUnBlock(BlockDto blockDto)
+        public static Block ConvertFromBlockDto_Add(AddBlockDto addBlockDto, SiteUser user)
         {
             return new Block
             {
-                BlockedUserId = blockDto.BlockedUserId,
-                UserId = blockDto.UserId
+                Id = Guid.NewGuid().ToString(),
+                BlockedUserId = addBlockDto.UserIdOrUserNameOrEmail,
+                UserId = user.Id
             };
         }
 
-        public static Block ConvertFromBlockDto_Update(BlockDto blockDto)
+        public static Block ConvertFromBlockDto_Update(UpdateBlockDto updateBlockDto, SiteUser user)
         {
-            if (blockDto.Id == null)
-            {
-                throw new NullReferenceException("Block id must not be null");
-            }
             return new Block
             {
-                BlockedUserId = blockDto.BlockedUserId,
-                UserId = blockDto.UserId
+                BlockedUserId = updateBlockDto.UserIdOrUserNameOrEmail,
+                UserId = user.Id,
+                Id = updateBlockDto.Id
             };
         }
 
 
-        public static Policy ConvertFromPolicyDto_Add(PolicyDto policyDto)
+        public static Policy ConvertFromPolicyDto_Add(AddPolicyDto addPolicyDto)
         {
             return new Policy
             {
                 Id = Guid.NewGuid().ToString(),
-                PolicyType = policyDto.PolicyType
+                PolicyType = addPolicyDto.PolicyType
             };
         }
 
 
-        public static Policy ConvertFromPolicyDto_Update(PolicyDto policyDto)
+        public static Policy ConvertFromPolicyDto_Update(UpdatePolicyDto updatePolicyDto)
         {
-            if (policyDto.Id == null)
-            {
-                throw new NullReferenceException("Policy id must not be null");
-            }
             return new Policy
             {
-                Id = policyDto.Id.ToString(),
-                PolicyType = policyDto.PolicyType
+                Id = updatePolicyDto.Id,
+                PolicyType = updatePolicyDto.PolicyType
             };
         }
 
-        public static ReactPolicy ConvertFromReactPolicyDto_Add(ReactPolicyDto reactPolicyDto)
+        public static ReactPolicy ConvertFromReactPolicyDto_Add(AddReactPolicyDto addReactPolicyDto)
         {
             return new ReactPolicy
             {
                 Id = Guid.NewGuid().ToString(),
-                PolicyId = reactPolicyDto.PolicyId
+                PolicyId = addReactPolicyDto.PolicyId
             };
         }
 
 
-        public static ReactPolicy ConvertFromReactPolicyDto_Update(ReactPolicyDto reactPolicyDto)
+        public static ReactPolicy ConvertFromReactPolicyDto_Update(UpdateReactPolicyDto updateReactPolicyDto)
         {
-            if (reactPolicyDto.Id == null)
-            {
-                throw new NullReferenceException("React policy id must not be null");
-            }
             return new ReactPolicy
             {
-                Id = reactPolicyDto.Id,
-                PolicyId = reactPolicyDto.PolicyId
+                Id = updateReactPolicyDto.Id,
+                PolicyId = updateReactPolicyDto.PolicyId
             };
         }
 
-        public static CommentPolicy ConvertFromCommentPolicyDto_Add(CommentPolicyDto commentPolicyDto)
+        public static CommentPolicy ConvertFromCommentPolicyDto_Add(AddCommentPolicyDto addCommentPolicyDto)
         {
             return new CommentPolicy
             {
                 Id = Guid.NewGuid().ToString(),
-                PolicyId = commentPolicyDto.PolicyId
+                PolicyId = addCommentPolicyDto.PolicyIdOrName
             };
         }
 
-        public static CommentPolicy ConvertFromCommentPolicyDto_Update(CommentPolicyDto commentPolicyDto)
+        public static CommentPolicy ConvertFromCommentPolicyDto_Update(
+            UpdateCommentPolicyDto updateCommentPolicyDto)
         {
-            if (commentPolicyDto.Id == null)
-            {
-                throw new NullReferenceException("Comment policy id must not be null");
-            }
             return new CommentPolicy
             {
-                Id = commentPolicyDto.Id,
-                PolicyId = commentPolicyDto.PolicyId
+                Id = updateCommentPolicyDto.Id,
+                PolicyId = updateCommentPolicyDto.PolicyIdOrName
             };
         }
 
@@ -234,7 +218,8 @@ namespace SocialMedia.Data.Extensions
         }
 
 
-        public static Post ConvertFromPostCommentPolicy_Update(UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
+        public static Post ConvertFromPostCommentPolicy_Update(
+            UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
         {
             return new Post
             {

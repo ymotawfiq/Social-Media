@@ -16,6 +16,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.UserId).IsRequired().HasColumnName("User Id");
             builder.Property(e => e.FolderName).IsRequired().HasColumnName("Folder Name")
                 .HasMaxLength(30);
+            builder.HasIndex(e => new { e.FolderName, e.UserId }).IsUnique();
         }
     }
 }

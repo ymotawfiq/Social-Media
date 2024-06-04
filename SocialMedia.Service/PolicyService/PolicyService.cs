@@ -17,16 +17,16 @@ namespace SocialMedia.Service.PolicyService
             this._policyRepository = _policyRepository;
         }
 
-        public async Task<ApiResponse<Policy>> AddPolicyAsync(PolicyDto policyDto)
+        public async Task<ApiResponse<Policy>> AddPolicyAsync(AddPolicyDto addPolicyDto)
         {
             var newPolicy = await _policyRepository.AddPolicyAsync(
-                ConvertFromDto.ConvertFromPolicyDto_Add(policyDto));
+                ConvertFromDto.ConvertFromPolicyDto_Add(addPolicyDto));
             if (newPolicy == null)
             {
                 return StatusCodeReturn<Policy>
                     ._500_ServerError("Can't add policy");
             }
-            var policy = await _policyRepository.GetPolicyByNameAsync(policyDto.PolicyType);
+            var policy = await _policyRepository.GetPolicyByNameAsync(addPolicyDto.PolicyType);
             if (policy != null)
             {
                 return StatusCodeReturn<Policy>
@@ -151,15 +151,10 @@ namespace SocialMedia.Service.PolicyService
             }
         }
 
-        public async Task<ApiResponse<Policy>> UpdatePolicyAsync(PolicyDto policyDto)
+        public async Task<ApiResponse<Policy>> UpdatePolicyAsync(UpdatePolicyDto updatePolicyDto)
         {
-            if (policyDto.Id == null)
-            {
-                return StatusCodeReturn<Policy>
-                            ._400_BadRequest("Policy id must not be null");
-            }
             var updatedPolicy = await _policyRepository.UpdatePolicyAsync(
-                ConvertFromDto.ConvertFromPolicyDto_Update(policyDto));
+                ConvertFromDto.ConvertFromPolicyDto_Update(updatePolicyDto));
             return StatusCodeReturn<Policy>
                     ._200_Success("Policy updated successfully", updatedPolicy);
         }

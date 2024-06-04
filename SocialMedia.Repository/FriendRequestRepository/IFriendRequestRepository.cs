@@ -9,9 +9,9 @@ namespace SocialMedia.Repository.FriendRequestRepository
     {
         Task<FriendRequest> AddFriendRequestAsync(FriendRequest friendRequest);
         Task<FriendRequest> UpdateFriendRequestAsync(FriendRequest friendRequest);
-        Task<FriendRequest> GetFriendRequestByIdAsync(Guid friendRequestId);
+        Task<FriendRequest> GetFriendRequestByIdAsync(string friendRequestId);
         Task<FriendRequest> GetFriendRequestByUserAndPersonIdAsync(string userId, string personId);
-        Task<FriendRequest> DeleteFriendRequestByAsync(Guid friendRequestId);
+        Task<FriendRequest> DeleteFriendRequestByAsync(string friendRequestId);
         Task<IEnumerable<FriendRequest>> GetAllFriendRequestsAsync();
         Task<IEnumerable<FriendRequest>> GetAllFriendRequestsByUserIdAsync(string userId);
         Task<IEnumerable<FriendRequest>> GetAllFriendRequestsByUserNameAsync(string userName);

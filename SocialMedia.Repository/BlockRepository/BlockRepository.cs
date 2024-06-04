@@ -29,7 +29,7 @@ namespace SocialMedia.Repository.BlockRepository
             }
         }
 
-        public async Task<Block> GetBlockByIdAndUserIdAsync(Guid blockId, string userId)
+        public async Task<Block> GetBlockByIdAndUserIdAsync(string blockId, string userId)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace SocialMedia.Repository.BlockRepository
             }
         }
 
-        public async Task<Block> GetBlockByIdAsync(Guid blockId)
+        public async Task<Block> GetBlockByIdAsync(string blockId)
         {
             try
             {

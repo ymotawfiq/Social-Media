@@ -36,11 +36,12 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("addCommentPolicy")]
-        public async Task<IActionResult> AddCommentPolicyAsync([FromBody] CommentPolicyDto commentPolicyDto)
+        public async Task<IActionResult> AddCommentPolicyAsync(
+            [FromBody] AddCommentPolicyDto addCommentPolicyDto)
         {
             try
             {
-                var response = await _commentPolicyService.AddCommentPolicyAsync(commentPolicyDto);
+                var response = await _commentPolicyService.AddCommentPolicyAsync(addCommentPolicyDto);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -52,11 +53,12 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("updateCommentPolicy")]
-        public async Task<IActionResult> UpdateCommentPolicyAsync([FromBody] CommentPolicyDto commentPolicyDto)
+        public async Task<IActionResult> UpdateCommentPolicyAsync(
+            [FromBody] UpdateCommentPolicyDto updateCommentPolicyDto)
         {
             try
             {
-                var response = await _commentPolicyService.UpdateCommentPolicyAsync(commentPolicyDto);
+                var response = await _commentPolicyService.UpdateCommentPolicyAsync(updateCommentPolicyDto);
                 return Ok(response);
             }
             catch (Exception ex)

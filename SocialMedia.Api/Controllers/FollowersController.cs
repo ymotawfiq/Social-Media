@@ -50,12 +50,7 @@ namespace SocialMedia.Api.Controllers
                                 user.Id, follower.Id);
                             if (isBlocked == null)
                             {
-                                var followerDto = new FollowerDto
-                                {
-                                    UserId = user!.Id,
-                                    FollowerId = follower!.Id
-                                };
-                                var response = await _followerService.FollowAsync(followerDto);
+                                var response = await _followerService.FollowAsync(followDto, follower);
                                 return Ok(response);
                             }
                         }
@@ -75,7 +70,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("adminFollow")]
         public async Task<IActionResult> FollowAsync(string userIdOrUserNameOrEmail
             , string followerIdOrUserNameOrEmail)
@@ -86,16 +81,11 @@ namespace SocialMedia.Api.Controllers
                         userIdOrUserNameOrEmail);
                 var follower = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         followerIdOrUserNameOrEmail);
-                if (user!=null && follower != null)
+                if (user != null && follower != null)
                 {
                     if (user.Id != follower.Id)
                     {
-                        var followerDto = new FollowerDto
-                        {
-                            UserId = user.Id,
-                            FollowerId = follower.Id
-                        };
-                        var response = await _followerService.FollowAsync(followerDto);
+                        var response = await _followerService.FollowAsync(user, follower);
                         return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
@@ -103,9 +93,9 @@ namespace SocialMedia.Api.Controllers
                 }
                 return StatusCode(StatusCodes.Status406NotAcceptable, StatusCodeReturn<string>
                     ._406_NotAcceptable());
-                
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
                     ._500_ServerError(ex.Message));
@@ -176,7 +166,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("unfollow")]
-        public async Task<IActionResult> UnfollowAsync(string userIdOrUserNameOrEmail)
+        public async Task<IActionResult> UnfollowAsync(UnFollowDto unFollowDto)
         {
             try
             {
@@ -185,7 +175,7 @@ namespace SocialMedia.Api.Controllers
                 {
                     var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                        userIdOrUserNameOrEmail); 
+                        unFollowDto.UserIdOrUserNameOrEmail); 
                     if (user != null && follower!=null)
                     {
                         if(user.Id != follower.Id)
@@ -194,7 +184,7 @@ namespace SocialMedia.Api.Controllers
                                 user.Id, follower.Id);
                             if (isBlocked == null)
                             {
-                                var response = await _followerService.UnfollowAsync(user.Id, follower.Id);
+                                var response = await _followerService.UnfollowAsync(unFollowDto, follower);
                                 return Ok(response);
                             }      
                         }

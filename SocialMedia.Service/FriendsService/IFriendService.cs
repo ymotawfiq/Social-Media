@@ -8,7 +8,7 @@ namespace SocialMedia.Service.FriendsService
 {
     public interface IFriendService
     {
-        Task<ApiResponse<Friend>> AddFriendAsync(FriendDto friendsDto);
+        Task<ApiResponse<Friend>> AddFriendAsync(AddFriendDto addFriendDto);
         Task<ApiResponse<Friend>> DeleteFriendAsync(string userId, string friendId);
         Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId);
         Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId);

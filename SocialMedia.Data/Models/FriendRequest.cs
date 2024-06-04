@@ -6,7 +6,7 @@ namespace SocialMedia.Data.Models
 {
     public class FriendRequest
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; } = null!;
         public string UserWhoSendId { get; set; } = null!;
         public string UserWhoReceivedId { get; set; } = null!;
         public bool IsAccepted { get; set; }

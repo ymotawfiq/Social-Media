@@ -37,11 +37,11 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("addReactPolicy")]
-        public async Task<IActionResult> AddReactPoliciesAsync([FromBody] ReactPolicyDto reactPolicyDto)
+        public async Task<IActionResult> AddReactPoliciesAsync([FromBody] AddReactPolicyDto addReactPolicyDto)
         {
             try
             {
-                var response = await _reactPolicyService.AddReactPolicyAsync(reactPolicyDto);
+                var response = await _reactPolicyService.AddReactPolicyAsync(addReactPolicyDto);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -53,11 +53,12 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("updateReactPolicy")]
-        public async Task<IActionResult> UpdateReactPolicyAsync([FromBody] ReactPolicyDto reactPolicyDto)
+        public async Task<IActionResult> UpdateReactPolicyAsync(
+            [FromBody] UpdateReactPolicyDto updateReactPolicyDto)
         {
             try
             {
-                var response = await _reactPolicyService.UpdateReactPolicyAsync(reactPolicyDto);
+                var response = await _reactPolicyService.UpdateReactPolicyAsync(updateReactPolicyDto);
                 return Ok(response);
             }
             catch (Exception ex)

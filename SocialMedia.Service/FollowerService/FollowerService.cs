@@ -15,34 +15,56 @@ namespace SocialMedia.Service.FollowerService
     {
         private readonly IFollowerRepository _followerRepository;
         private readonly UserManager<SiteUser> _userManager;
+        private readonly UserManagerReturn _userManagerReturn;
         public FollowerService(IFollowerRepository _followerRepository,
-            UserManager<SiteUser> _userManager)
+            UserManager<SiteUser> _userManager, UserManagerReturn _userManagerReturn)
         {
             this._followerRepository = _followerRepository;
             this._userManager = _userManager;
+            this._userManagerReturn = _userManagerReturn;
         }
-        public async Task<ApiResponse<Follower>> FollowAsync(FollowerDto followersDto)
+        public async Task<ApiResponse<Follower>> FollowAsync(FollowDto followDto, SiteUser user)
         {
             try
             {
-                var follower = await _userManager.FindByIdAsync(followersDto.FollowerId);
-                var user = await _userManager.FindByIdAsync(followersDto.UserId);
-                var isFollowing = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
-                    user!.Id, follower!.Id);
-                if (isFollowing != null)
+                var followedPerson = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                    followDto.UserIdOrUserNameOrEmail);
+                if (followedPerson != null)
                 {
+                    var isFollowing = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
+                    user.Id, followedPerson.Id);
+                    if (isFollowing == null)
+                    {
+                        followDto.UserIdOrUserNameOrEmail = followedPerson.Id;
+                        var follow = await _followerRepository.FollowAsync(
+                            ConvertFromDto.ConvertFromFollowerDto_Add(followDto, user));
+                        return StatusCodeReturn<Follower>
+                            ._200_Success("Followed successfully");
+                    }
                     return StatusCodeReturn<Follower>
-                        ._400_BadRequest("You already following this person");
+                        ._403_Forbidden("You already following this person");
                 }
-                var follow = await _followerRepository.FollowAsync(
-                    ConvertFromDto.ConvertFromFollowerDto_Add(followersDto));
+
                 return StatusCodeReturn<Follower>
-                    ._200_Success("Followed successfully");
+                        ._404_NotFound("User you want to follow not found");
+
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public async Task<ApiResponse<Follower>> FollowAsync(SiteUser user, SiteUser follower)
+        {
+            var follow = await _followerRepository.FollowAsync(new Follower
+            {
+                Id = Guid.NewGuid().ToString(),
+                FollowerId = follower.Id,
+                UserId = user.Id
+            }); ;
+            return StatusCodeReturn<Follower>
+                ._200_Success("Followed successfully", follow);
         }
 
         public async Task<ApiResponse<IEnumerable<Follower>>> GetAllFollowers(string userId)
@@ -57,23 +79,27 @@ namespace SocialMedia.Service.FollowerService
                     ._200_Success("Followers found successfully", followers);
         }
 
-        public async Task<ApiResponse<Follower>> UnfollowAsync(string userId, string followerId)
+        public async Task<ApiResponse<Follower>> UnfollowAsync(UnFollowDto unFollowDto, SiteUser user)
         {
+            var followedPerson = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                unFollowDto.UserIdOrUserNameOrEmail);
+            if (followedPerson != null)
+            {
+                var isFollowed = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
+                user.Id, followedPerson.Id);
+                if (isFollowed != null)
+                {
+                    var unfollow = await _followerRepository.UnfollowAsync(user.Id, followedPerson.Id);
+                    return StatusCodeReturn<Follower>
+                        ._200_Success("Unfollowed successfully", unfollow);
+                }
+                return StatusCodeReturn<Follower>
+                    ._403_Forbidden("You are not following this person");
+            }
 
-            if(userId == followerId)
-            {
-                return StatusCodeReturn<Follower>
-                    ._403_Forbidden("You can't follow yourself");
-            }
-            var isFollowed = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(userId, followerId);
-            if (isFollowed == null)
-            {
-                return StatusCodeReturn<Follower>
-                    ._400_BadRequest("You are not following this person");
-            }
-            var unfollow = await _followerRepository.UnfollowAsync(userId, followerId);
             return StatusCodeReturn<Follower>
-                ._200_Success("Unfollowed successfully", unfollow);
+                         ._404_NotFound("User you want to unfollow not found");
+
         }
     }
 }

@@ -20,18 +20,19 @@ namespace SocialMedia.Service.FriendsService
             this._friendsRepository = _friendsRepository;
             this._friendListPolicyService = _friendListPolicyService;
         }
-        public async Task<ApiResponse<Friend>> AddFriendAsync(FriendDto friendsDto)
+        public async Task<ApiResponse<Friend>> AddFriendAsync(
+            AddFriendDto addFriendDto)
         {
-            var existFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(friendsDto.UserId,
-                friendsDto.FriendId);
+            var existFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(addFriendDto.UserId,
+                addFriendDto.FriendId);
             if (existFriend != null)
             {
                 return StatusCodeReturn<Friend>
                     ._400_BadRequest("You are already friends");
             }
-            var userFriendList = await _friendsRepository.GetAllUserFriendsAsync(friendsDto.UserId);
+            var userFriendList = await _friendsRepository.GetAllUserFriendsAsync(addFriendDto.UserId);
             var newFriend = await _friendsRepository.AddFriendAsync(
-                ConvertFromDto.ConvertFromFriendtDto_Add(friendsDto));
+                ConvertFromDto.ConvertFromFriendtDto_Add(addFriendDto));
             newFriend.User = null;
             return StatusCodeReturn<Friend>
                 ._201_Created("Friend added successfully to your friend list", newFriend);

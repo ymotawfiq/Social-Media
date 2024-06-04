@@ -36,11 +36,11 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("addPolicy")]
-        public async Task<IActionResult> AddPolicyAsync([FromBody] PolicyDto policyDto)
+        public async Task<IActionResult> AddPolicyAsync([FromBody] AddPolicyDto addPolicyDto)
         {
             try
             {
-                var response = await _policyService.AddPolicyAsync(policyDto);
+                var response = await _policyService.AddPolicyAsync(addPolicyDto);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -51,11 +51,11 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("updatePolicy")]
-        public async Task<IActionResult> UpdatePolicyAsync([FromBody] PolicyDto policyDto)
+        public async Task<IActionResult> UpdatePolicyAsync([FromBody] UpdatePolicyDto updatePolicyDto)
         {
             try
             {
-                var response = await _policyService.UpdatePolicyAsync(policyDto);
+                var response = await _policyService.UpdatePolicyAsync(updatePolicyDto);
                 return Ok(response);
             }
             catch (Exception ex)

@@ -21,22 +21,23 @@ namespace SocialMedia.Service.ReactPolicyService
             this._reactPolicyRepository = _reactPolicyRepository;
             this._policyRepository = _policyRepository;
         }
-        public async Task<ApiResponse<ReactPolicy>> AddReactPolicyAsync(ReactPolicyDto reactPolicyDto)
+        public async Task<ApiResponse<ReactPolicy>> AddReactPolicyAsync(AddReactPolicyDto addReactPolicyDto)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(reactPolicyDto.PolicyId);
+            var policy = await _policyRepository.GetPolicyByIdAsync(addReactPolicyDto.PolicyId);
             if (policy == null)
             {
                 return StatusCodeReturn<ReactPolicy>
                     ._404_NotFound("Policy not found");
             }
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(reactPolicyDto.PolicyId);
+            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(
+                addReactPolicyDto.PolicyId);
             if (reactPolicy != null)
             {
                 return StatusCodeReturn<ReactPolicy>
                     ._400_BadRequest("React policy already exists");
             }
             var newReactPolicy = await _reactPolicyRepository.AddReactPolicyAsync(
-                ConvertFromDto.ConvertFromReactPolicyDto_Add(reactPolicyDto));
+                ConvertFromDto.ConvertFromReactPolicyDto_Add(addReactPolicyDto));
             return StatusCodeReturn<ReactPolicy>
                     ._201_Created("React policy added successfully", newReactPolicy);
         }
@@ -111,27 +112,23 @@ namespace SocialMedia.Service.ReactPolicyService
                 ._200_Success("React policy found successfully", reactPolicy);
         }
 
-        public async Task<ApiResponse<ReactPolicy>> UpdateReactPolicyAsync(ReactPolicyDto reactPolicyDto)
+        public async Task<ApiResponse<ReactPolicy>> UpdateReactPolicyAsync(
+            UpdateReactPolicyDto updateReactPolicyDto)
         {
-            if (reactPolicyDto.Id == null)
-            {
-                return StatusCodeReturn<ReactPolicy>
-                    ._400_BadRequest("React policy id must not be null");
-            }
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(reactPolicyDto.Id);
+            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(updateReactPolicyDto.Id);
             if (reactPolicy == null)
             {
                 return StatusCodeReturn<ReactPolicy>
                     ._404_NotFound("React policy not found");
             }
-            var policy = await _policyRepository.GetPolicyByIdAsync(reactPolicyDto.PolicyId);
+            var policy = await _policyRepository.GetPolicyByIdAsync(updateReactPolicyDto.PolicyId);
             if (policy == null)
             {
                 return StatusCodeReturn<ReactPolicy>
                     ._404_NotFound("Policy not found"); ;
             }
             var updatedReactPolicy = await _reactPolicyRepository.UpdateReactPolicyAsync(
-                ConvertFromDto.ConvertFromReactPolicyDto_Update(reactPolicyDto));
+                ConvertFromDto.ConvertFromReactPolicyDto_Update(updateReactPolicyDto));
             return StatusCodeReturn<ReactPolicy>
                 ._200_Success("React policy updated successfully", updatedReactPolicy);
         }

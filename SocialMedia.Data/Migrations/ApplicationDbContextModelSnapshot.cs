@@ -322,9 +322,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("BlockedUserId")
                         .IsRequired()
@@ -364,13 +363,12 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FollowerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("Follower Id");
 
                     b.Property<string>("UserId")
@@ -382,18 +380,20 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("FollowerId", "UserId")
+                        .IsUnique();
+
                     b.ToTable("Followers");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Friend", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FriendId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("Friend Id");
 
                     b.Property<string>("UserId")
@@ -403,7 +403,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "FriendId")
+                        .IsUnique();
 
                     b.ToTable("Friends");
                 });
@@ -428,9 +429,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsAccepted")
                         .HasColumnType("bit");
@@ -447,10 +447,10 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserWhoReceivedId")
-                        .IsUnique();
-
                     b.HasIndex("UserWhoSendId");
+
+                    b.HasIndex("UserWhoReceivedId", "UserWhoSendId")
+                        .IsUnique();
 
                     b.ToTable("FriendRequests");
                 });
@@ -601,7 +601,7 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("Image Url");
 
                     b.Property<string>("PostId")
@@ -610,6 +610,9 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnName("Post Id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ImageUrl")
+                        .IsUnique();
 
                     b.HasIndex("PostId");
 
@@ -729,9 +732,10 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasIndex("FolderId");
 
-                    b.HasIndex("PostId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("PostId", "FolderId")
+                        .IsUnique();
 
                     b.ToTable("SavedPosts");
                 });
@@ -817,6 +821,9 @@ namespace SocialMedia.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("FolderName", "UserId")
+                        .IsUnique();
 
                     b.ToTable("UserSavedPostsFolders");
                 });

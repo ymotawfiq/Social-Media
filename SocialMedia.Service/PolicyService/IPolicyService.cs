@@ -8,8 +8,8 @@ namespace SocialMedia.Service.PolicyService
 {
     public interface IPolicyService
     {
-        Task<ApiResponse<Policy>> AddPolicyAsync(PolicyDto policyDto);
-        Task<ApiResponse<Policy>> UpdatePolicyAsync(PolicyDto policyDto);
+        Task<ApiResponse<Policy>> AddPolicyAsync(AddPolicyDto addPolicyDto);
+        Task<ApiResponse<Policy>> UpdatePolicyAsync(UpdatePolicyDto updatePolicyDto);
         Task<ApiResponse<Policy>> DeletePolicyByIdAsync(string policyId);
         Task<ApiResponse<Policy>> DeletePolicyByNameAsync(string policyName);
         Task<ApiResponse<Policy>> DeletePolicyByIdOrNameAsync(string policyIdOrName);

@@ -13,6 +13,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.FollowerId).IsRequired().HasColumnName("Follower Id");
             builder.Property(e => e.UserId).IsRequired().HasColumnName("User Id");
             builder.HasOne(e => e.User).WithMany(e => e.Followers).HasForeignKey(e => e.UserId);
+            builder.HasIndex(e => new { e.FollowerId, e.UserId }).IsUnique();
         }
     }
 }

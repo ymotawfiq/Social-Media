@@ -14,6 +14,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.HasOne(e => e.Post).WithMany(e => e.PostImages).HasForeignKey(e => e.PostId);
             builder.Property(e => e.PostId).IsRequired().HasColumnName("Post Id");
             builder.Property(e => e.ImageUrl).IsRequired().HasColumnName("Image Url");
+            builder.HasIndex(e => e.ImageUrl).IsUnique();
         }
     }
 }

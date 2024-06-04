@@ -22,23 +22,25 @@ namespace SocialMedia.Service.CommentPolicyService
             this._policyRepository = _policyRepository;
             this._policyService = _policyService;
         }
-        public async Task<ApiResponse<CommentPolicy>> AddCommentPolicyAsync(CommentPolicyDto commentPolicyDto)
+        public async Task<ApiResponse<CommentPolicy>> AddCommentPolicyAsync(
+            AddCommentPolicyDto addCommentPolicyDto)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(commentPolicyDto.PolicyId);
+            var policy = await GetPolicyByIdOrNameAsync(addCommentPolicyDto.PolicyIdOrName);
             if (policy == null)
             {
                 return StatusCodeReturn<CommentPolicy>
                     ._404_NotFound("Policy not found");
             }
             var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync
-                (commentPolicyDto.PolicyId);
+                (policy.Id);
             if (commentPolicy != null)
             {
                 return StatusCodeReturn<CommentPolicy>
                     ._403_Forbidden("Comment policy already exists");
             }
+            addCommentPolicyDto.PolicyIdOrName = policy.Id;
             var newComentPolicy = await _commentPolicyRepository.AddCommentPolicyAsync(
-                ConvertFromDto.ConvertFromCommentPolicyDto_Add(commentPolicyDto));
+                ConvertFromDto.ConvertFromCommentPolicyDto_Add(addCommentPolicyDto));
             return StatusCodeReturn<CommentPolicy>
                 ._200_Success("Comment policy added successfully", newComentPolicy);
         }
@@ -82,34 +84,29 @@ namespace SocialMedia.Service.CommentPolicyService
         }
 
         public async Task<ApiResponse<CommentPolicy>> UpdateCommentPolicyAsync
-            (CommentPolicyDto commentPolicyDto)
+            (UpdateCommentPolicyDto updateCommentPolicyDto)
         {
-            if (commentPolicyDto.Id == null)
-            {
-                return StatusCodeReturn<CommentPolicy>
-                    ._400_BadRequest("Comment policy id must not be null");
-            }
-            var policy = await _policyRepository.GetPolicyByIdAsync(commentPolicyDto.PolicyId);
+            var policy = await GetPolicyByIdOrNameAsync(updateCommentPolicyDto.PolicyIdOrName);
             if (policy == null)
             {
                 return StatusCodeReturn<CommentPolicy>
                     ._404_NotFound("Policy not found");
             }
             var commentPolicy = await _commentPolicyRepository
-                .GetCommentPolicyByPolicyIdAsync(commentPolicyDto.PolicyId);
+                .GetCommentPolicyByPolicyIdAsync(policy.Id);
             if (commentPolicy == null)
             {
                 return StatusCodeReturn<CommentPolicy>
                     ._404_NotFound("Comment policy not found");
             }
             var existCommentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(
-                commentPolicyDto.PolicyId);
+                policy.Id);
             if (existCommentPolicy != null)
             {
                 return StatusCodeReturn<CommentPolicy>._403_Forbidden("Comment policy already exists");
             }
             var updatedComentPolicy = await _commentPolicyRepository.UpdateCommentPolicyAsync(
-                ConvertFromDto.ConvertFromCommentPolicyDto_Update(commentPolicyDto));
+                ConvertFromDto.ConvertFromCommentPolicyDto_Update(updateCommentPolicyDto));
             return StatusCodeReturn<CommentPolicy>
                 ._200_Success("Comment policy updated successfully", updatedComentPolicy);
         }
@@ -146,5 +143,15 @@ namespace SocialMedia.Service.CommentPolicyService
             return StatusCodeReturn<CommentPolicy>._404_NotFound(
                         "Policy not found");
         }
+
+
+        private async Task<Policy> GetPolicyByIdOrNameAsync(string policyIdOrName)
+        {
+            var policyById = await _policyRepository.GetPolicyByIdAsync(policyIdOrName);
+            var policyByName = await _policyRepository.GetPolicyByNameAsync(policyIdOrName);
+            return policyById == null ? policyByName! : policyById;
+        }
+
+
     }
 }

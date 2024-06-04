@@ -3,13 +3,15 @@
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
+using SocialMedia.Data.Models.Authentication;
 
 namespace SocialMedia.Service.FollowerService
 {
     public interface IFollowerService
     {
-        Task<ApiResponse<Follower>> FollowAsync(FollowerDto followersDto);
-        Task<ApiResponse<Follower>> UnfollowAsync(string userId, string followerId);
+        Task<ApiResponse<Follower>> FollowAsync(FollowDto followDto, SiteUser user);
+        Task<ApiResponse<Follower>> FollowAsync(SiteUser user, SiteUser follower);
+        Task<ApiResponse<Follower>> UnfollowAsync(UnFollowDto followDto, SiteUser user);
         Task<ApiResponse<IEnumerable<Follower>>> GetAllFollowers(string userId);
     }
 }

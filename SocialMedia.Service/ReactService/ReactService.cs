@@ -16,15 +16,15 @@ namespace SocialMedia.Service.ReactService
         {
             this._reactRepository = _reactRepository;
         }
-        public async Task<ApiResponse<React>> AddReactAsync(ReactDto reactDto)
+        public async Task<ApiResponse<React>> AddReactAsync(AddReactDto addReactDto)
         {
-            if (reactDto.ReactValue == null)
+            if (addReactDto.ReactValue == null)
             {
                 return StatusCodeReturn<React>
                     ._400_BadRequest("React value must not be null");
             }
             var newReact = await _reactRepository.AddReactAsync(
-                ConvertFromDto.ConvertFromReactDto_Add(reactDto));
+                ConvertFromDto.ConvertFromReactDto_Add(addReactDto));
             return StatusCodeReturn<React>
                 ._201_Created("React added successfully", newReact);
         }
@@ -67,20 +67,15 @@ namespace SocialMedia.Service.ReactService
                     ._200_Success("React found successfully", react);
         }
 
-        public async Task<ApiResponse<React>> UpdateReactAsync(ReactDto reactDto)
+        public async Task<ApiResponse<React>> UpdateReactAsync(UpdateReactDto updateReactDto)
         {
-            if (reactDto.ReactValue == null)
-            {
-                return StatusCodeReturn<React>
-                    ._400_BadRequest("React value must not be null");
-            }
-            else if(reactDto.Id == null)
+            if(updateReactDto.Id == null)
             {
                 return StatusCodeReturn<React>
                     ._400_BadRequest("React id must not be null");
             }
             var updatedReact = await _reactRepository.UpdateReactAsync(
-                ConvertFromDto.ConvertFromReactDto_Update(reactDto));
+                ConvertFromDto.ConvertFromReactDto_Update(updateReactDto));
             return StatusCodeReturn<React>
                     ._200_Success("React updated successfully", updatedReact);
         }

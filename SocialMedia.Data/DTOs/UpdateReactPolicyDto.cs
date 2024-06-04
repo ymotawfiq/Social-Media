@@ -4,9 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SocialMedia.Data.DTOs
 {
-    public class CommentPolicyDto
+    public class UpdateReactPolicyDto
     {
-        public string? Id { get; set; } = null!;
+        [Required]
+        public string Id { get; set; } = null!;
 
         [Required]
         public string PolicyId { get; set; } = null!;

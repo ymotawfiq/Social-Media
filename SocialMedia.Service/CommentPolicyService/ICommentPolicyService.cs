@@ -7,8 +7,9 @@ namespace SocialMedia.Service.CommentPolicyService
 {
     public interface ICommentPolicyService
     {
-        Task<ApiResponse<CommentPolicy>> AddCommentPolicyAsync(CommentPolicyDto commentPolicyDto);
-        Task<ApiResponse<CommentPolicy>> UpdateCommentPolicyAsync(CommentPolicyDto commentPolicyDto);
+        Task<ApiResponse<CommentPolicy>> AddCommentPolicyAsync(AddCommentPolicyDto addCommentPolicyDto);
+        Task<ApiResponse<CommentPolicy>> UpdateCommentPolicyAsync(
+            UpdateCommentPolicyDto updateCommentPolicyDto);
         Task<ApiResponse<CommentPolicy>> DeleteCommentPolicyByIdAsync(string commentPolicyId);
         Task<ApiResponse<CommentPolicy>> GetCommentPolicyByIdAsync(string commentPolicyId);
         Task<ApiResponse<CommentPolicy>> GetCommentPolicyAsync(string commentPolicyIdOrPolicyName);

@@ -1,12 +1,12 @@
 ﻿
-
 using System.ComponentModel.DataAnnotations;
 
 namespace SocialMedia.Data.DTOs
 {
-    public class PolicyDto
+    public class UpdatePolicyDto
     {
-        public string? Id { get; set; }
+        [Required]
+        public string Id { get; set; } = null!;
 
         [Required]
         public string PolicyType { get; set; } = null!;

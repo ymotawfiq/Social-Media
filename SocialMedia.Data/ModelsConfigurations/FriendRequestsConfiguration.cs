@@ -13,9 +13,9 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.HasKey(e => e.Id);
             builder.HasOne(e => e.User).WithMany(e => e.FriendRequests).HasForeignKey(e => e.UserWhoSendId);
             builder.Property(e => e.UserWhoReceivedId).IsRequired().HasColumnName("Friend Request Person Id");
-            builder.HasIndex(e => e.UserWhoReceivedId).IsUnique();
             builder.Property(e => e.UserWhoSendId).IsRequired().HasColumnName("User sended friend request Id");
             builder.Property(e => e.IsAccepted).IsRequired();
+            builder.HasIndex(e => new { e.UserWhoReceivedId, e.UserWhoSendId }).IsUnique();
         }
     }
 }

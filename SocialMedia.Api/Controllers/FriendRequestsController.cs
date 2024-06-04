@@ -34,7 +34,8 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("sendFriendRequest")]
-        public async Task<IActionResult> AddFriendRequestAsync([FromBody] AddFriendRequestDto addFriendRequestDto)
+        public async Task<IActionResult> AddFriendRequestAsync(
+            [FromBody] AddFriendRequestDto addFriendRequestDto)
         {
             try
             {
@@ -52,13 +53,8 @@ namespace SocialMedia.Api.Controllers
                                 user.Id, friendRequestPerson.Id);
                             if (isBlocked == null)
                             {
-                                var friendRequestDto = new FriendRequestDto
-                                {
-                                    UserId = user.Id,
-                                    PersonId = friendRequestPerson.Id
-                                };
                                 var response = await _friendRequestService.AddFriendRequestAsync
-                                    (friendRequestDto);
+                                    (addFriendRequestDto, user);
                                 return Ok(response);
                             }
                             
@@ -94,21 +90,14 @@ namespace SocialMedia.Api.Controllers
                         if (updateFriendRequestDto.FriendRequestId != null)
                         {
                             var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(
-                            new Guid(updateFriendRequestDto.FriendRequestId));
+                            updateFriendRequestDto.FriendRequestId);
                             if (friendRequest != null)
                             {
-                                var friendRequestDto = new FriendRequestDto
-                                {
-                                    UserId = friendRequest.UserWhoSendId,
-                                    PersonId = friendRequest.UserWhoReceivedId,
-                                    IsAccepted = updateFriendRequestDto.IsAccepted,
-                                    Id = updateFriendRequestDto.FriendRequestId
-                                };
                                 if (await _userManager.IsInRoleAsync(user, "Admin")
-                                    || user.Id == friendRequestDto.PersonId)
+                                    || user.Id == friendRequest.UserWhoReceivedId)
                                 {
                                     var response = await _friendRequestService
-                                        .UpdateFriendRequestAsync(friendRequestDto);
+                                        .UpdateFriendRequestAsync(updateFriendRequestDto);
                                     return Ok(response);
                                 }
                             }   
@@ -128,7 +117,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpDelete("deleteFriendRequest/{friendRequestId}")]
-        public async Task<IActionResult> DeleteFriendRequestAsync([FromRoute] Guid friendRequestId)
+        public async Task<IActionResult> DeleteFriendRequestAsync([FromRoute] string friendRequestId)
         {
             try
             {
@@ -166,7 +155,8 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpDelete("unSendFriendRequest/{userWhoReceivedIdOrUserName}")]
-        public async Task<IActionResult> UnSendFriendRequestAsync([FromRoute] string userWhoReceivedIdOrUserName)
+        public async Task<IActionResult> UnSendFriendRequestAsync(
+            [FromRoute] string userWhoReceivedIdOrUserName)
         {
             try
             {

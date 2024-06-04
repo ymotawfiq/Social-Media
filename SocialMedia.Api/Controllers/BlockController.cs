@@ -26,7 +26,7 @@ namespace SocialMedia.Api.Controllers
 
 
         [HttpPost("block")]
-        public async Task<IActionResult> BlockAsync([FromBody] BlockUserDto blockUserDto)
+        public async Task<IActionResult> BlockAsync([FromBody] AddBlockDto addBlockDto)
         {
             try
             {
@@ -35,17 +35,12 @@ namespace SocialMedia.Api.Controllers
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var blockedUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync
-                        (blockUserDto.UserIdOrUserNameOrEmail);
+                        (addBlockDto.UserIdOrUserNameOrEmail);
                     if (user != null && blockedUser != null)
                     {
                         if (user.Id != blockedUser.Id)
                         {
-                            var blockDto = new BlockDto
-                            {
-                                BlockedUserId = blockedUser.Id,
-                                UserId = user.Id
-                            };
-                            var response = await _blockService.BlockUserAsync(blockDto);
+                            var response = await _blockService.BlockUserAsync(addBlockDto, user);
                             return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
@@ -65,7 +60,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("unblock")]
-        public async Task<IActionResult> UnBlockAsync([FromBody] BlockUserDto blockUserDto)
+        public async Task<IActionResult> UnBlockAsync([FromBody] UpdateBlockDto updateBlockDto)
         {
             try
             {
@@ -74,17 +69,12 @@ namespace SocialMedia.Api.Controllers
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var blockedUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync
-                        (blockUserDto.UserIdOrUserNameOrEmail);
+                        (updateBlockDto.UserIdOrUserNameOrEmail);
                     if (user != null && blockedUser != null)
                     {
                         if (user.Id != blockedUser.Id)
                         {
-                            var blockDto = new BlockDto
-                            {
-                                BlockedUserId = blockedUser.Id,
-                                UserId = user.Id
-                            };
-                            var response = await _blockService.UnBlockUserAsync(blockDto);
+                            var response = await _blockService.UnBlockUserAsync(updateBlockDto, user);
                             return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>

@@ -8,8 +8,8 @@ namespace SocialMedia.Service.ReactPolicyService
 {
     public interface IReactPolicyService
     {
-        Task<ApiResponse<ReactPolicy>> AddReactPolicyAsync(ReactPolicyDto reactPolicyDto);
-        Task<ApiResponse<ReactPolicy>> UpdateReactPolicyAsync(ReactPolicyDto reactPolicyDto);
+        Task<ApiResponse<ReactPolicy>> AddReactPolicyAsync(AddReactPolicyDto addReactPolicyDto);
+        Task<ApiResponse<ReactPolicy>> UpdateReactPolicyAsync(UpdateReactPolicyDto updateReactPolicyDto);
         Task<ApiResponse<ReactPolicy>> DeleteReactPolicyByIdAsync(string reactPolicyId);
         Task<ApiResponse<ReactPolicy>> GetReactPolicyByIdAsync(string reactPolicyId);
         Task<ApiResponse<ReactPolicy>> GetReactPolicyAsync(string reactPolicyIdOrPolicyName);
