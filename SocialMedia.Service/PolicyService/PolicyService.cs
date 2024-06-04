@@ -19,74 +19,58 @@ namespace SocialMedia.Service.PolicyService
 
         public async Task<ApiResponse<Policy>> AddPolicyAsync(AddPolicyDto addPolicyDto)
         {
-            var newPolicy = await _policyRepository.AddPolicyAsync(
-                ConvertFromDto.ConvertFromPolicyDto_Add(addPolicyDto));
-            if (newPolicy == null)
+            var existPolicy = await _policyRepository.GetPolicyByNameAsync(addPolicyDto.PolicyType);
+            if (existPolicy == null)
             {
+                var newPolicy = await _policyRepository.AddPolicyAsync(
+                    ConvertFromDto.ConvertFromPolicyDto_Add(addPolicyDto));
                 return StatusCodeReturn<Policy>
-                    ._500_ServerError("Can't add policy");
-            }
-            var policy = await _policyRepository.GetPolicyByNameAsync(addPolicyDto.PolicyType);
-            if (policy != null)
-            {
-                return StatusCodeReturn<Policy>
-                    ._400_BadRequest("Policy already exists");
+                        ._201_Created("Policy added successfully", newPolicy);
             }
             return StatusCodeReturn<Policy>
-                    ._201_Created("Policy added successfully", newPolicy);
+                    ._403_Forbidden("Policy already exists");
+            
         }
 
         public async Task<ApiResponse<Policy>> DeletePolicyByIdAsync(string policyId)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(policyId.ToString());
-            if (policy == null)
+            var policy = await _policyRepository.GetPolicyByIdAsync(policyId);
+            if (policy != null)
             {
+                await _policyRepository.DeletePolicyByIdAsync(policyId);
                 return StatusCodeReturn<Policy>
-                    ._404_NotFound("Policy not found");
+                        ._200_Success("Policy deleted successfully", policy);
             }
-            var deletedPolicy = await _policyRepository.DeletePolicyByIdAsync(policyId);
             return StatusCodeReturn<Policy>
-                    ._200_Success("Policy deleted successfully", deletedPolicy);
+                    ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<Policy>> DeletePolicyByIdOrNameAsync(string policyIdOrName)
         {
-            try
+            var policy = await GetPolicyAsync(policyIdOrName);
+            if (policy != null)
             {
-                var policy = await GetPolicyAsync(policyIdOrName);
-                if (policy == null)
-                {
-                    return StatusCodeReturn<Policy>
-                        ._404_NotFound("Policy not found");
-                }
-                var deletedPolicy = await _policyRepository.DeletePolicyByIdAsync(policy.Id);
+                await _policyRepository.DeletePolicyByIdAsync(policy.Id);
                 return StatusCodeReturn<Policy>
-                        ._200_Success("Policy deleted successfully", deletedPolicy);
+                        ._200_Success("Policy deleted successfully", policy);
+                    
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<Policy>
+                    ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<Policy>> DeletePolicyByNameAsync(string policyName)
         {
-            try
+            var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
+            if (policy != null)
             {
-                var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
-                if (policy == null)
-                {
-                    return StatusCodeReturn<Policy>
-                        ._404_NotFound("Policy not found");
-                }
-                var deletedPolicy = await _policyRepository.DeletePolicyByIdAsync(policy.Id);
+                await _policyRepository.DeletePolicyByIdAsync(policy.Id);
                 return StatusCodeReturn<Policy>
-                        ._200_Success("Policy deleted successfully", deletedPolicy);
+                        ._200_Success("Policy deleted successfully", policy);
+                    
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<Policy>
+                    ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<IEnumerable<Policy>>> GetPoliciesAsync()
@@ -104,59 +88,59 @@ namespace SocialMedia.Service.PolicyService
         public async Task<ApiResponse<Policy>> GetPolicyByIdAsync(string policyId)
         {
             var policy = await _policyRepository.GetPolicyByIdAsync(policyId);
-            if (policy == null)
+            if (policy != null)
             {
                 return StatusCodeReturn<Policy>
-                        ._404_NotFound("Policy not found");
+                    ._200_Success("Policy found successfully", policy);
             }
             return StatusCodeReturn<Policy>
-                    ._200_Success("Policy found successfully", policy);
+                        ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<Policy>> GetPolicyByIdOrNameAsync(string policyIdOrName)
         {
-            try
+            var policy = await GetPolicyAsync(policyIdOrName);
+            if (policy != null)
             {
-                var policy = await GetPolicyAsync(policyIdOrName);
-                if (policy == null)
-                {
-                    return StatusCodeReturn<Policy>
-                            ._404_NotFound("Policy not found");
-                }
                 return StatusCodeReturn<Policy>
-                        ._200_Success("Policy found successfully", policy);
+                    ._200_Success("Policy found successfully", policy);
+                    
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<Policy>
+                        ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<Policy>> GetPolicyByNameAsync(string policyName)
         {
-            try
+            var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
+            if (policy != null)
             {
-                var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
-                if (policy == null)
-                {
-                    return StatusCodeReturn<Policy>
-                            ._404_NotFound("Policy not found");
-                }
                 return StatusCodeReturn<Policy>
-                        ._200_Success("Policy found successfully", policy);
+                    ._200_Success("Policy found successfully", policy);
+                    
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<Policy>
+                        ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<Policy>> UpdatePolicyAsync(UpdatePolicyDto updatePolicyDto)
         {
-            var updatedPolicy = await _policyRepository.UpdatePolicyAsync(
-                ConvertFromDto.ConvertFromPolicyDto_Update(updatePolicyDto));
+            var policyById = await _policyRepository.GetPolicyByIdAsync(updatePolicyDto.Id);
+            if (policyById != null)
+            {
+                var policyByName = await _policyRepository.GetPolicyByNameAsync(updatePolicyDto.PolicyType);
+                if (policyByName == null)
+                {
+                    var updatedPolicy = await _policyRepository.UpdatePolicyAsync(
+                            ConvertFromDto.ConvertFromPolicyDto_Update(updatePolicyDto));
+                    return StatusCodeReturn<Policy>
+                            ._200_Success("Policy updated successfully", updatedPolicy);
+                }
+                return StatusCodeReturn<Policy>
+                       ._403_Forbidden("Policy already exists");
+            }
             return StatusCodeReturn<Policy>
-                    ._200_Success("Policy updated successfully", updatedPolicy);
+                   ._404_NotFound("Policy not found");
         }
 
 

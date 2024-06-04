@@ -24,7 +24,7 @@ namespace SocialMedia.Service.AccountPolicyService
             AddAccountPolicyAsync(AddAccountPolicyDto addAccountPolicyDto)
         {
             var policy = await _policyService.GetPolicyByIdOrNameAsync(addAccountPolicyDto.PolicyIdOrName);
-            if (policy.ResponseObject != null)
+            if (policy!=null && policy.ResponseObject != null)
             {
                 var accountPolicyByPolicyId = await _accountPolicyRepository
                         .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
@@ -37,39 +37,33 @@ namespace SocialMedia.Service.AccountPolicyService
                         ._201_Created("Account policy added successfully", accountPolicy);
                 }
                 return StatusCodeReturn<AccountPolicy>
-                    ._400_BadRequest("Account policy already exists");
+                    ._403_Forbidden("Account policy already exists");
                 
             }
             return StatusCodeReturn<AccountPolicy>
                         ._404_NotFound("Policy not found"); ;
         }
 
-        public async Task<ApiResponse<AccountPolicy>> DeleteAccountPolicyByPolicyAsync(string policyIdOrName)
+        public async Task<ApiResponse<AccountPolicy>> DeleteAccountPolicyByPolicyAsync(
+            string policyIdOrName)
         {
-            try
+            var policy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
+            if (policy!=null && policy.ResponseObject != null)
             {
-                var policy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
-                if (policy.ResponseObject != null)
+                var accoountPolicy = await _accountPolicyRepository
+                    .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
+                if (accoountPolicy != null)
                 {
-                    var accoountPolicy = await _accountPolicyRepository
-                        .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
-                    if (accoountPolicy != null)
-                    {
-                        var deletedAccountPolicy = await _accountPolicyRepository
-                            .DeleteAccountPolicyByIdAsync(accoountPolicy.Id);
-                        return StatusCodeReturn<AccountPolicy>
-                            ._200_Success("Account policy deleted successfully", deletedAccountPolicy);
-                    }
+                    await _accountPolicyRepository.DeleteAccountPolicyByIdAsync(accoountPolicy.Id);
                     return StatusCodeReturn<AccountPolicy>
-                        ._404_NotFound("Account policy not found");
+                        ._200_Success("Account policy deleted successfully", accoountPolicy);
                 }
                 return StatusCodeReturn<AccountPolicy>
-                        ._404_NotFound("Policy not found");
+                    ._404_NotFound("Account policy not found");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<AccountPolicy>
+                    ._404_NotFound("Policy not found");
+            
         }
 
         public async Task<ApiResponse<AccountPolicy>> DeleteAccountPolicyByIdAsync(string accountPolicyId)
@@ -78,10 +72,9 @@ namespace SocialMedia.Service.AccountPolicyService
                     accountPolicyId);
             if (accountPolicy != null)
             {
-                var deletedAccountPolicy = await _accountPolicyRepository
-                    .DeleteAccountPolicyByIdAsync(accountPolicyId);
+                await _accountPolicyRepository.DeleteAccountPolicyByIdAsync(accountPolicyId);
                 return StatusCodeReturn<AccountPolicy>
-                    ._200_Success("Account policy deleted successfully", deletedAccountPolicy);
+                    ._200_Success("Account policy deleted successfully", accountPolicy);
             }
             return StatusCodeReturn<AccountPolicy>
                         ._404_NotFound("Account policy not found");
@@ -89,14 +82,12 @@ namespace SocialMedia.Service.AccountPolicyService
 
         public async Task<ApiResponse<AccountPolicy>> DeleteAccountPolicyByPolicyIdAsync(string policyId)
         {
-            var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByPolicyIdAsync(
-                policyId);
+            var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByPolicyIdAsync(policyId);
             if (accountPolicy != null)
             {
-                var deletedAccountPolicy = await _accountPolicyRepository
-                    .DeleteAccountPolicyByPolicyIdAsync(policyId);
+                await _accountPolicyRepository.DeleteAccountPolicyByPolicyIdAsync(policyId);
                 return StatusCodeReturn<AccountPolicy>
-                    ._200_Success("Account policy deleted successfully", deletedAccountPolicy);
+                    ._200_Success("Account policy deleted successfully", accountPolicy);
             }
             return StatusCodeReturn<AccountPolicy>
                         ._404_NotFound("Account policy not found");
@@ -116,28 +107,22 @@ namespace SocialMedia.Service.AccountPolicyService
 
         public async Task<ApiResponse<AccountPolicy>> GetAccountPolicyByPolicyAsync(string policyIdOrName)
         {
-            try
+            var policy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
+            if (policy != null && policy.ResponseObject != null)
             {
-                var policy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
-                if (policy.ResponseObject != null)
+                var accoountPolicy = await _accountPolicyRepository
+                    .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
+                if (accoountPolicy != null)
                 {
-                    var accoountPolicy = await _accountPolicyRepository
-                        .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
-                    if (accoountPolicy != null)
-                    {
-                        return StatusCodeReturn<AccountPolicy>
-                            ._200_Success("Account policies found successfully", accoountPolicy);
-                    }
                     return StatusCodeReturn<AccountPolicy>
-                        ._404_NotFound("Account policy not found");
+                        ._200_Success("Account policy found successfully", accoountPolicy);
                 }
                 return StatusCodeReturn<AccountPolicy>
-                        ._404_NotFound("Policy not found");
+                    ._404_NotFound("Account policy not found");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return StatusCodeReturn<AccountPolicy>
+                    ._404_NotFound("Policy not found");
+            
         }
 
         public async Task<ApiResponse<AccountPolicy>> GetAccountPolicyByIdAsync(string accountPolicyId)
@@ -155,8 +140,7 @@ namespace SocialMedia.Service.AccountPolicyService
 
         public async Task<ApiResponse<AccountPolicy>> GetAccountPolicyByPolicyIdAsync(string policyId)
         {
-            var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByPolicyIdAsync(
-                policyId);
+            var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByPolicyIdAsync(policyId);
             if (accountPolicy != null)
             {
                 return StatusCodeReturn<AccountPolicy>
@@ -166,8 +150,8 @@ namespace SocialMedia.Service.AccountPolicyService
                         ._404_NotFound("Account policy not found");
         }
 
-        public async Task<ApiResponse<AccountPolicy>> 
-            UpdateAccountPolicyAsync(UpdateAccountPolicyDto updateAccountPolicyDto)
+        public async Task<ApiResponse<AccountPolicy>> UpdateAccountPolicyAsync(
+            UpdateAccountPolicyDto updateAccountPolicyDto)
         {
             var accountPolicy = await _accountPolicyRepository.GetAccountPolicyByIdAsync(
                 updateAccountPolicyDto.Id);
@@ -177,18 +161,18 @@ namespace SocialMedia.Service.AccountPolicyService
                     updateAccountPolicyDto.PolicyIdOrName);
                 if (policy.ResponseObject != null)
                 {
-                    var accountPolicyByPolicyId = await _accountPolicyRepository
+                    var existAccountPolicy = await _accountPolicyRepository
                         .GetAccountPolicyByPolicyIdAsync(policy.ResponseObject.Id);
-                    if (accountPolicyByPolicyId == null)
+                    if(existAccountPolicy == null)
                     {
                         updateAccountPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
                         var updatedAccountPolicy = await _accountPolicyRepository.UpdateAccountPolicyAsync(
                             ConvertFromDto.ConvertFromAccountPolicyDto_Update(updateAccountPolicyDto));
                         return StatusCodeReturn<AccountPolicy>
-                    ._200_Success("Account policy updated successfully", updatedAccountPolicy);
+                                ._200_Success("Account policy updated successfully", updatedAccountPolicy);
                     }
                     return StatusCodeReturn<AccountPolicy>
-                        ._400_BadRequest("Account policy already exists");
+                        ._403_Forbidden("Account policy already exists");
                 }
                 return StatusCodeReturn<AccountPolicy>
                         ._404_NotFound("Policy not found");

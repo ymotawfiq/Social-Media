@@ -18,11 +18,6 @@ namespace SocialMedia.Service.ReactService
         }
         public async Task<ApiResponse<React>> AddReactAsync(AddReactDto addReactDto)
         {
-            if (addReactDto.ReactValue == null)
-            {
-                return StatusCodeReturn<React>
-                    ._400_BadRequest("React value must not be null");
-            }
             var newReact = await _reactRepository.AddReactAsync(
                 ConvertFromDto.ConvertFromReactDto_Add(addReactDto));
             return StatusCodeReturn<React>
@@ -32,14 +27,14 @@ namespace SocialMedia.Service.ReactService
         public async Task<ApiResponse<React>> DeleteReactByIdAsync(string reactId)
         {
             var react = await _reactRepository.GetReactByIdAsync(reactId);
-            if (react == null)
+            if (react != null)
             {
+                await _reactRepository.DeleteReactByIdAsync(reactId);
                 return StatusCodeReturn<React>
-                    ._404_NotFound("React not found");
+                    ._200_Success("React deleted successfully", react);
             }
-            var deletedReact = await _reactRepository.DeleteReactByIdAsync(reactId);
             return StatusCodeReturn<React>
-                ._200_Success("React deleted successfully", deletedReact);
+                    ._404_NotFound("React not found");
         }
 
         public async Task<ApiResponse<IEnumerable<React>>> GetAllReactsAsync()
@@ -58,26 +53,32 @@ namespace SocialMedia.Service.ReactService
         public async Task<ApiResponse<React>> GetReactByIdAsync(string reactId)
         {
             var react = await _reactRepository.GetReactByIdAsync(reactId);
-            if (react == null)
+            if (react != null)
             {
                 return StatusCodeReturn<React>
-                    ._404_NotFound("React not found");
+                    ._200_Success("React found successfully", react);
             }
             return StatusCodeReturn<React>
-                    ._200_Success("React found successfully", react);
+                    ._404_NotFound("React not found");
         }
 
         public async Task<ApiResponse<React>> UpdateReactAsync(UpdateReactDto updateReactDto)
         {
-            if(updateReactDto.Id == null)
+            var reactById = await _reactRepository.GetReactByIdAsync(updateReactDto.Id);
+            if (reactById != null)
             {
+                if(reactById.ReactValue.ToUpper() != updateReactDto.ReactValue.ToUpper())
+                {
+                    var updatedReact = await _reactRepository.UpdateReactAsync(
+                                    ConvertFromDto.ConvertFromReactDto_Update(updateReactDto));
+                    return StatusCodeReturn<React>
+                            ._200_Success("React updated successfully", updatedReact);
+                }
                 return StatusCodeReturn<React>
-                    ._400_BadRequest("React id must not be null");
+                    ._403_Forbidden("React already exists");
             }
-            var updatedReact = await _reactRepository.UpdateReactAsync(
-                ConvertFromDto.ConvertFromReactDto_Update(updateReactDto));
             return StatusCodeReturn<React>
-                    ._200_Success("React updated successfully", updatedReact);
+                ._404_NotFound("React not found");
         }
     }
 }

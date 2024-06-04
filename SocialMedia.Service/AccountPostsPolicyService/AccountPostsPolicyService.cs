@@ -24,29 +24,29 @@ namespace SocialMedia.Service.AccountPostsPolicyService
         public async Task<ApiResponse<AccountPostsPolicy>> AddAccountPostPolicyAsync
             (AddAccountPostsPolicyDto addAccountPostsPolicyDto)
         {
-            var policy = await _policyService.GetPolicyByIdOrNameAsync
-                (addAccountPostsPolicyDto.PolicyIdOrName);
+            var policy = await _policyService.GetPolicyByIdOrNameAsync(
+                addAccountPostsPolicyDto.PolicyIdOrName);
             if (policy != null && policy.ResponseObject != null)
             {
                 var accountPostPolicy = await _accountPostsPolicyRepository
                     .GetAccountPostPolicyByPolicyIdAsync(policy.ResponseObject.Id);
-                if (accountPostPolicy != null)
+                if (accountPostPolicy == null)
                 {
+                    addAccountPostsPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
+                    var newAccountPostsPolicy = await _accountPostsPolicyRepository.AddAccountPostPolicyAsync(
+                        ConvertFromDto.ConvertAccountPostsPolicyDto_Add(addAccountPostsPolicyDto));
                     return StatusCodeReturn<AccountPostsPolicy>
-                        ._403_Forbidden("Account post policy already exists");
+                        ._201_Created("Account posts policy created successfully", newAccountPostsPolicy);
                 }
-                addAccountPostsPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
-                var newAccountPostsPolicy = await _accountPostsPolicyRepository.AddAccountPostPolicyAsync(
-                    ConvertFromDto.ConvertAccountPostsPolicyDto_Add(addAccountPostsPolicyDto));
                 return StatusCodeReturn<AccountPostsPolicy>
-                    ._201_Created("Account posts policy created successfully", newAccountPostsPolicy);
+                        ._403_Forbidden("Account post policy already exists");
             }
             return StatusCodeReturn<AccountPostsPolicy>
                 ._404_NotFound("Policy not found");
         }
 
-        public async Task<ApiResponse<AccountPostsPolicy>> DeleteAccountPostPolicyAsync
-            (string postPolicyIdOrPolicyIdOrPolicyName)
+        public async Task<ApiResponse<AccountPostsPolicy>> DeleteAccountPostPolicyAsync(
+            string postPolicyIdOrPolicyIdOrPolicyName)
         {
             var accountPostsPolicy = await GetAccountPostsPolicyByIdOrPolicyAsync(
                 postPolicyIdOrPolicyIdOrPolicyName);
@@ -60,8 +60,8 @@ namespace SocialMedia.Service.AccountPostsPolicyService
                 ._404_NotFound("Account post policy not found");
         }
 
-        public async Task<ApiResponse<AccountPostsPolicy>> DeleteAccountPostPolicyByIdAsync
-            (string postPolicyId)
+        public async Task<ApiResponse<AccountPostsPolicy>> DeleteAccountPostPolicyByIdAsync(
+            string postPolicyId)
         {
             var accountPostsPolicy = await _accountPostsPolicyRepository.GetAccountPostPolicyByIdAsync(
                 postPolicyId);
@@ -102,8 +102,8 @@ namespace SocialMedia.Service.AccountPostsPolicyService
                     ._200_Success("Account posts policy found successfully", accountPostsPolicies);
         }
 
-        public async Task<ApiResponse<AccountPostsPolicy>> GetAccountPostPolicyAsync
-            (string postPolicyIdOrPolicyIdOrPolicyName)
+        public async Task<ApiResponse<AccountPostsPolicy>> GetAccountPostPolicyAsync(
+            string postPolicyIdOrPolicyIdOrPolicyName)
         {
             var accountPostsPolicy = await GetAccountPostsPolicyByIdOrPolicyAsync(
                 postPolicyIdOrPolicyIdOrPolicyName);
@@ -142,25 +142,31 @@ namespace SocialMedia.Service.AccountPostsPolicyService
                 ._404_NotFound("Account post policy not found");
         }
 
-        public async Task<ApiResponse<AccountPostsPolicy>> UpdateAccountPostPolicyAsync
-            (UpdateAccountPostsPolicyDto updateAccountPostsPolicyDto)
+        public async Task<ApiResponse<AccountPostsPolicy>> UpdateAccountPostPolicyAsync(
+            UpdateAccountPostsPolicyDto updateAccountPostsPolicyDto)
         {
             var accountPostsPolicy = await _accountPostsPolicyRepository.GetAccountPostPolicyByIdAsync(
                 updateAccountPostsPolicyDto.Id);
-            var policy = await _policyService
-                .GetPolicyByIdOrNameAsync(updateAccountPostsPolicyDto.PolicyIdOrName);
-            if (accountPostsPolicy != null && policy != null && policy.ResponseObject != null)
+            if (accountPostsPolicy != null)
             {
-                var accountPostPolicy = await _accountPostsPolicyRepository
-                    .GetAccountPostPolicyByPolicyIdAsync(policy.ResponseObject.Id);
-                if (accountPostPolicy != null)
+                var policy = await _policyService
+                .GetPolicyByIdOrNameAsync(updateAccountPostsPolicyDto.PolicyIdOrName);
+                if (policy != null && policy.ResponseObject != null)
                 {
+                    var existAccountPostsPolicy = await _accountPostsPolicyRepository
+                    .GetAccountPostPolicyByPolicyIdAsync(policy.ResponseObject.Id);
+                    if (existAccountPostsPolicy == null)
+                    {
+                        updateAccountPostsPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
+                        var updated = await _accountPostsPolicyRepository.UpdateAccountPostPolicyAsync(
+                            ConvertFromDto.ConvertAccountPostsPolicyDto_Update(updateAccountPostsPolicyDto)
+                            );
+                        return StatusCodeReturn<AccountPostsPolicy>
+                            ._200_Success("Account post policy updated successfully", updated);
+                    }
                     return StatusCodeReturn<AccountPostsPolicy>
                         ._403_Forbidden("Account post policy already exists");
                 }
-                await _accountPostsPolicyRepository.UpdateAccountPostPolicyAsync(accountPostsPolicy);
-                return StatusCodeReturn<AccountPostsPolicy>
-                    ._200_Success("Account post policy updated successfully", accountPostsPolicy);
             }
             return StatusCodeReturn<AccountPostsPolicy>
                     ._404_NotFound("Account post policy not found");

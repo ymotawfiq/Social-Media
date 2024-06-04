@@ -31,11 +31,18 @@ namespace SocialMedia.Service.FriendListPolicyService
                 addFriendListPolicyDto.PolicyIdOrName);
             if (policy != null && policy.ResponseObject!=null)
             {
-                addFriendListPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
-                var newFriendListPolicy = await _friendListPolicyRepository.AddFriendListPolicyAsync(
-                    ConvertFromDto.ConvertFriendListPolicyDto_Add(addFriendListPolicyDto));
+                var existFriendListPolicy = await _friendListPolicyRepository
+                    .GetFriendListPolicyByPolicyIdAsync(policy.ResponseObject.Id);
+                if (existFriendListPolicy == null)
+                {
+                    addFriendListPolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
+                    var newFriendListPolicy = await _friendListPolicyRepository.AddFriendListPolicyAsync(
+                        ConvertFromDto.ConvertFriendListPolicyDto_Add(addFriendListPolicyDto));
+                    return StatusCodeReturn<FriendListPolicy>
+                        ._201_Created("Friend list policy added successfully", newFriendListPolicy);
+                }
                 return StatusCodeReturn<FriendListPolicy>
-                    ._201_Created("Friend list policy added successfully", newFriendListPolicy);
+                    ._403_Forbidden("Friend list policy already exists");
             }
             return StatusCodeReturn<FriendListPolicy>
                     ._404_NotFound("Policy not found");
@@ -86,11 +93,18 @@ namespace SocialMedia.Service.FriendListPolicyService
                 updateFriendListPolicyDto.PolicyIdOrName);
                 if (policy.ResponseObject != null)
                 {
-                    var updatedFriendListPolicy = await _friendListPolicyRepository
+                    var existFriendListPolicy = await _friendListPolicyRepository
+                        .GetFriendListPolicyByPolicyIdAsync(policy.ResponseObject.Id);
+                    if (existFriendListPolicy == null)
+                    {
+                        var updatedFriendListPolicy = await _friendListPolicyRepository
                         .UpdateFriendListPolicyAsync(
                             ConvertFromDto.ConvertFriendListPolicyDto_Update(updateFriendListPolicyDto));
+                        return StatusCodeReturn<FriendListPolicy>
+                            ._200_Success("Friend list policy updated successfully", updatedFriendListPolicy);
+                    }
                     return StatusCodeReturn<FriendListPolicy>
-                        ._200_Success("Friend list policy updated successfully", updatedFriendListPolicy);
+                        ._403_Forbidden("Friend list policy already exists");
                 }
                 return StatusCodeReturn<FriendListPolicy>
                         ._404_NotFound("Policy not found");

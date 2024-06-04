@@ -157,8 +157,8 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
-        public static AccountPolicy 
-            ConvertFromAccountPolicyDto_Update(UpdateAccountPolicyDto updateAccountPolicyDto)
+        public static AccountPolicy ConvertFromAccountPolicyDto_Update(
+            UpdateAccountPolicyDto updateAccountPolicyDto)
         {
             return new AccountPolicy
             {
@@ -249,13 +249,23 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
-        public static AccountPostsPolicy ConvertAccountPostsPolicyDto_Add
-            (AddAccountPostsPolicyDto addAccountPostsPolicyDto)
+        public static AccountPostsPolicy ConvertAccountPostsPolicyDto_Add(
+            AddAccountPostsPolicyDto addAccountPostsPolicyDto)
         {
             return new AccountPostsPolicy
             {
                 Id = Guid.NewGuid().ToString(),
                 PolicyId = addAccountPostsPolicyDto.PolicyIdOrName
+            };
+        }
+
+        public static AccountPostsPolicy ConvertAccountPostsPolicyDto_Update(
+            UpdateAccountPostsPolicyDto updateAccountPostsPolicyDto)
+        {
+            return new AccountPostsPolicy
+            {
+                Id = updateAccountPostsPolicyDto.Id,
+                PolicyId = updateAccountPostsPolicyDto.PolicyIdOrName
             };
         }
 
