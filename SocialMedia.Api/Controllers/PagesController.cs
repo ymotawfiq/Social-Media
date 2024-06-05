@@ -119,6 +119,34 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpGet("pages")]
+        public async Task<IActionResult> GetUserPagesAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _pageService.GetPagesByUserIdAsync(user.Id);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
 
         [HttpGet("pages/{userId}")]
         public async Task<IActionResult> GetPagesByUserIdAsync([FromRoute] string userId)

@@ -1,6 +1,7 @@
 ﻿
 
 using SocialMedia.Data.DTOs;
+using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.PagePostsRepository;
@@ -65,7 +66,6 @@ namespace SocialMedia.Service.PagePostsService
                     user.Id, pagePost.PostId);
                 if (userPost != null)
                 {
-                    await _pagePostsRepository.DeletePagePostByIdAsync(pagePostId);
                     await _postService.DeletePostAsync(user, pagePost.PostId);
                     return StatusCodeReturn<object>
                         ._200_Success("Page post deleted successfully");
@@ -75,6 +75,20 @@ namespace SocialMedia.Service.PagePostsService
             }
             return StatusCodeReturn<object>
                 ._404_NotFound("Page post not found");
+        }
+
+        public async Task<ApiResponse<object>> DeletePagePostByPostIdAsync(string postId, SiteUser user)
+        {
+            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(
+                user.Id, postId);
+            if (userPost != null)
+            {
+                await _postService.DeletePostAsync(user, postId);
+                return StatusCodeReturn<object>
+                    ._200_Success("Page post deleted successfully");
+            }
+            return StatusCodeReturn<object>
+                ._404_NotFound("User post not found");
         }
 
         public Task<ApiResponse<object>> GetPagePostByIdAsync(string pagePostId)

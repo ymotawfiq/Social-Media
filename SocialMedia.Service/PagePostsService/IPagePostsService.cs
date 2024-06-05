@@ -11,6 +11,7 @@ namespace SocialMedia.Service.PagePostsService
     {
         Task<ApiResponse<object>> AddPagePostAsync(AddPagePostDto addPagePostDto, SiteUser user);
         Task<ApiResponse<object>> DeletePagePostByIdAsync(string pagePostId, SiteUser user);
+        Task<ApiResponse<object>> DeletePagePostByPostIdAsync(string postId, SiteUser user);
         Task<ApiResponse<object>> GetPagePostByIdAsync(string pagePostId);
     }
 }
