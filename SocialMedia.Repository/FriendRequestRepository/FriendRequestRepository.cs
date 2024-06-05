@@ -109,10 +109,10 @@ namespace SocialMedia.Repository.FriendRequestRepository
         public async Task<FriendRequest> GetFriendRequestByUserAndPersonIdAsync
             (string userId, string personId)
         {
-            var user1 = await _dbContext.FriendRequests.Where(e => e.UserWhoSendId == userId)
-                .Where(e => e.UserWhoReceivedId == personId).FirstOrDefaultAsync();
-            var user2 = await _dbContext.FriendRequests.Where(e => e.UserWhoSendId == personId)
-                .Where(e => e.UserWhoReceivedId == userId).FirstOrDefaultAsync();
+            var user1 = (await _dbContext.FriendRequests.Where(e => e.UserWhoSendId == userId)
+                .Where(e => e.UserWhoReceivedId == personId).FirstOrDefaultAsync())!;
+            var user2 = (await _dbContext.FriendRequests.Where(e => e.UserWhoSendId == personId)
+                .Where(e => e.UserWhoReceivedId == userId).FirstOrDefaultAsync())!;
             return user1 == null ? user2! : user1;
         }
 

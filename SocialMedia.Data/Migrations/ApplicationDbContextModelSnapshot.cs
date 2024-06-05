@@ -455,6 +455,53 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("FriendRequests");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Pages");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.PagePosts", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PageId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Page Id");
+
+                    b.Property<string>("PostId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Post Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PageId");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("PagePosts");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
                 {
                     b.Property<string>("Id")
@@ -776,6 +823,31 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("SpecialPostReacts");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.UserPage", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PageId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Page Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PageId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserPages");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.UserPosts", b =>
                 {
                     b.Property<string>("Id")
@@ -1000,6 +1072,25 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.PagePosts", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Page", "Page")
+                        .WithMany("PagePosts")
+                        .HasForeignKey("PageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                        .WithMany("PagePosts")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Page");
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.CommentPolicy", "CommentPolicy")
@@ -1180,6 +1271,25 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("React");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.UserPage", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Page", "Page")
+                        .WithMany("UserPages")
+                        .HasForeignKey("PageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("UserPages")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Page");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.UserPosts", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Post", "Post")
@@ -1238,6 +1348,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("SavedPosts");
 
+                    b.Navigation("UserPages");
+
                     b.Navigation("UserPosts");
 
                     b.Navigation("UserSavedPostsFolders");
@@ -1253,6 +1365,13 @@ namespace SocialMedia.Data.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.FriendListPolicy", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
+                {
+                    b.Navigation("PagePosts");
+
+                    b.Navigation("UserPages");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
@@ -1272,6 +1391,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
                 {
+                    b.Navigation("PagePosts");
+
                     b.Navigation("PostComments");
 
                     b.Navigation("PostImages");

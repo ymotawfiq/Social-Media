@@ -150,6 +150,28 @@ namespace SocialMedia.Service.GenericReturn
             };
         }
 
+        public static ApiResponse<T> _406_NotAcceptable(string msg, T o)
+        {
+            return new ApiResponse<T>
+            {
+                IsSuccess = false,
+                Message = msg,
+                StatusCode = 406,
+                ResponseObject = o
+            };
+        }
+
+        public static ApiResponse<T> _406_NotAcceptable(T o)
+        {
+            return new ApiResponse<T>
+            {
+                IsSuccess = false,
+                Message = "Not Acceptable",
+                StatusCode = 406,
+                ResponseObject = o
+            };
+        }
+
 
     }
 }

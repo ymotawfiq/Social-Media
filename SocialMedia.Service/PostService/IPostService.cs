@@ -10,7 +10,7 @@ namespace SocialMedia.Service.PostService
 {
     public interface IPostService
     {
-        Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, CreatePostDto createPostDto);
+        Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto createPostDto);
         Task<ApiResponse<PostDto>> GetPostByIdAsync(SiteUser user, string postId);
         Task<ApiResponse<PostDto>> DeletePostAsync(SiteUser user, string postId);
         Task<ApiResponse<PostDto>> UpdatePostAsync(SiteUser user, UpdatePostDto updatePostDto);

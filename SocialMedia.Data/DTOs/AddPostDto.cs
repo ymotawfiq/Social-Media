@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SocialMedia.Data.DTOs
 {
-    public class CreatePostDto
+    public class AddPostDto
     {
         [Required]
         public string PostContent { get; set; } = string.Empty;

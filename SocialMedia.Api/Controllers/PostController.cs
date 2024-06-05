@@ -35,7 +35,7 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPost("post")]
-        public async Task<IActionResult> PosTAsync([FromForm] CreatePostDto createPostDto)
+        public async Task<IActionResult> PosTAsync([FromForm] AddPostDto createPostDto)
         {
             try
             {
@@ -83,13 +83,18 @@ namespace SocialMedia.Api.Controllers
                         if (post != null)
                         {
                             var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
-                            var routeUser = await _userManager.FindByIdAsync(userPost.UserId);
-                            if (routeUser != null)
+                            if (userPost != null)
                             {
-                                var response = await _postService
-                                    .GetPostByIdAsync(currentUser, routeUser, post.Id);
-                                return Ok(response);
+                                var routeUser = await _userManager.FindByIdAsync(userPost.UserId);
+                                if (routeUser != null)
+                                {
+                                    var response = await _postService
+                                        .GetPostByIdAsync(currentUser, routeUser, post.Id);
+                                    return Ok(response);
+                                }
                             }
+                            return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User post not found"));
                         }
                     }
                 }

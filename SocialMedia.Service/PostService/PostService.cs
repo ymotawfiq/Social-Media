@@ -58,7 +58,7 @@ namespace SocialMedia.Service.PostService
             this._postViewRepository = _postViewRepository;
             this._webHostEnvironment = _webHostEnvironment;
         }
-        public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, CreatePostDto createPostDto)
+        public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
             var accountPostsPolicy = await _accountPostsPolicyRepository
                 .GetAccountPostPolicyByIdAsync(user.AccountPostPolicyId!);
@@ -96,7 +96,7 @@ namespace SocialMedia.Service.PostService
             }
             var newPostDto = await _postRepository.AddPostAsync(user, post, postImages);
             var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
-            userPosts.User = null;
+            //userPosts.User = null;
             return StatusCodeReturn<PostDto>
                     ._201_Created("Post created successfully", newPostDto);
         }
@@ -148,8 +148,8 @@ namespace SocialMedia.Service.PostService
         }
 
 
-        public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsByPolicyAsync
-            (SiteUser user, Policy policy)
+        public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsByPolicyAsync(
+            SiteUser user, Policy policy)
         {
             var checkPolicy = await _policyRepository.GetPolicyByNameAsync(policy.PolicyType);
             if (checkPolicy == null)
@@ -195,8 +195,8 @@ namespace SocialMedia.Service.PostService
                     ._200_Success("Posts found successfully", posts);
         }
 
-        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> 
-            GetPostsForFriendsOfFriendsAsync(SiteUser user)
+        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> GetPostsForFriendsOfFriendsAsync(
+            SiteUser user)
         {
             var publicPolicy = await _policyRepository.GetPolicyByNameAsync("public");
             var publicPosts = await GetUserPostsByPolicyAsync(user, publicPolicy);
@@ -223,8 +223,8 @@ namespace SocialMedia.Service.PostService
         }
 
 
-        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> 
-            CheckFriendShipAndGetPostsAsync(SiteUser currentUser, SiteUser routeUser)
+        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> CheckFriendShipAndGetPostsAsync(
+            SiteUser currentUser, SiteUser routeUser)
         {
             var isFriend = await _friendService.IsUserFriendAsync(routeUser.Id, currentUser.Id);
             if (isFriend.ResponseObject)
@@ -250,8 +250,8 @@ namespace SocialMedia.Service.PostService
         }
 
 
-        public async Task<ApiResponse<PostDto>> 
-            UpdatePostAsync(SiteUser user, UpdatePostDto updatePostDto)
+        public async Task<ApiResponse<PostDto>> UpdatePostAsync(
+            SiteUser user, UpdatePostDto updatePostDto)
         {
             var userPost = await _userPostsRepository
                 .GetUserPostByUserAndPostIdAsync(user.Id, updatePostDto.PostId);
@@ -362,8 +362,8 @@ namespace SocialMedia.Service.PostService
 
 
 
-        public async Task<ApiResponse<bool>> UpdatePostPolicyAsync
-            (SiteUser user, UpdatePostPolicyDto updatePostPolicyDto)
+        public async Task<ApiResponse<bool>> UpdatePostPolicyAsync(
+            SiteUser user, UpdatePostPolicyDto updatePostPolicyDto)
         {
             var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
                 updatePostPolicyDto.PostId);
@@ -385,8 +385,8 @@ namespace SocialMedia.Service.PostService
                 ._404_NotFound("Post not found for this user");
         }
 
-        public async Task<ApiResponse<bool>> UpdatePostReactPolicyAsync
-            (SiteUser user, UpdatePostReactPolicyDto updatePostReactPolicy)
+        public async Task<ApiResponse<bool>> UpdatePostReactPolicyAsync(
+            SiteUser user, UpdatePostReactPolicyDto updatePostReactPolicy)
         {
             var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
                 updatePostReactPolicy.PostId);
@@ -415,8 +415,8 @@ namespace SocialMedia.Service.PostService
                 ._404_NotFound("Post not found for this user");
         }
 
-        public async Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync
-            (SiteUser user, UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
+        public async Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync(
+            SiteUser user, UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
         {
             var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
                 updatePostCommentPolicyDto.PostId);

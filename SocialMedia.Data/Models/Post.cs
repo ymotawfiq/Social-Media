@@ -22,5 +22,6 @@ namespace SocialMedia.Data.Models
         public List<SavedPosts>? SavedPosts { get; set; }
         public List<PostReacts>? PostReacts { get; set; }
         public List<PostComment>? PostComments { get; set; }
+        public List<PagePosts>? PagePosts { get; set; }
     }
 }

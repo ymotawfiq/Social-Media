@@ -32,6 +32,7 @@ namespace SocialMedia.Data.Models.Authentication
         public List<PostReacts>? PostReacts { get; set; }
         public List<PostComment>? PostComments { get; set; }
         public List<PostCommentReplay>? PostCommentReplays { get; set; }
+        public List<UserPage>? UserPages { get; set; }
 
     }
 }

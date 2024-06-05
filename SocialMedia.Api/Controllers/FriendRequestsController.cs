@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models;
-using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.GenericReturn;

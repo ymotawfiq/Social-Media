@@ -49,10 +49,10 @@ namespace SocialMedia.Repository.FriendsRepository
 
         public async Task<Friend> GetFriendByUserAndFriendIdAsync(string userId, string friendId)
         {
-            var friend1 = await _dbContext.Friends.Where(e => e.UserId == userId)
-                .Where(e => e.FriendId == friendId).FirstOrDefaultAsync();
-            var friend2 = await _dbContext.Friends.Where(e => e.UserId == friendId)
-                .Where(e => e.FriendId == userId).FirstOrDefaultAsync();
+            var friend1 = (await _dbContext.Friends.Where(e => e.UserId == userId)
+                .Where(e => e.FriendId == friendId).FirstOrDefaultAsync())!;
+            var friend2 = !(await _dbContext.Friends.Where(e => e.UserId == friendId)
+                .Where(e => e.FriendId == userId).FirstOrDefaultAsync())!;
             return friend1 == null ? friend2! : friend1;
         }
 

@@ -46,8 +46,8 @@ namespace SocialMedia.Repository.FollowerRepository
 
         public async Task<Follower> GetFollowingByUserIdAndFollowerIdAsync(string userId, string followerId)
         {
-            return await _dbContext.Followers.Where(e => e.UserId == userId)
-                .Where(e => e.FollowerId == followerId).FirstOrDefaultAsync();
+            return (await _dbContext.Followers.Where(e => e.UserId == userId)
+                .Where(e => e.FollowerId == followerId).FirstOrDefaultAsync())!;
         }
 
         public async Task SaveChangesAsync()

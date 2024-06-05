@@ -50,7 +50,8 @@ namespace SocialMedia.Repository.CommentPolicyRepository
 
         public async Task<CommentPolicy> GetCommentPolicyByIdAsync(string commentPolicyId)
         {
-            return (await _dbContext.CommentPolicies.Where(e => e.Id == commentPolicyId).FirstOrDefaultAsync())!;
+            return (await _dbContext.CommentPolicies.Where(e => e.Id == commentPolicyId)
+                .FirstOrDefaultAsync())!;
         }
 
         public async Task<CommentPolicy> GetCommentPolicyByPolicyIdAsync(string policyId)

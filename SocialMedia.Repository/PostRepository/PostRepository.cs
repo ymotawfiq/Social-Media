@@ -1,7 +1,6 @@
 ﻿
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using SocialMedia.Data;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models;

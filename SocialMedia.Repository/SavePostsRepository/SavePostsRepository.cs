@@ -36,8 +36,7 @@ namespace SocialMedia.Repository.SavePostsRepository
             try
             {
                 return (await _dbContext.SavedPosts.Where(e => e.UserId == user.Id)
-                    .Where(e => e.PostId == postId)
-                    .FirstOrDefaultAsync())!;
+                    .Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {

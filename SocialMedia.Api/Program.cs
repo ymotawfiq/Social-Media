@@ -15,6 +15,8 @@ using SocialMedia.Repository.FollowerRepository;
 using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Repository.PagePostsRepository;
+using SocialMedia.Repository.PageRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostCommentReplayRepository;
 using SocialMedia.Repository.PostCommentsRepository;
@@ -37,6 +39,8 @@ using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.PagePostsService;
+using SocialMedia.Service.PageService;
 using SocialMedia.Service.PolicyService;
 using SocialMedia.Service.PostCommentReplayService;
 using SocialMedia.Service.PostCommentService;
@@ -146,6 +150,8 @@ builder.Services.AddScoped<ISpecialCommentReactsService, SpecialCommentReactsSer
 builder.Services.AddScoped<IPostReactsService, PostReactsService>();
 builder.Services.AddScoped<IPostCommentService, PostCommentService>();
 builder.Services.AddScoped<IPostCommentReplayService, PostCommentReplayService>();
+builder.Services.AddScoped<IPageService, PageService>();
+builder.Services.AddScoped<IPagePostsService, PagePostsService>();
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
 builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -167,6 +173,8 @@ builder.Services.AddScoped<ISpecialCommentReactsRepository, SpecialCommentReacts
 builder.Services.AddScoped<IPostReactsRepository, PostReactsRepository>();
 builder.Services.AddScoped<IPostCommentsRepository, PostCommentsRepository>();
 builder.Services.AddScoped<IPostCommentReplayRepository, PostCommentReplayRepository>();
+builder.Services.AddScoped<IPageRepository, PageRepository>();
+builder.Services.AddScoped<IPagePostsRepository, PagePostsRepository>();
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

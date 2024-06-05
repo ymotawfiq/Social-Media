@@ -168,7 +168,7 @@ namespace SocialMedia.Data.Extensions
         }
 
 
-        public static Post ConvertFromCreatePostDto_Add(CreatePostDto createPostDto, Policy policy,
+        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, Policy policy,
             ReactPolicy reactPolicy, CommentPolicy commentPolicy)
         {
             return new Post
@@ -363,6 +363,36 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+
+        public static Page ConvertFromPageDto_Add(AddPageDto addPageDto)
+        {
+            return new Page
+            {
+                Description = addPageDto.Description,
+                Name = addPageDto.Name,
+                Id = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.Now
+            };
+        }
+
+        public static Page ConvertFromPageDto_Update(UpdatePageDto updatePageDto)
+        {
+            return new Page
+            {
+                Description = updatePageDto.Description,
+                Name = updatePageDto.Name,
+                Id = updatePageDto.Id
+            };
+        }
+
+        public static AddPostDto ConvertFromAddPagePostDtoToAddPostDto(AddPagePostDto addPagePostDto)
+        {
+            return new AddPostDto
+            {
+                Images = addPagePostDto.Images,
+                PostContent = addPagePostDto.PostContent
+            };
+        }
 
 
     }
