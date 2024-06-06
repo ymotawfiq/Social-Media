@@ -478,6 +478,31 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Pages");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.PageFollower", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FollowerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Follower Id");
+
+                    b.Property<string>("PageId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Page Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowerId");
+
+                    b.HasIndex("PageId", "FollowerId")
+                        .IsUnique();
+
+                    b.ToTable("PageFollowers");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.PagePosts", b =>
                 {
                     b.Property<string>("Id")
@@ -1072,6 +1097,25 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.PageFollower", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("PageFollowers")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Page", "Page")
+                        .WithMany("PageFollowers")
+                        .HasForeignKey("PageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Page");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.PagePosts", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Page", "Page")
@@ -1340,6 +1384,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("Friends");
 
+                    b.Navigation("PageFollowers");
+
                     b.Navigation("PostCommentReplays");
 
                     b.Navigation("PostComments");
@@ -1369,6 +1415,8 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
                 {
+                    b.Navigation("PageFollowers");
+
                     b.Navigation("PagePosts");
 
                     b.Navigation("UserPages");

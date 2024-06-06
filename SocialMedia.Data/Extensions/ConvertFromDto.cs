@@ -395,5 +395,38 @@ namespace SocialMedia.Data.Extensions
         }
 
 
+
+        public static PageFollower ConvertFromFollowPageDto_Add(
+            FollowPageDto followPageDto, SiteUser user)
+        {
+            return new PageFollower
+            {
+                FollowerId = user.Id,
+                PageId = followPageDto.PageId,
+                Id = Guid.NewGuid().ToString()
+            };
+        }
+
+        public static PageFollower ConvertFromUnFollowPageDto_Delete(
+                    UnFollowPageDto unFollowPageDto, SiteUser user)
+        {
+            return new PageFollower
+            {
+                FollowerId = user.Id,
+                PageId = unFollowPageDto.PageId,
+                Id = Guid.NewGuid().ToString()
+            };
+        }
+
+        public static PageFollower ConvertFromFollowPageUserDto_Add(FollowPageUserDto followPageUserDto)
+        {
+            return new PageFollower
+            {
+                FollowerId = followPageUserDto.UserIdOrUserNameOrEmail,
+                PageId = followPageUserDto.PageId,
+                Id = Guid.NewGuid().ToString()
+            };
+        }
+
     }
 }

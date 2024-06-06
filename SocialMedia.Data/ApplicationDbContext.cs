@@ -60,7 +60,8 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new PostCommentReplayConfigurations())
                    .ApplyConfiguration(new PageConfigurations())
                    .ApplyConfiguration(new UserPageConfiguration())
-                   .ApplyConfiguration(new PagePostsConfigurations());
+                   .ApplyConfiguration(new PagePostsConfigurations())
+                   .ApplyConfiguration(new PageFollowersConfigurations());
         }
 
 
@@ -89,8 +90,7 @@ namespace SocialMedia.Data
         public DbSet<Page> Pages { get; set; }
         public DbSet<UserPage> UserPages { get; set; }
         public DbSet<PagePosts> PagePosts { get; set; }
-
-
+        public DbSet<PageFollower> PageFollowers { get; set; }
 
     }
 }
