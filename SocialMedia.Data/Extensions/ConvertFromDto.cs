@@ -447,5 +447,24 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+
+        public static GroupRole ConvertFromGroupRoleDto_Add(AddGroupRoleDto addGroupRoleDto)
+        {
+            return new GroupRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                RoleName = addGroupRoleDto.RoleName
+            };
+        }
+
+        public static GroupRole ConvertFromGroupRoleDto_Update(UpdateGroupRoleDto updateGroupRoleDto)
+        {
+            return new GroupRole
+            {
+                Id = updateGroupRoleDto.Id,
+                RoleName = updateGroupRoleDto.RoleName
+            };
+        }
+
     }
 }

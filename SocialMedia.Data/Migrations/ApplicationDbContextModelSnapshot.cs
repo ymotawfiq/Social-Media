@@ -473,6 +473,23 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("GroupPolicies");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleName")
+                        .IsUnique();
+
+                    b.ToTable("GroupRoles");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
                 {
                     b.Property<string>("Id")
