@@ -455,6 +455,24 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("FriendRequests");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("GroupPolicies");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
                 {
                     b.Property<string>("Id")
@@ -1097,6 +1115,17 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("GroupPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.PageFollower", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -1429,6 +1458,8 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("CommentPolicies");
 
                     b.Navigation("FriendListPolicies");
+
+                    b.Navigation("GroupPolicies");
 
                     b.Navigation("PostPolicies");
 

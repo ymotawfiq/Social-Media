@@ -428,5 +428,24 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+
+        public static GroupPolicy ConvertFromGroupPolicyDto_Add(AddGroupPolicyDto addGroupPolicyDto)
+        {
+            return new GroupPolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = addGroupPolicyDto.PolicyIdOrName
+            };
+        }
+
+        public static GroupPolicy ConvertFromGroupPolicyDto_Update(UpdateGroupPolicyDto updateGroupPolicyDto)
+        {
+            return new GroupPolicy
+            {
+                Id = updateGroupPolicyDto.Id,
+                PolicyId = updateGroupPolicyDto.PolicyIdOrName
+            };
+        }
+
     }
 }
