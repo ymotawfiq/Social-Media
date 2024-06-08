@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SocialMedia.Data;
@@ -15,7 +14,10 @@ using SocialMedia.Repository.FollowerRepository;
 using SocialMedia.Repository.FriendListPolicyRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Repository.GroupAccessRequestRepository;
+using SocialMedia.Repository.GroupMemberRepository;
 using SocialMedia.Repository.GroupPolicyRepository;
+using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
 using SocialMedia.Repository.PagePostsRepository;
 using SocialMedia.Repository.PageRepository;
@@ -42,8 +44,11 @@ using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.GroupAccessRequestService;
+using SocialMedia.Service.GroupManager;
 using SocialMedia.Service.GroupPolicyService;
 using SocialMedia.Service.GroupRolesService;
+using SocialMedia.Service.GroupService;
 using SocialMedia.Service.PagePostsService;
 using SocialMedia.Service.PageService;
 using SocialMedia.Service.PagesFollowersService;
@@ -161,7 +166,9 @@ builder.Services.AddScoped<IPagePostsService, PagePostsService>();
 builder.Services.AddScoped<IPagesFollowersService, PagesFollowersService>();
 builder.Services.AddScoped<IGroupPolicyService, GroupPolicyService>();
 builder.Services.AddScoped<IGroupRolesService, GroupRolesService>();
-
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IGroupManager, GroupManager>();
+builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService>();
 
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
@@ -189,6 +196,10 @@ builder.Services.AddScoped<IPagePostsRepository, PagePostsRepository>();
 builder.Services.AddScoped<IPagesFollowersRepository, PagesFollowersRepository>();
 builder.Services.AddScoped<IGroupPolicyRepository, GroupPolicyRepository>();
 builder.Services.AddScoped<IGroupRoleRepository, GroupRoleRepository>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IGroupAccessRequestRepository, GroupAccessRequestRepository>();
+builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+
 
 builder.Services.AddControllers().AddJsonOptions(op =>
 {

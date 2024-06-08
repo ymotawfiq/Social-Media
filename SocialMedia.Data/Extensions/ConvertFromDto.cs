@@ -466,5 +466,46 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+        public static Group ConvertFromGroupDto_Add(AddGroupDto addGroupDto, SiteUser user)
+        {
+            return new Group
+            {
+                Id = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.Now,
+                Name = addGroupDto.Name,
+                Description = addGroupDto.Description,
+                GroupPolicyId = addGroupDto.GroupPolicyIdOrName,
+                CreatedUserId = user.Id
+            };
+        }
+
+        public static Group ConvertFromGroupDto_Update(UpdateGroupDto updateGroupDto, SiteUser user,
+            Group group)
+        {
+            return new Group
+            {
+                Id = updateGroupDto.Id,
+                Name = updateGroupDto.Name,
+                Description = updateGroupDto.Description,
+                CreatedUserId = user.Id,
+                GroupPolicyId = group.GroupPolicyId,
+                CreatedAt = group.CreatedAt
+            };
+        }
+
+        public static Group ConvertFromGroupDto_Update(
+            UpdateExistGroupPolicyDto updateExistGroupPolicyDto, Group group)
+        {
+            return new Group
+            {
+                Id = updateExistGroupPolicyDto.GroupId,
+                GroupPolicyId = updateExistGroupPolicyDto.GroupPolicyIdOrName,
+                CreatedUserId = group.CreatedUserId,
+                Name = group.Name,
+                Description = group.Description,
+                CreatedAt = group.CreatedAt
+            };
+        }
+
     }
 }

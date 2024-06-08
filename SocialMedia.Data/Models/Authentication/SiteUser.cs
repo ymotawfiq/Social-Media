@@ -34,6 +34,9 @@ namespace SocialMedia.Data.Models.Authentication
         public List<PostCommentReplay>? PostCommentReplays { get; set; }
         public List<UserPage>? UserPages { get; set; }
         public List<PageFollower>? PageFollowers { get; set; }
+        public LinkedList<Group>? Groups { get; set; }
+        public List<GroupMember>? GroupMembers { get; set; }
+        public List<GroupAccessRequest>? GroupAccessRequests { get; set; }
 
     }
 }

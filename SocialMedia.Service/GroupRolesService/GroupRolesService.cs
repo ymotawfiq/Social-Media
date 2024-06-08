@@ -88,7 +88,7 @@ namespace SocialMedia.Service.GroupRolesService
                     ._200_Success("No group roles found", groupRoles);
             }
             return StatusCodeReturn<object>
-                    ._200_Success("Group roles not found", groupRoles);
+                    ._200_Success("Group roles found successfully", groupRoles);
         }
 
         public async Task<object> UpdateGroupRoleAsync(UpdateGroupRoleDto updateGroupRoleDto)

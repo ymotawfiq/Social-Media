@@ -63,7 +63,10 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new PagePostsConfigurations())
                    .ApplyConfiguration(new PageFollowersConfigurations())
                    .ApplyConfiguration(new GroupPolicyConfigurations())
-                   .ApplyConfiguration(new GroupRoleConfigurations());
+                   .ApplyConfiguration(new GroupRoleConfigurations())
+                   .ApplyConfiguration(new GroupConfigurations())
+                   .ApplyConfiguration(new GroupMembersConfigurations())
+                   .ApplyConfiguration(new GroupAccessRequestConfigurations());
         }
 
 
@@ -95,6 +98,9 @@ namespace SocialMedia.Data
         public DbSet<PageFollower> PageFollowers { get; set; }
         public DbSet<GroupPolicy> GroupPolicies { get; set; }
         public DbSet<GroupRole> GroupRoles { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<GroupAccessRequest> GroupAccessRequests { get; set; }
 
     }
 }

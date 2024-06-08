@@ -6,5 +6,6 @@ namespace SocialMedia.Data.Models
     {
         public string Id { get; set; } = null!;
         public string RoleName { get; set; } = null!;
+        public List<GroupMember>? GroupMembers { get; set; }
     }
 }

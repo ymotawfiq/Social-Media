@@ -455,6 +455,100 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("FriendRequests");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Group", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Group Creator Id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("GroupPolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Group Policy Id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedUserId");
+
+                    b.HasIndex("GroupPolicyId");
+
+                    b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupAccessRequest", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GroupId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Group Id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("GroupId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("GroupAccessRequests");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GroupId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Group Id");
+
+                    b.Property<string>("MemberId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Member Id");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Role Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("RoleId", "MemberId", "GroupId")
+                        .IsUnique();
+
+                    b.ToTable("GroupMembers");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
                 {
                     b.Property<string>("Id")
@@ -1132,6 +1226,71 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Group", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("Groups")
+                        .HasForeignKey("CreatedUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.GroupPolicy", "GroupPolicy")
+                        .WithMany("Groups")
+                        .HasForeignKey("GroupPolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GroupPolicy");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupAccessRequest", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Group", "Group")
+                        .WithMany("GroupAccessRequests")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("GroupAccessRequests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Group", "Group")
+                        .WithMany("GroupMembers")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("GroupMembers")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.GroupRole", "Role")
+                        .WithMany("GroupMembers")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
@@ -1430,6 +1589,12 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("Friends");
 
+                    b.Navigation("GroupAccessRequests");
+
+                    b.Navigation("GroupMembers");
+
+                    b.Navigation("Groups");
+
                     b.Navigation("PageFollowers");
 
                     b.Navigation("PostCommentReplays");
@@ -1457,6 +1622,23 @@ namespace SocialMedia.Data.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.FriendListPolicy", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.Group", b =>
+                {
+                    b.Navigation("GroupAccessRequests");
+
+                    b.Navigation("GroupMembers");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
+                {
+                    b.Navigation("Groups");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupRole", b =>
+                {
+                    b.Navigation("GroupMembers");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
