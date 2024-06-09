@@ -530,7 +530,27 @@ namespace SocialMedia.Data.Migrations
                     b.Property<string>("MemberId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Member Id");
+                        .HasColumnName("User Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("MemberId", "GroupId")
+                        .IsUnique();
+
+                    b.ToTable("GroupMembers");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupMemberRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GroupMemberId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Group Member Id");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
@@ -539,14 +559,12 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("GroupMemberId");
 
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("RoleId", "MemberId", "GroupId")
+                    b.HasIndex("RoleId", "GroupMemberId")
                         .IsUnique();
 
-                    b.ToTable("GroupMembers");
+                    b.ToTable("GroupMemberRoles");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
@@ -1278,17 +1296,28 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.GroupRole", "Role")
-                        .WithMany("GroupMembers")
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupMemberRole", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.GroupMember", "GroupMember")
+                        .WithMany("GroupMemberRoles")
+                        .HasForeignKey("GroupMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.GroupRole", "GroupRole")
+                        .WithMany("GroupMemberRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Group");
+                    b.Navigation("GroupMember");
 
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
+                    b.Navigation("GroupRole");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
@@ -1631,6 +1660,11 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("GroupMembers");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
+                {
+                    b.Navigation("GroupMemberRoles");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
                 {
                     b.Navigation("Groups");
@@ -1638,7 +1672,7 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.GroupRole", b =>
                 {
-                    b.Navigation("GroupMembers");
+                    b.Navigation("GroupMemberRoles");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>

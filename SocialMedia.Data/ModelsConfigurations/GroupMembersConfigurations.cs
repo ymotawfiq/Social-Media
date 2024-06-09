@@ -15,10 +15,8 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.HasOne(e => e.Group).WithMany(e => e.GroupMembers).HasForeignKey(e => e.GroupId)
                 .OnDelete(DeleteBehavior.NoAction);
             builder.Property(e => e.GroupId).IsRequired().HasColumnName("Group Id");
-            builder.Property(e => e.MemberId).IsRequired().HasColumnName("Member Id");
-            builder.HasOne(e => e.Role).WithMany(e => e.GroupMembers).HasForeignKey(e => e.RoleId);
-            builder.HasIndex(e => new { e.RoleId, e.MemberId, e.GroupId }).IsUnique();
-            builder.Property(e => e.RoleId).IsRequired().HasColumnName("Role Id");
+            builder.Property(e => e.MemberId).IsRequired().HasColumnName("User Id");
+            builder.HasIndex(e => new { e.MemberId, e.GroupId }).IsUnique();
         }
     }
 }

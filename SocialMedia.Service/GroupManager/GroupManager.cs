@@ -5,6 +5,7 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.GroupAccessRequestRepository;
 using SocialMedia.Repository.GroupMemberRepository;
+using SocialMedia.Repository.GroupMemberRoleRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
 using SocialMedia.Service.GenericReturn;
@@ -18,15 +19,18 @@ namespace SocialMedia.Service.GroupManager
         private readonly IGroupRepository _groupRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly UserManagerReturn _userManagerReturn;
+        private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         public GroupManager(IGroupAccessRequestRepository _groupAccessRequestRepository,
             IGroupRoleRepository _groupRoleRepository, IGroupRepository _groupRepository,
-            IGroupMemberRepository _groupMemberRepository, UserManagerReturn _userManagerReturn)
+            IGroupMemberRepository _groupMemberRepository, UserManagerReturn _userManagerReturn,
+            IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupAccessRequestRepository = _groupAccessRequestRepository;
             this._groupRepository = _groupRepository;
             this._groupRoleRepository = _groupRoleRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._userManagerReturn = _userManagerReturn;
+            this._groupMemberRoleRepository = _groupMemberRoleRepository;
         }
 
         public async Task<ApiResponse<bool>> AcceptGroupRequestAsync(string requestId, SiteUser user)
@@ -41,12 +45,17 @@ namespace SocialMedia.Service.GroupManager
                     var userRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("user");
                     if (userRole != null)
                     {
-                        await _groupMemberRepository.AddGroupMemberAsync(
-                        new GroupMember
+                        var groupMember = new GroupMember
                         {
                             Id = Guid.NewGuid().ToString(),
                             GroupId = group.Id,
                             MemberId = request.UserId,
+                        };
+                        await _groupMemberRepository.AddGroupMemberAsync(groupMember);
+                        await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            GroupMemberId = groupMember.Id,
                             RoleId = userRole.Id
                         });
                         await _groupAccessRequestRepository.DeleteGroupAccessRequestByIdAsync(request.Id);
@@ -74,15 +83,7 @@ namespace SocialMedia.Service.GroupManager
                     var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
                     if (getRole != null)
                     {
-                        await _groupMemberRepository.AddGroupMemberAsync(new GroupMember
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            GroupId = group.Id,
-                            MemberId = user.Id,
-                            RoleId = getRole.Id
-                        });
-                        return StatusCodeReturn<bool>
-                            ._200_Success("Role added successfully to user", true);
+                        return await CheckRoleAndAddToUserAsync(groupMember, group, getRole);
                     }
                     return StatusCodeReturn<bool>
                         ._404_NotFound("Role not found");
@@ -106,23 +107,7 @@ namespace SocialMedia.Service.GroupManager
                     var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
                     if (getRole != null)
                     {
-                        var isMemberInRole = await IsInRoleAsync(
-                            await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(groupMember.MemberId),
-                            group, role);
-                        if(!isMemberInRole.ResponseObject)
-                        {
-                            await _groupMemberRepository.AddGroupMemberAsync(new GroupMember
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                GroupId = group.Id,
-                                RoleId = getRole.Id,
-                                MemberId = groupMember.MemberId
-                            });
-                            return StatusCodeReturn<bool>
-                                ._200_Success("Role added successfully to user", true);
-                        }
-                        return StatusCodeReturn<bool>
-                            ._403_Forbidden("Member already in role");
+                        return await CheckRoleAndAddToUserAsync(groupMember, group, getRole);
                     }
                     return StatusCodeReturn<bool>
                         ._404_NotFound("Role not found");
@@ -183,11 +168,12 @@ namespace SocialMedia.Service.GroupManager
                 var groupMember = await _groupMemberRepository.GetGroupMemberAsync(userId, group.Id);
                 if (groupMember != null)
                 {
-                    var userGroupRolesIds = await _groupMemberRepository.GetUserRolesAsync(userId);
+                    var userGroupRolesIds = await _groupMemberRoleRepository.GetMemberRolesAsync(
+                        groupMember.Id);
                     List<string> roles = new();
                     foreach (var role in userGroupRolesIds)
                     {
-                        roles.Add((await _groupRoleRepository.GetGroupRoleByIdAsync(role)).RoleName);
+                        roles.Add((await _groupRoleRepository.GetGroupRoleByIdAsync(role.RoleId)).RoleName);
                     }
                     return StatusCodeReturn<IEnumerable<string>>
                         ._200_Success("Roles found successfully", roles);
@@ -217,11 +203,18 @@ namespace SocialMedia.Service.GroupManager
             if (getRole != null)
             {
                 var groupMember = await _groupMemberRepository.GetGroupMemberAsync(
-                    user.Id, group.Id, getRole.Id);
+                    user.Id, group.Id);
                 if (groupMember != null)
                 {
-                    return StatusCodeReturn<bool>
+                    var memberRole = await _groupMemberRoleRepository.GetGroupMemberRoleAsync(
+                        groupMember.Id, getRole.Id);
+                    if (memberRole != null)
+                    {
+                        return StatusCodeReturn<bool>
                         ._200_Success("User is in role", true);
+                    }
+                    return StatusCodeReturn<bool>
+                        ._404_NotFound("User not in role", false);
                 }
                 return StatusCodeReturn<bool>
                         ._404_NotFound("Group member not found", false);
@@ -243,8 +236,7 @@ namespace SocialMedia.Service.GroupManager
             {
                 var group = await _groupRepository.GetGroupByIdAsync(groupMember.GroupId);
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
-                var isGroupMember = await _groupMemberRepository.GetGroupMemberAsync(user.Id, group.Id);
-                if (isAdmin != null && isAdmin.ResponseObject && isGroupMember != null)
+                if (isAdmin != null)
                 {
                     await _groupMemberRepository.DeleteGroupMemberAsync(groupMemberId);
                     return StatusCodeReturn<bool>
@@ -274,29 +266,11 @@ namespace SocialMedia.Service.GroupManager
                 if (groupMember != null)
                 {
                     var group = await _groupRepository.GetGroupByIdAsync(groupMember.GroupId);
-                    var userRoles = await GetUserRolesAsync(user.Id, group.Id);
-                    if (userRoles != null && userRoles.ResponseObject != null)
+                    var userRoles = await GetUserRolesAsync(groupMember.MemberId, group.Id);
+                    if (userRoles != null)
                     {
-                        if (userRoles.ResponseObject.ToList().Count > 1)
-                        {
-                            var isAdmin = await IsInRoleAsync(user, group, "admin");
-                            if (isAdmin.ResponseObject)
-                            {
-                                var existGroupMember = await _groupMemberRepository.GetGroupMemberAsync(
-                                user.Id, group.Id, getRole.Id);
-                                if (existGroupMember != null)
-                                {
-                                    await _groupMemberRepository.DeleteGroupMemberAsync(existGroupMember.Id);
-                                    return StatusCodeReturn<bool>
-                                        ._200_Success("Role deleted from user successfully", true);
-                                }
-                                return StatusCodeReturn<bool>
-                                    ._403_Forbidden("User not in role");
-                            }
-                            return isAdmin;
-                        }
-                        return StatusCodeReturn<bool>
-                                    ._403_Forbidden();
+                        return await CheckUserRoleAndRemoveFromAsync(user, group, getRole, userRoles,
+                            groupMember);
                     }
                     return StatusCodeReturn<bool>
                             ._404_NotFound("No roles found for this user");
@@ -309,12 +283,89 @@ namespace SocialMedia.Service.GroupManager
                                 ._404_NotFound("Role not found");
         }
 
-        private object SetNull(GroupAccessRequest groupAccessRequest)
+
+        public async Task<ApiResponse<IEnumerable<GroupMember>>> GetUserJoinedGroupsAsync(
+            SiteUser routeUser, SiteUser currentUser)
+        {
+            if (routeUser.Id == currentUser.Id)
+            {
+                var joinedGroups = await _groupMemberRepository.GetUserJoinedGroupsAsync(routeUser.Id);
+                foreach(var g in joinedGroups)
+                {
+                    SetNull(g);
+                }
+                if (joinedGroups.ToList().Count == 0)
+                {
+                    return StatusCodeReturn<IEnumerable<GroupMember>>
+                        ._200_Success("No groups found", joinedGroups);
+                }
+                return StatusCodeReturn<IEnumerable<GroupMember>>
+                        ._200_Success("Groups found successfully", joinedGroups);
+            }
+            return StatusCodeReturn<IEnumerable<GroupMember>>
+                ._403_Forbidden();
+        }
+
+        private void SetNull(GroupAccessRequest groupAccessRequest)
         {
             groupAccessRequest.Group = null;
             groupAccessRequest.User = null;
-            return groupAccessRequest;
         }
+
+        private void SetNull(GroupMember groupMember)
+        {
+            groupMember.Group = null;
+            groupMember.GroupMemberRoles = null;
+            groupMember.User = null;
+        }
+
+
+        private async Task<ApiResponse<bool>> CheckUserRoleAndRemoveFromAsync(SiteUser user, Group group,
+            GroupRole getRole, ApiResponse<IEnumerable<string>> userRoles, GroupMember groupMember)
+        {
+            if (userRoles.ResponseObject != null && userRoles.ResponseObject.ToList().Count > 1)
+            {
+                var isAdmin = await IsInRoleAsync(user, group, "admin");
+                if (isAdmin.ResponseObject)
+                {
+                    var isInRole = await _groupMemberRoleRepository.GetGroupMemberRoleAsync(
+                        groupMember.Id, getRole.Id);
+                    if (isInRole != null)
+                    {
+                        await _groupMemberRoleRepository.DeleteGroupMemberRoleAsync(isInRole.Id);
+                        return StatusCodeReturn<bool>
+                            ._200_Success("Role deleted from user successfully", true);
+                    }
+                    return StatusCodeReturn<bool>
+                        ._403_Forbidden("User not in role");
+                }
+                return isAdmin;
+            }
+            return StatusCodeReturn<bool>
+                        ._403_Forbidden();
+        }
+
+        private async Task<ApiResponse<bool>> CheckRoleAndAddToUserAsync(GroupMember groupMember,
+            Group group, GroupRole role)
+        {
+            var isMemberInRole = await IsInRoleAsync(
+            await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(groupMember.MemberId),
+            group, role.RoleName);
+            if (!isMemberInRole.ResponseObject)
+            {
+                await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    GroupMemberId = groupMember.Id,
+                    RoleId = role.Id
+                });
+                return StatusCodeReturn<bool>
+                    ._200_Success("Role added successfully to user", true);
+            }
+            return StatusCodeReturn<bool>
+                ._403_Forbidden("Member already in role");
+        }
+
 
     }
 }

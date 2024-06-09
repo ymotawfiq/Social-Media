@@ -22,6 +22,8 @@ namespace SocialMedia.Service.GroupManager
         Task<ApiResponse<bool>> RemoveFromGroupAsync(string groupMemberId, SiteUser user);
         Task<ApiResponse<IEnumerable<GroupAccessRequest>>> GetRequestsAsync(string groupId, SiteUser user);
         Task<ApiResponse<IEnumerable<GroupMember>>> GetGroupMembersAsync(string groupId);
+        Task<ApiResponse<IEnumerable<GroupMember>>> GetUserJoinedGroupsAsync(
+            SiteUser routeUser, SiteUser currentUser);
 
 
     }

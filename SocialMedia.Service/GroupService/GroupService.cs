@@ -6,6 +6,7 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.GroupMemberRepository;
+using SocialMedia.Repository.GroupMemberRoleRepository;
 using SocialMedia.Repository.GroupPolicyRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
@@ -21,15 +22,18 @@ namespace SocialMedia.Service.GroupService
         private readonly IGroupPolicyRepository _groupPolicyRepository;
         private readonly IGroupRoleRepository _groupRoleRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
+        private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         public GroupService(IGroupRepository _groupRepository, IPolicyService _policyService,
             IGroupPolicyRepository _groupPolicyRepository, IGroupRoleRepository _groupRoleRepository,
-            IGroupMemberRepository _groupMemberRepository)
+            IGroupMemberRepository _groupMemberRepository, 
+            IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupRepository = _groupRepository;
             this._policyService = _policyService;
             this._groupPolicyRepository = _groupPolicyRepository;
             this._groupRoleRepository = _groupRoleRepository;
             this._groupMemberRepository = _groupMemberRepository;
+            this._groupMemberRoleRepository = _groupMemberRoleRepository;
         }
         public async Task<ApiResponse<Group>> AddGroupAsync(AddGroupDto addGroupDto, SiteUser user)
         {
@@ -40,12 +44,14 @@ namespace SocialMedia.Service.GroupService
                     policy.ResponseObject.Id);
                 if (groupPolicy != null)
                 {
-                    addGroupDto.GroupPolicyIdOrName = groupPolicy.Id;
-                    var newGroup = await _groupRepository.AddGroupAsync(ConvertFromDto
-                        .ConvertFromGroupDto_Add(addGroupDto, user));
-                    SetNull(newGroup);
+                    var adminRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("admin");
+                    if (adminRole != null)
+                    {
+                        addGroupDto.GroupPolicyIdOrName = groupPolicy.Id;
+                        return await CreateGroupWithMemberAdmin(addGroupDto, user, adminRole);
+                    }
                     return StatusCodeReturn<Group>
-                        ._201_Created("Group created successfully", newGroup);
+                    ._404_NotFound("Admin role not found");
                 }
                 return StatusCodeReturn<Group>
                     ._404_NotFound("Group policy not found");
@@ -180,6 +186,29 @@ namespace SocialMedia.Service.GroupService
                             ._404_NotFound("Group not found");
         }
 
+
+        private async Task<ApiResponse<Group>> CreateGroupWithMemberAdmin(AddGroupDto addGroupDto,
+            SiteUser user, GroupRole adminRole)
+        {
+            var newGroup = await _groupRepository.AddGroupAsync(ConvertFromDto
+                .ConvertFromGroupDto_Add(addGroupDto, user));
+            var groupMember = new GroupMember
+            {
+                Id = Guid.NewGuid().ToString(),
+                GroupId = newGroup.Id,
+                MemberId = newGroup.CreatedUserId
+            };
+            await _groupMemberRepository.AddGroupMemberAsync(groupMember);
+            await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                RoleId = adminRole.Id,
+                GroupMemberId = groupMember.Id
+            });
+            SetNull(newGroup);
+            return StatusCodeReturn<Group>
+                ._201_Created("Group created successfully", newGroup);
+        }
 
         private Group SetNull(Group group)
         {

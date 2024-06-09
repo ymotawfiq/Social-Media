@@ -20,13 +20,6 @@ namespace SocialMedia.Repository.GroupRepository
             try
             {
                 await _dbContext.Groups.AddAsync(group);
-                await _dbContext.GroupMembers.AddAsync(new GroupMember
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    GroupId = group.Id,
-                    MemberId = group.CreatedUserId,
-                    RoleId = (await _groupRoleRepository.GetGroupRoleByRoleNameAsync("admin")).Id
-                });
                 await SaveChangesAsync();
                 return group;
             }

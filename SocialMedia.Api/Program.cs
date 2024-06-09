@@ -16,6 +16,7 @@ using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.GroupAccessRequestRepository;
 using SocialMedia.Repository.GroupMemberRepository;
+using SocialMedia.Repository.GroupMemberRoleRepository;
 using SocialMedia.Repository.GroupPolicyRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
@@ -199,6 +200,7 @@ builder.Services.AddScoped<IGroupRoleRepository, GroupRoleRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IGroupAccessRequestRepository, GroupAccessRequestRepository>();
 builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+builder.Services.AddScoped<IGroupMemberRoleRepository, GroupMemberRoleRepository>();
 
 
 builder.Services.AddControllers().AddJsonOptions(op =>
@@ -208,7 +210,7 @@ builder.Services.AddControllers().AddJsonOptions(op =>
 
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Social Media Website Endpoints", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Social Media Endpoints", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,

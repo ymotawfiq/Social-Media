@@ -50,12 +50,6 @@ namespace SocialMedia.Repository.GroupMemberRepository
                 .Where(e => e.MemberId == userId).FirstOrDefaultAsync())!;
         }
 
-        public async Task<GroupMember> GetGroupMemberAsync(string userId, string groupId, string roleId)
-        {
-            return (await _dbContext.GroupMembers.Where(e => e.GroupId == groupId)
-                .Where(e => e.MemberId == userId).Where(e=>e.RoleId == roleId).FirstOrDefaultAsync())!;
-        }
-
         public async Task<GroupMember> GetGroupMemberAsync(string groupMemberId)
         {
             return (await _dbContext.GroupMembers.Where(e => e.Id == groupMemberId).FirstOrDefaultAsync())!;
@@ -63,7 +57,7 @@ namespace SocialMedia.Repository.GroupMemberRepository
 
         public async Task<IEnumerable<GroupMember>> GetGroupMembersAsync(string groupId)
         {
-            return from g in await _dbContext.GroupMembers.ToListAsync()
+            return from g in await _dbContext.GroupMembers.Distinct().ToListAsync()
                    where g.GroupId == groupId
                    select g;
         }
@@ -75,11 +69,11 @@ namespace SocialMedia.Repository.GroupMemberRepository
                    select g;
         }
 
-        public async Task<IEnumerable<string>> GetUserRolesAsync(string userId)
+        public async Task<IEnumerable<GroupMember>> GetUserJoinedGroupsAsync(string userId)
         {
             return from g in await _dbContext.GroupMembers.ToListAsync()
                    where g.MemberId == userId
-                   select g.RoleId;
+                   select g;
         }
 
         public async Task SaveChangesAsync()

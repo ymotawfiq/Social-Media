@@ -11,10 +11,9 @@ namespace SocialMedia.Repository.GroupMemberRepository
         Task<GroupMember> GetGroupMemberAsync(string userId, string groupId);
         Task<GroupMember> GetGroupMemberAsync(string groupMemberId);
         Task<GroupMember> DeleteGroupMemberAsync(string groupMemberId);
-        Task<GroupMember> GetGroupMemberAsync(string userId, string groupId, string roleId);
         Task<IEnumerable<GroupMember>> GetGroupMembersAsync(string groupId);
         Task<IEnumerable<GroupMember>> GetUserGroupsAsync(string userId);
-        Task<IEnumerable<string>> GetUserRolesAsync(string userId);
+        Task<IEnumerable<GroupMember>> GetUserJoinedGroupsAsync(string userId);
         Task SaveChangesAsync();
     }
 }
