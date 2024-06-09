@@ -18,6 +18,7 @@ using SocialMedia.Repository.GroupAccessRequestRepository;
 using SocialMedia.Repository.GroupMemberRepository;
 using SocialMedia.Repository.GroupMemberRoleRepository;
 using SocialMedia.Repository.GroupPolicyRepository;
+using SocialMedia.Repository.GroupPostsRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
 using SocialMedia.Repository.PagePostsRepository;
@@ -48,6 +49,7 @@ using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.GroupAccessRequestService;
 using SocialMedia.Service.GroupManager;
 using SocialMedia.Service.GroupPolicyService;
+using SocialMedia.Service.GroupPostsService;
 using SocialMedia.Service.GroupRolesService;
 using SocialMedia.Service.GroupService;
 using SocialMedia.Service.PagePostsService;
@@ -170,6 +172,7 @@ builder.Services.AddScoped<IGroupRolesService, GroupRolesService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService>();
+builder.Services.AddScoped<IGroupPostsService, GroupPostsService>();
 
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
@@ -201,6 +204,7 @@ builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IGroupAccessRequestRepository, GroupAccessRequestRepository>();
 builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<IGroupMemberRoleRepository, GroupMemberRoleRepository>();
+builder.Services.AddScoped<IGroupPostsRepository, GroupPostsRepository>();
 
 
 builder.Services.AddControllers().AddJsonOptions(op =>

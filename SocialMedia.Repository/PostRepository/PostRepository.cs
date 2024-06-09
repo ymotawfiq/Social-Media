@@ -98,7 +98,13 @@ namespace SocialMedia.Repository.PostRepository
         {
             try
             {
-                _dbContext.Posts.Update(post);
+                var oldPost = await GetPostByIdAsync(post.Id);
+                oldPost.PolicyId = post.PolicyId;
+                oldPost.PostedAt = post.PostedAt;
+                oldPost.CommentPolicyId = post.CommentPolicyId;
+                oldPost.Content = post.Content;
+                oldPost.ReactPolicyId = post.ReactPolicyId;
+                oldPost.UpdatedAt = DateTime.Now;
                 await UpdatePostImagesAsync(post, postImages);
                 await SaveChangesAsync();
                 return CreatePostDtoObject(post, postImages);

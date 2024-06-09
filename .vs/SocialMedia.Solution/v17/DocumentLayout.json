@@ -3,20 +3,20 @@
   "WorkspaceRootPath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\groupmanager\\groupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\groupmanager\\groupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.repository\\postrepository\\postrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|solutionrelative:socialmedia.repository\\postrepository\\postrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\groupmanager\\igroupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\groupmanager\\igroupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\postservice\\postservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\postservice\\postservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\groupcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\groupcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\grouppostsservice\\grouppostsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\grouppostsservice\\grouppostsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\groupservice\\groupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\groupservice\\groupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\grouppostscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\grouppostscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,54 +34,54 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "GroupService.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupService\\GroupService.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Service\\GroupService\\GroupService.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupService\\GroupService.cs",
-              "RelativeToolTip": "SocialMedia.Service\\GroupService\\GroupService.cs",
-              "ViewState": "AQIAAB8AAAAAAAAAAAAgwNsAAAAJAAAA",
+              "DocumentIndex": 0,
+              "Title": "PostRepository.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "RelativeToolTip": "SocialMedia.Repository\\PostRepository\\PostRepository.cs",
+              "ViewState": "AQIAAE0AAAAAAAAAAAAwwGoAAAAxAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-09T09:18:48.753Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "GroupController.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\GroupController.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\GroupController.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\GroupController.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Controllers\\GroupController.cs",
-              "ViewState": "AQIAAK8BAAAAAAAAAAAxwK8BAAA/AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-09T09:06:50.543Z",
+              "WhenOpened": "2024-06-09T13:07:21.418Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "IGroupManager.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupManager\\IGroupManager.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Service\\GroupManager\\IGroupManager.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupManager\\IGroupManager.cs",
-              "RelativeToolTip": "SocialMedia.Service\\GroupManager\\IGroupManager.cs",
-              "ViewState": "AQIAAAgAAAAAAAAAAAAxwBkAAAA2AAAA",
+              "Title": "PostService.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\PostService\\PostService.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Service\\PostService\\PostService.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\PostService\\PostService.cs",
+              "RelativeToolTip": "SocialMedia.Service\\PostService\\PostService.cs",
+              "ViewState": "AQIAAAkBAAAAAAAAAAAkwCYBAAAqAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-09T09:01:25.476Z",
+              "WhenOpened": "2024-06-09T12:48:45.105Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "GroupManager.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupManager\\GroupManager.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Service\\GroupManager\\GroupManager.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupManager\\GroupManager.cs",
-              "RelativeToolTip": "SocialMedia.Service\\GroupManager\\GroupManager.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAADgBAAAAAAAA",
+              "DocumentIndex": 2,
+              "Title": "GroupPostsService.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupPostsService\\GroupPostsService.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Service\\GroupPostsService\\GroupPostsService.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\GroupPostsService\\GroupPostsService.cs",
+              "RelativeToolTip": "SocialMedia.Service\\GroupPostsService\\GroupPostsService.cs",
+              "ViewState": "AQIAAB0AAAAAAAAAAAAuwDkAAAAUAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-09T07:43:27.336Z",
+              "WhenOpened": "2024-06-09T12:29:27.56Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "GroupPostsController.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\GroupPostsController.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\GroupPostsController.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\GroupPostsController.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Controllers\\GroupPostsController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAEQAAAAjAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-09T12:23:21.077Z",
               "EditorCaption": ""
             }
           ]

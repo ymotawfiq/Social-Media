@@ -67,7 +67,8 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new GroupConfigurations())
                    .ApplyConfiguration(new GroupMembersConfigurations())
                    .ApplyConfiguration(new GroupAccessRequestConfigurations())
-                   .ApplyConfiguration(new GroupMemberRoleConfigurations());
+                   .ApplyConfiguration(new GroupMemberRoleConfigurations())
+                   .ApplyConfiguration(new GroupPostsConfigurations());
         }
 
 
@@ -103,6 +104,7 @@ namespace SocialMedia.Data
         public DbSet<GroupMember> GroupMembers { get; set; }
         public DbSet<GroupAccessRequest> GroupAccessRequests { get; set; }
         public DbSet<GroupMemberRole> GroupMemberRoles { get; set; }
+        public DbSet<GroupPost> GroupPosts { get; set; }
 
     }
 }

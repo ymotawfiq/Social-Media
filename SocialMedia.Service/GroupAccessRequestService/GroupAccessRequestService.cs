@@ -54,44 +54,7 @@ namespace SocialMedia.Service.GroupAccessRequestService
                 var groupPolicy = await _groupPolicyRepository.GetGroupPolicyByIdAsync(group.GroupPolicyId);
                 if (groupPolicy != null)
                 {
-                    var policy = await _policyRepository.GetPolicyByIdAsync(groupPolicy.PolicyId);
-                    if (policy.PolicyType == "PUBLIC")
-                    {
-                        var userRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("user");
-                        if (userRole != null)
-                        {
-                            var groupMember = new GroupMember
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                GroupId = group.Id,
-                                MemberId = user.Id,
-                            };
-                            await _groupMemberRepository.AddGroupMemberAsync(groupMember);
-                            await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                GroupMemberId = groupMember.Id,
-                                RoleId = userRole.Id
-                            });
-                            return StatusCodeReturn<object>
-                                ._201_Created("Joined successfully");
-                        }
-                        return StatusCodeReturn<object>
-                            ._404_NotFound("User role not found");
-                    }
-                    else
-                    {
-                        var request = await _groupAccessRequestRepository.AddGroupAccessRequestAsync(
-                            new GroupAccessRequest
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                GroupId = group.Id,
-                                UserId = user.Id
-                            });
-                        SetNull(request);
-                        return StatusCodeReturn<object>
-                            ._201_Created("Request sent successfully", request);
-                    }
+                    return await CheckGroupPolicyAndApplyRequestAsync(groupPolicy, group, user);
                 }
                 return StatusCodeReturn<object>
                     ._404_NotFound("Group policy not found");
@@ -128,5 +91,50 @@ namespace SocialMedia.Service.GroupAccessRequestService
             group.Group = null;
             return group;
         }
+
+        private async Task<ApiResponse<object>> CheckGroupPolicyAndApplyRequestAsync(
+            GroupPolicy groupPolicy, Group group, SiteUser user)
+        {
+            var policy = await _policyRepository.GetPolicyByIdAsync(groupPolicy.PolicyId);
+            if (policy.PolicyType == "PUBLIC")
+            {
+                var userRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("user");
+                if (userRole != null)
+                {
+                    var groupMember = new GroupMember
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        GroupId = group.Id,
+                        MemberId = user.Id,
+                    };
+                    await _groupMemberRepository.AddGroupMemberAsync(groupMember);
+                    await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        GroupMemberId = groupMember.Id,
+                        RoleId = userRole.Id
+                    });
+                    return StatusCodeReturn<object>
+                        ._201_Created("Joined successfully");
+                }
+                return StatusCodeReturn<object>
+                    ._404_NotFound("User role not found");
+            }
+            else
+            {
+                var request = await _groupAccessRequestRepository.AddGroupAccessRequestAsync(
+                    new GroupAccessRequest
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        GroupId = group.Id,
+                        UserId = user.Id
+                    });
+                SetNull(request);
+                return StatusCodeReturn<object>
+                    ._201_Created("Request sent successfully", request);
+            }
+        }
+
+
     }
 }

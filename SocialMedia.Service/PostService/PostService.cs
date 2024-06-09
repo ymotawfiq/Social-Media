@@ -12,6 +12,9 @@ using SocialMedia.Repository.AccountPolicyRepository;
 using SocialMedia.Repository.AccountPostsPolicyRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Repository.GroupPolicyRepository;
+using SocialMedia.Repository.GroupPostsRepository;
+using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.PostViewRepository;
@@ -36,6 +39,9 @@ namespace SocialMedia.Service.PostService
         private readonly IAccountPostsPolicyRepository _accountPostsPolicyRepository;
         private readonly IPostViewRepository _postViewRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IGroupPolicyRepository _groupPolicyRepository;
+        private readonly IGroupPostsRepository _groupPostsRepository;
+        private readonly IGroupRepository _groupRepository;
         
 
         public PostService(IPostRepository _postRepository,
@@ -43,8 +49,9 @@ namespace SocialMedia.Service.PostService
             IReactPolicyRepository _reactPolicyRepository, IPolicyRepository _policyRepository,
             IFriendsRepository _friendsRepository, IFriendService _friendService,
             IUserPostsRepository _userPostsRepository, IPolicyService _policyService,
-            IAccountPostsPolicyRepository _accountPostsPolicyRepository,
-            IPostViewRepository _postViewRepository, IWebHostEnvironment _webHostEnvironment)
+            IAccountPostsPolicyRepository _accountPostsPolicyRepository, IGroupRepository _groupRepository,
+            IPostViewRepository _postViewRepository, IWebHostEnvironment _webHostEnvironment,
+            IGroupPolicyRepository _groupPolicyRepository, IGroupPostsRepository _groupPostsRepository)
         {
             this._postRepository = _postRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
@@ -57,6 +64,9 @@ namespace SocialMedia.Service.PostService
             this._accountPostsPolicyRepository = _accountPostsPolicyRepository;
             this._postViewRepository = _postViewRepository;
             this._webHostEnvironment = _webHostEnvironment;
+            this._groupPostsRepository = _groupPostsRepository;
+            this._groupPolicyRepository = _groupPolicyRepository;
+            this._groupRepository = _groupRepository;
         }
         public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
@@ -258,18 +268,18 @@ namespace SocialMedia.Service.PostService
             if (userPost != null)
             {
                 var postDto = await _postRepository.GetPostByIdAsync(user, updatePostDto.PostId);
-                if (postDto.Images != null)
-                {
-                    foreach(var p in postDto.Images)
-                    {
-                        DeletePostImage(p.ImageUrl);
-                    }
-                }
                 var postImages = new List<PostImages>();
-                if (updatePostDto.Images != null)
+                if (postDto != null)
                 {
                     if (updatePostDto.Images != null)
                     {
+                        if (postDto.Images != null)
+                        {
+                            foreach (var p in postDto.Images)
+                            {
+                                DeletePostImage(p.ImageUrl);
+                            }
+                        }
                         foreach (var i in updatePostDto.Images)
                         {
                             postImages.Add(new PostImages
@@ -280,15 +290,17 @@ namespace SocialMedia.Service.PostService
                             });
                         }
                     }
+                    var oldPost = await _postRepository.IsPostExistsAsync(postDto.PostId);
+                    var post = ConvertFromDto.ConvertFromPostDto_Update(updatePostDto,
+                        postDto, oldPost);
+                    var updatedPost = await _postRepository.UpdatePostAsync(user, post, postImages);
+                    var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                    userPosts.User = null;
+                    return StatusCodeReturn<PostDto>
+                        ._200_Success("Post updated successfully", updatedPost);
                 }
-                var oldPost = await _postRepository.IsPostExistsAsync(postDto.PostId);
-                var post = ConvertFromDto.ConvertFromPostDto_Update(updatePostDto,
-                    postDto, oldPost);
-                var updatedPost = await _postRepository.UpdatePostAsync(user, post, postImages);
-                var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
-                userPosts.User = null;
                 return StatusCodeReturn<PostDto>
-                    ._200_Success("Post updated successfully", updatedPost);
+                ._404_NotFound("Post not found");
             }
             return StatusCodeReturn<PostDto>
                 ._403_Forbidden();
@@ -372,11 +384,16 @@ namespace SocialMedia.Service.PostService
                 var policy = await _policyService.GetPolicyByIdOrNameAsync(updatePostPolicyDto.PolicyIdOrName);
                 if (policy.ResponseObject != null)
                 {
-                    var post = await _postRepository.GetPostByIdAsync(user, updatePostPolicyDto.PostId);
-                    post.PolicyId = policy.ResponseObject.Id;
-                    await _postRepository.UpdatePostPolicyAsync(user, ConvertFromPostDto(post));
-                    return StatusCodeReturn<bool>
-                        ._200_Success("Post policy updated successfully", true);
+                    var canModify = await CanModifyPostPolicyAsync(userPost, policy.ResponseObject.Id);
+                    if (canModify.ResponseObject)
+                    {
+                        var post = await _postRepository.GetPostByIdAsync(user, updatePostPolicyDto.PostId);
+                        post.PolicyId = policy.ResponseObject.Id;
+                        await _postRepository.UpdatePostPolicyAsync(user, ConvertFromPostDto(post));
+                        return StatusCodeReturn<bool>
+                            ._200_Success("Post policy updated successfully", true);
+                    }
+                    return canModify;
                 }
                 return StatusCodeReturn<bool>
                 ._404_NotFound("Policy not found");
@@ -520,6 +537,37 @@ namespace SocialMedia.Service.PostService
             };
         }
 
-        
+        private async Task<ApiResponse<GroupPost>> IsGroupPostAsync(UserPosts userPost)
+        {
+            var isGroupPost = await _groupPostsRepository.GetGroupPostByPostIdAsync(userPost.PostId);
+            if (isGroupPost != null)
+            {
+                return StatusCodeReturn<GroupPost>
+                    ._200_Success("Group post", isGroupPost);
+            }
+            return StatusCodeReturn<GroupPost>
+                    ._404_NotFound("Not group post");
+        }
+
+        private async Task<ApiResponse<bool>> CanModifyPostPolicyAsync(UserPosts userPost, string policyId)
+        {
+            var isGroupPost = await IsGroupPostAsync(userPost);
+            if (isGroupPost != null && isGroupPost.ResponseObject != null)
+            {
+                var newPolicy = await _policyRepository.GetPolicyByIdAsync(policyId);
+                if (newPolicy.PolicyType != "PUBLIC")
+                {
+                    return StatusCodeReturn<bool>
+                        ._403_Forbidden();
+                }
+                return StatusCodeReturn<bool>
+                    ._200_Success("Ok", true);
+            }
+            return StatusCodeReturn<bool>
+                    ._200_Success("Ok", true);
+        }
+
+
+
     }
 }
