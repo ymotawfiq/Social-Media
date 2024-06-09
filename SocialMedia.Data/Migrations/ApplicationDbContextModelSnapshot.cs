@@ -958,6 +958,35 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("ReactPolicies");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessage", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("Message");
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Receiver Id");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Anonymous");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.ToTable("SarehneMessages");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.SavedPosts", b =>
                 {
                     b.Property<string>("Id")
@@ -1558,6 +1587,17 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Policy");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessage", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("SarehneMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.SavedPosts", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.UserSavedPostsFolders", "UserSavedPostsFolder")
@@ -1691,6 +1731,8 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("PostComments");
 
                     b.Navigation("PostReacts");
+
+                    b.Navigation("SarehneMessages");
 
                     b.Navigation("SavedPosts");
 

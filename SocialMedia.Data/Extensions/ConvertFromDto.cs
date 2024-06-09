@@ -507,5 +507,28 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
+
+        public static SarehneMessage ConvertFromSendSarehneMessageDto(
+            SendSarahaMessageDto sendSarahaMessageDto, SiteUser user, SiteUser receiver)
+        {
+            if (sendSarahaMessageDto.ShareYourName && user != null)
+            {
+                return new SarehneMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Message = sendSarahaMessageDto.Message,
+                    ReceiverId = receiver.Id,
+                    SenderName = $"{user.FirstName} {user.LastName}"
+                };
+            }
+            return new SarehneMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                Message = sendSarahaMessageDto.Message,
+                ReceiverId = receiver.Id,
+                SenderName = "Anonymous"
+            };
+        }
+
     }
 }

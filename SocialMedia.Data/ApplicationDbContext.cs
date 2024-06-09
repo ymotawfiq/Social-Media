@@ -68,7 +68,8 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new GroupMembersConfigurations())
                    .ApplyConfiguration(new GroupAccessRequestConfigurations())
                    .ApplyConfiguration(new GroupMemberRoleConfigurations())
-                   .ApplyConfiguration(new GroupPostsConfigurations());
+                   .ApplyConfiguration(new GroupPostsConfigurations())
+                   .ApplyConfiguration(new SarehneMessagesConfigurations());
         }
 
 
@@ -105,6 +106,7 @@ namespace SocialMedia.Data
         public DbSet<GroupAccessRequest> GroupAccessRequests { get; set; }
         public DbSet<GroupMemberRole> GroupMemberRoles { get; set; }
         public DbSet<GroupPost> GroupPosts { get; set; }
+        public DbSet<SarehneMessage> SarehneMessages { get; set; }
 
     }
 }

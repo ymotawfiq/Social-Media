@@ -38,6 +38,7 @@ namespace SocialMedia.Data.Models.Authentication
         public List<GroupMember>? GroupMembers { get; set; }
         public List<GroupAccessRequest>? GroupAccessRequests { get; set; }
         public List<GroupPost>? GroupPosts { get; set; }
+        public List<SarehneMessage>? SarehneMessages { get; set; }
 
     }
 }
