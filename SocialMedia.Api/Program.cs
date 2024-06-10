@@ -32,6 +32,7 @@ using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
+using SocialMedia.Repository.SarehneMessagePolicyRepository;
 using SocialMedia.Repository.SarehneRepository;
 using SocialMedia.Repository.SavePostsRepository;
 using SocialMedia.Repository.SpecialCommentReactsRepository;
@@ -63,6 +64,7 @@ using SocialMedia.Service.PostReactsService;
 using SocialMedia.Service.PostService;
 using SocialMedia.Service.ReactPolicyService;
 using SocialMedia.Service.ReactService;
+using SocialMedia.Service.SarehneMessagePolicyService;
 using SocialMedia.Service.SarehneService;
 using SocialMedia.Service.SavedPostsService;
 using SocialMedia.Service.SendEmailService;
@@ -176,6 +178,7 @@ builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService>();
 builder.Services.AddScoped<IGroupPostsService, GroupPostsService>();
 builder.Services.AddScoped<ISarehneService, SarehneService>();
+builder.Services.AddScoped<ISarehneMessagePolicyService, SarehneMessagePolicyService>();
 
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
@@ -209,6 +212,7 @@ builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<IGroupMemberRoleRepository, GroupMemberRoleRepository>();
 builder.Services.AddScoped<IGroupPostsRepository, GroupPostsRepository>();
 builder.Services.AddScoped<ISarehneRepository, SarehneRepository>();
+builder.Services.AddScoped<ISarehneMessagePolicyRepository, SarehneMessagePolicyRepository>();
 
 
 builder.Services.AddControllers().AddJsonOptions(op =>

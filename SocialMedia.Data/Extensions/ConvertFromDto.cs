@@ -509,7 +509,8 @@ namespace SocialMedia.Data.Extensions
 
 
         public static SarehneMessage ConvertFromSendSarehneMessageDto(
-            SendSarahaMessageDto sendSarahaMessageDto, SiteUser user, SiteUser receiver)
+            SendSarahaMessageDto sendSarahaMessageDto, SiteUser user, SiteUser receiver, 
+                SarehneMessagePolicy policy)
         {
             if (sendSarahaMessageDto.ShareYourName && user != null)
             {
@@ -518,7 +519,9 @@ namespace SocialMedia.Data.Extensions
                     Id = Guid.NewGuid().ToString(),
                     Message = sendSarahaMessageDto.Message,
                     ReceiverId = receiver.Id,
-                    SenderName = $"{user.FirstName} {user.LastName}"
+                    SenderName = $"{user.FirstName} {user.LastName}",
+                    MessagePolicyId = policy.Id,
+                    SentAt = DateTime.Now
                 };
             }
             return new SarehneMessage
@@ -526,7 +529,37 @@ namespace SocialMedia.Data.Extensions
                 Id = Guid.NewGuid().ToString(),
                 Message = sendSarahaMessageDto.Message,
                 ReceiverId = receiver.Id,
-                SenderName = "Anonymous"
+                SenderName = "Anonymous",
+                MessagePolicyId = policy.Id,
+                SentAt = DateTime.Now
+            };
+        }
+
+
+        public static SarehneMessage ConvertFromUpdateSarehneMessagePolicyDto(
+            UpdateSarehneMessagePolicyDto updateSarehneMessagePolicyDto, SarehneMessage sarehneMessage)
+        {
+            sarehneMessage.MessagePolicyId = updateSarehneMessagePolicyDto.PolicyIdOrName;
+            return sarehneMessage;
+        }
+
+        public static SarehneMessagePolicy ConvertFromSarehneMessagePolicyDto_Add(
+            AddSarehneMessagePolicyDto addSarehneMessagePolicyDto)
+        {
+            return new SarehneMessagePolicy
+            {
+                Id = Guid.NewGuid().ToString(),
+                PolicyId = addSarehneMessagePolicyDto.PolicyIdOrName
+            };
+        }
+
+        public static SarehneMessagePolicy ConvertFromSarehneMessagePolicyDto_Update(
+            UpdateSarehneMessagePolicyToAnotherDto updateSarehneMessagePolicyToAnotherDto)
+        {
+            return new SarehneMessagePolicy
+            {
+                Id = updateSarehneMessagePolicyToAnotherDto.Id,
+                PolicyId = updateSarehneMessagePolicyToAnotherDto.PolicyIdOrName
             };
         }
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.SarehneService;
@@ -118,6 +117,28 @@ namespace SocialMedia.Api.Controllers
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpGet("getSarehneMessages/{userIdOrNameOrEmail}")]
+        public async Task<IActionResult> GetPublicUserSarehneMessagesAsync(
+            [FromRoute] string userIdOrNameOrEmail)
+        {
+            try
+            {
+                var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(userIdOrNameOrEmail);
+                if (user != null)
+                {
+                    var response1 = await _sarehneService.GetPublicMessagesAsync(user);
+                    return Ok(response1);
+                }
+                return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
             }
             catch (Exception ex)
             {

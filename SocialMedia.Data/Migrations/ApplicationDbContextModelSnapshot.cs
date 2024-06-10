@@ -969,6 +969,11 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("Message");
 
+                    b.Property<string>("MessagePolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Message Policy Id");
+
                     b.Property<string>("ReceiverId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
@@ -980,11 +985,36 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("Anonymous");
 
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2024, 6, 10, 20, 39, 0, 504, DateTimeKind.Local).AddTicks(3181));
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MessagePolicyId");
 
                     b.HasIndex("ReceiverId");
 
                     b.ToTable("SarehneMessages");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessagePolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("SarehneMessagePolicies");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.SavedPosts", b =>
@@ -1589,13 +1619,32 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessage", b =>
                 {
+                    b.HasOne("SocialMedia.Data.Models.SarehneMessagePolicy", "SarehneMessagePolicy")
+                        .WithMany("SarehneMessages")
+                        .HasForeignKey("MessagePolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("SarehneMessages")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("SarehneMessagePolicy");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessagePolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("SarehneMessagePolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.SavedPosts", b =>
@@ -1803,6 +1852,8 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Posts");
 
                     b.Navigation("ReactPolicies");
+
+                    b.Navigation("SarehneMessagePolicies");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
@@ -1846,6 +1897,11 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Posts");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessagePolicy", b =>
+                {
+                    b.Navigation("SarehneMessages");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.SpecialPostReacts", b =>

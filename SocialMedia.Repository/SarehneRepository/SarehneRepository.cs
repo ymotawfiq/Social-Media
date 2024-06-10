@@ -49,6 +49,13 @@ namespace SocialMedia.Repository.SarehneRepository
                    select m;
         }
 
+        public async Task<IEnumerable<SarehneMessage>> GetMessagesAsync(string userId, string policyId)
+        {
+            return from m in await _dbContext.SarehneMessages.ToListAsync()
+                   where m.ReceiverId == userId && m.MessagePolicyId == policyId
+                   select m;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
@@ -59,6 +66,14 @@ namespace SocialMedia.Repository.SarehneRepository
             await _dbContext.SarehneMessages.AddAsync(sarehneMessage);
             await SaveChangesAsync();
             return sarehneMessage;
+        }
+
+        public async Task<SarehneMessage> UpdateMessagePolicyAsync(SarehneMessage sarehneMessage)
+        {
+            var message = await GetMessageAsync(sarehneMessage.Id);
+            message.MessagePolicyId = sarehneMessage.MessagePolicyId;
+            await SaveChangesAsync();
+            return message;
         }
     }
 }
