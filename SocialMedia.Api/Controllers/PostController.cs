@@ -79,24 +79,11 @@ namespace SocialMedia.Api.Controllers
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (currentUser != null)
                     {
-                        var post = await _postRepository.IsPostExistsAsync(postId);
-                        if (post != null)
-                        {
-                            var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
-                            if (userPost != null)
-                            {
-                                var routeUser = await _userManager.FindByIdAsync(userPost.UserId);
-                                if (routeUser != null)
-                                {
-                                    var response = await _postService
-                                        .GetPostByIdAsync(currentUser, routeUser, post.Id);
-                                    return Ok(response);
-                                }
-                            }
-                            return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
-                                ._404_NotFound("User post not found"));
-                        }
+                        var response = await _postService.GetPostByIdAsync(currentUser, postId);
+                        return Ok(response);
                     }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
@@ -120,15 +107,11 @@ namespace SocialMedia.Api.Controllers
                     
                     if (user != null)
                     {
-                        var userPost = await _userPostsRepository.GetUserPostByIdAsync(postId);
-                        if (userPost != null)
-                        {
-                            var response = await _postService.DeletePostAsync(user, postId);
-                            return Ok(response);
-                        }
-                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                            ._403_Forbidden());
+                        var response = await _postService.DeletePostAsync(user, postId);
+                        return Ok(response);   
                     }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
@@ -153,27 +136,18 @@ namespace SocialMedia.Api.Controllers
                     var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         userIdOrUserName);
-                    if (currentUser != null && routeUser != null)
+                    if (currentUser != null)
                     {
-                        var isBlocked = await _blockService
-                            .GetBlockByUserIdAndBlockedUserIdAsync(routeUser.Id, currentUser.Id);
-                        if (isBlocked.ResponseObject != null)
+                        if (routeUser != null)
                         {
-                            return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                                ._403_Forbidden());
-                        }
-                        var response = await _postService.GetUserPostsAsync(routeUser);
-                        if (currentUser.Id == routeUser.Id)
-                        {
+                            var response = await _postService.GetUserPostsAsync(currentUser, routeUser);
                             return Ok(response);
                         }
-                        else
-                        {
-                            var response1 = await _postService
-                                .CheckFriendShipAndGetPostsAsync(currentUser, routeUser);
-                            return Ok(response1);
-                        }
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                               ._404_NotFound("User you want to get posts not found"));
                     }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
@@ -220,8 +194,7 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var post = await _postRepository.IsPostExistsAsync(updatePostDto.PostId);
-                    if (user != null && post != null)
+                    if (user != null)
                     {
                         var response = await _postService.UpdatePostAsync(user, updatePostDto);
                         return Ok(response);
@@ -240,7 +213,8 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("updatePostPolicy")]
-        public async Task<IActionResult> UpdatePostPolicyAsync([FromBody] UpdatePostPolicyDto updatePostPolicyDto)
+        public async Task<IActionResult> UpdatePostPolicyAsync(
+            [FromBody] UpdatePostPolicyDto updatePostPolicyDto)
         {
             try
             {

@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Data.DTOs;
-using SocialMedia.Service.AccountPostsPolicyService;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.PostsPolicyService;
 
 namespace SocialMedia.Api.Controllers
 {
@@ -12,10 +12,10 @@ namespace SocialMedia.Api.Controllers
     public class AccountPostsPolicyController : ControllerBase
     {
 
-        private readonly IAccountPostsPolicyService _accountPostsPolicyService;
-        public AccountPostsPolicyController(IAccountPostsPolicyService _accountPostsPolicyService)
+        private readonly IPostsPolicyService _postsPolicyService;
+        public AccountPostsPolicyController(IPostsPolicyService _postsPolicyService)
         {
-            this._accountPostsPolicyService = _accountPostsPolicyService;
+            this._postsPolicyService = _postsPolicyService;
         }
 
         [HttpPost("addAccountPostsPolicy")]
@@ -24,7 +24,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .AddAccountPostPolicyAsync(addAccountPostsPolicyDto);
                 return Ok(response);
             }
@@ -41,7 +41,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .UpdateAccountPostPolicyAsync(updateAccountPostsPolicyDto);
                 return Ok(response);
             }
@@ -59,7 +59,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .GetAccountPostPolicyByIdAsync(accountPolicyId);
                 return Ok(response);
             }
@@ -76,7 +76,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .GetAccountPostPolicyByPolicyIdAsync(policyId);
                 return Ok(response);
             }
@@ -93,7 +93,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .GetAccountPostPolicyAsync(postPolicyIdOrPolicyIdOrPolicyName);
                 return Ok(response);
             }
@@ -110,7 +110,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .DeleteAccountPostPolicyByIdAsync(accountPolicyId);
                 return Ok(response);
             }
@@ -127,7 +127,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .DeleteAccountPostPolicyByIdAsync(policyId);
                 return Ok(response);
             }
@@ -144,7 +144,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService
+                var response = await _postsPolicyService
                     .DeleteAccountPostPolicyAsync(postPolicyIdOrPolicyIdOrPolicyName);
                 return Ok(response);
             }
@@ -160,7 +160,7 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                var response = await _accountPostsPolicyService.GetAccountPostPoliciesAsync();
+                var response = await _postsPolicyService.GetAccountPostPoliciesAsync();
                 return Ok(response);
             }
             catch (Exception ex)

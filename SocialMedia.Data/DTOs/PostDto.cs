@@ -8,20 +8,8 @@ namespace SocialMedia.Data.DTOs
 {
     public class PostDto
     {
-        [Required]
-        public string PostId { get; set; } = null!;
 
-        [Required]
-        public string PolicyId { get; set; } = string.Empty;
-
-        [Required]
-        public string ReactPolicyId { get; set; } = string.Empty;
-
-        [Required]
-        public string CommentPolicyId { get; set; } = string.Empty;
-
-        [Required]
-        public string PostContent { get; set; } = string.Empty;
+        public Post Post { get; set; } = null!;
 
         public List<PostImages>? Images { get; set; }
 

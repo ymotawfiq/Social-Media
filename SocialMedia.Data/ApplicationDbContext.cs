@@ -88,7 +88,7 @@ namespace SocialMedia.Data
         public DbSet<AccountPolicy> AccountPolicies { get; set; }
         public DbSet<PostView> PostViews { get; set; }
         public DbSet<FriendListPolicy> FriendListPolicies { get; set; }
-        public DbSet<AccountPostsPolicy> PostPolicies { get; set; }
+        public DbSet<PostsPolicy> PostPolicies { get; set; }
         public DbSet<SavedPosts> SavedPosts { get; set; }
         public DbSet<UserSavedPostsFolders> UserSavedPostsFolders { get; set; }
         public DbSet<SpecialPostReacts> SpecialPostReacts { get; set; }

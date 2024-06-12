@@ -173,24 +173,6 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("AccountPolicies");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.AccountPostsPolicy", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PolicyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Policy Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PolicyId")
-                        .IsUnique();
-
-                    b.ToTable("PostPolicies");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Property<string>("Id")
@@ -739,13 +721,16 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnName("Post content");
 
                     b.Property<string>("PolicyId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PostPolicyId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Policy Id");
+                        .HasColumnName("Post Policy Id");
 
                     b.Property<DateTime>("PostedAt")
                         .HasColumnType("datetime2")
-                        .HasColumnName("Post Date");
+                        .HasColumnName("Posted At Date");
 
                     b.Property<string>("ReactPolicyId")
                         .IsRequired()
@@ -756,13 +741,22 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("Post Update Date");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("User Id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CommentPolicyId");
 
                     b.HasIndex("PolicyId");
 
+                    b.HasIndex("PostPolicyId");
+
                     b.HasIndex("ReactPolicyId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Posts");
                 });
@@ -925,6 +919,24 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("PostViews");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.PostsPolicy", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PolicyId")
+                        .IsUnique();
+
+                    b.ToTable("PostPolicies");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
                 {
                     b.Property<string>("Id")
@@ -988,7 +1000,7 @@ namespace SocialMedia.Data.Migrations
                     b.Property<DateTime>("SentAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 10, 20, 39, 0, 504, DateTimeKind.Local).AddTicks(3181));
+                        .HasDefaultValue(new DateTime(2024, 6, 12, 23, 24, 58, 818, DateTimeKind.Local).AddTicks(2345));
 
                     b.HasKey("Id");
 
@@ -1224,24 +1236,13 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Policy");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.AccountPostsPolicy", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
-                        .WithMany("PostPolicies")
-                        .HasForeignKey("PolicyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Policy");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.AccountPolicy", "AccountPolicy")
                         .WithMany("Users")
                         .HasForeignKey("AccountPolicyId");
 
-                    b.HasOne("SocialMedia.Data.Models.AccountPostsPolicy", "PostPolicy")
+                    b.HasOne("SocialMedia.Data.Models.PostsPolicy", "PostPolicy")
                         .WithMany("Users")
                         .HasForeignKey("AccountPostPolicyId");
 
@@ -1494,9 +1495,13 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                    b.HasOne("SocialMedia.Data.Models.Policy", null)
                         .WithMany("Posts")
-                        .HasForeignKey("PolicyId")
+                        .HasForeignKey("PolicyId");
+
+                    b.HasOne("SocialMedia.Data.Models.PostsPolicy", "PostPolicy")
+                        .WithMany("Posts")
+                        .HasForeignKey("PostPolicyId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -1506,11 +1511,19 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("Posts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("CommentPolicy");
 
-                    b.Navigation("Policy");
+                    b.Navigation("PostPolicy");
 
                     b.Navigation("ReactPolicy");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
@@ -1604,6 +1617,17 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.PostsPolicy", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
+                        .WithMany("PostPolicies")
+                        .HasForeignKey("PolicyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Policy");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.ReactPolicy", b =>
@@ -1750,11 +1774,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.AccountPostsPolicy", b =>
-                {
-                    b.Navigation("Users");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Navigation("Blocks");
@@ -1780,6 +1799,8 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("PostComments");
 
                     b.Navigation("PostReacts");
+
+                    b.Navigation("Posts");
 
                     b.Navigation("SarehneMessages");
 
@@ -1883,6 +1904,13 @@ namespace SocialMedia.Data.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.PostCommentReplay", b =>
                 {
                     b.Navigation("PostCommentReplays");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.PostsPolicy", b =>
+                {
+                    b.Navigation("Posts");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>

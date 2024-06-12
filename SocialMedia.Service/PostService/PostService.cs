@@ -2,14 +2,13 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-
+using Microsoft.Extensions.Hosting;
+using SocialMedia.Data;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.AccountPolicyRepository;
-using SocialMedia.Repository.AccountPostsPolicyRepository;
 using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.GroupPolicyRepository;
@@ -17,9 +16,11 @@ using SocialMedia.Repository.GroupPostsRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
+using SocialMedia.Repository.PostsPolicyRepository;
 using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.UserPostsRepository;
+using SocialMedia.Service.BlockService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
@@ -36,12 +37,13 @@ namespace SocialMedia.Service.PostService
         private readonly IFriendService _friendService;
         private readonly IPolicyService _policyService;
         private readonly IUserPostsRepository _userPostsRepository;
-        private readonly IAccountPostsPolicyRepository _accountPostsPolicyRepository;
+        private readonly IPostsPolicyRepository _postsPolicyRepository;
         private readonly IPostViewRepository _postViewRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IGroupPolicyRepository _groupPolicyRepository;
         private readonly IGroupPostsRepository _groupPostsRepository;
         private readonly IGroupRepository _groupRepository;
+        private readonly IBlockService _blockService;
         
 
         public PostService(IPostRepository _postRepository,
@@ -49,9 +51,10 @@ namespace SocialMedia.Service.PostService
             IReactPolicyRepository _reactPolicyRepository, IPolicyRepository _policyRepository,
             IFriendsRepository _friendsRepository, IFriendService _friendService,
             IUserPostsRepository _userPostsRepository, IPolicyService _policyService,
-            IAccountPostsPolicyRepository _accountPostsPolicyRepository, IGroupRepository _groupRepository,
+            IPostsPolicyRepository _postsPolicyRepository, IGroupRepository _groupRepository,
             IPostViewRepository _postViewRepository, IWebHostEnvironment _webHostEnvironment,
-            IGroupPolicyRepository _groupPolicyRepository, IGroupPostsRepository _groupPostsRepository)
+            IGroupPolicyRepository _groupPolicyRepository, IGroupPostsRepository _groupPostsRepository,
+            IBlockService _blockService)
         {
             this._postRepository = _postRepository;
             this._commentPolicyRepository = _commentPolicyRepository;
@@ -61,36 +64,24 @@ namespace SocialMedia.Service.PostService
             this._friendService = _friendService;
             this._userPostsRepository = _userPostsRepository;
             this._policyService = _policyService;
-            this._accountPostsPolicyRepository = _accountPostsPolicyRepository;
+            this._postsPolicyRepository = _postsPolicyRepository;
             this._postViewRepository = _postViewRepository;
             this._webHostEnvironment = _webHostEnvironment;
             this._groupPostsRepository = _groupPostsRepository;
             this._groupPolicyRepository = _groupPolicyRepository;
             this._groupRepository = _groupRepository;
+            this._blockService = _blockService;
         }
         public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
-            var accountPostsPolicy = await _accountPostsPolicyRepository
-                .GetAccountPostPolicyByIdAsync(user.AccountPostPolicyId!);
+            var postsPolicy = await _postsPolicyRepository.GetPostPolicyByIdAsync(
+                user.AccountPostPolicyId!);
             var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(user.ReactPolicyId!);
-            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByIdAsync
-                (user.CommentPolicyId!);
-            var policy = await _policyRepository.GetPolicyByIdAsync(accountPostsPolicy.PolicyId);
+            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByIdAsync(
+                user.CommentPolicyId!);
 
-            if (policy == null)
-            {
-                policy = await _policyRepository.GetPolicyByNameAsync("public");
-            }
-            if (reactPolicy == null)
-            {
-                reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
-            }
-            if (commentPolicy == null)
-            {
-                commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
-            }
-            var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, policy, reactPolicy,
-                commentPolicy);
+            var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, postsPolicy, reactPolicy,
+                commentPolicy, user);
             var postImages = new List<PostImages>();
             if (createPostDto.Images != null)
             {
@@ -104,50 +95,68 @@ namespace SocialMedia.Service.PostService
                     });
                 }
             }
-            var newPostDto = await _postRepository.AddPostAsync(user, post, postImages);
-            var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
-            //userPosts.User = null;
+            var newPostDto = await _postRepository.AddPostAsync(post, postImages);
+            SetNull(newPostDto);
             return StatusCodeReturn<PostDto>
                     ._201_Created("Post created successfully", newPostDto);
         }
 
-        public async Task<ApiResponse<PostDto>> DeletePostAsync(SiteUser user, string postId)
+        public async Task<ApiResponse<bool>> DeletePostAsync(SiteUser user, string postId)
         {
-            var existPost = await _postRepository.IsPostExistsAsync(postId);
-            if (existPost == null)
+            var post = await _postRepository.GetPostWithImagesByPostIdAsync(postId);
+            if (post != null)
             {
-                return StatusCodeReturn<PostDto>
-                    ._404_NotFound("Post not found");
-            }
-            var post = await _postRepository.GetPostByIdAsync(user, postId);
-            if(post.Images!=null && post.Images.Count != 0)
-            {
-                foreach(var i in post.Images)
+                if(post.Post.UserId == user.Id)
                 {
-                    DeletePostImage(i.ImageUrl);
-                }
-            }
-            await _postRepository.DeletePostAsync(user, postId);
-            return StatusCodeReturn<PostDto>
+                    if(post.Images != null && post.Images.Count > 0)
+                    {
+                        foreach(var i in post.Images)
+                        {
+                            DeletePostImage(i.ImageUrl);
+                        }
+                    }
+                    await _postRepository.DeletePostAsync(postId);
+                    return StatusCodeReturn<bool>
                     ._200_Success("Post deleted successfully");
+                }
+                return StatusCodeReturn<bool>
+                    ._403_Forbidden();
+            }
+            return StatusCodeReturn<bool>
+                    ._404_NotFound("Post not found");
         }
 
         public async Task<ApiResponse<PostDto>> GetPostByIdAsync(SiteUser user, string postId)
         {
-            var existPost = await _postRepository.IsPostExistsAsync(postId);
-            if (existPost == null)
+            var existPost = await _postRepository.GetPostByIdAsync(postId);
+            if (existPost != null)
             {
+                if(!(await IsBlockedAsync(user.Id, existPost.UserId)).ResponseObject)
+                {
+                    if ((await CheckPostPolicyAsync(user, existPost)).IsSuccess)
+                    {
+                        var post = await _postRepository.GetPostWithImagesByPostIdAsync(postId);
+                        SetNull(post);
+                        return StatusCodeReturn<PostDto>
+                                ._200_Success("Post found successfully", post);
+                    }
+                    return StatusCodeReturn<PostDto>
+                    ._403_Forbidden();
+                }
                 return StatusCodeReturn<PostDto>
-                    ._404_NotFound("Post not found");
+                    ._403_Forbidden();
             }
-            var post = await _postRepository.GetPostByIdAsync(user, postId);
             return StatusCodeReturn<PostDto>
-                    ._200_Success("Post found successfully", post);
+                    ._404_NotFound("Post not found");
         }
 
         public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsAsync(SiteUser user)
         {
             var posts = await _postRepository.GetUserPostsAsync(user);
+            foreach (var p in posts)
+            {
+                SetNull(p);
+            }
             if (posts.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<PostDto>>
@@ -157,17 +166,35 @@ namespace SocialMedia.Service.PostService
                     ._200_Success("Posts found successfully", posts);
         }
 
+        public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsAsync(SiteUser user,
+            SiteUser routeUser)
+        {
+            if (user.Id == routeUser.Id)
+            {
+                return await GetUserPostsAsync(user);
+            }
+            else if (!(await IsBlockedAsync(user.Id, routeUser.Id)).ResponseObject)
+            {
+                return await CheckFriendShipAndGetPostsAsync(user, routeUser); 
+            }
+            return StatusCodeReturn<IEnumerable<PostDto>>
+                                ._403_Forbidden();
+        }
 
         public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsByPolicyAsync(
-            SiteUser user, Policy policy)
+            SiteUser user, PostsPolicy policy)
         {
-            var checkPolicy = await _policyRepository.GetPolicyByNameAsync(policy.PolicyType);
+            var checkPolicy = await _policyRepository.GetPolicyByIdAsync(policy.PolicyId);
             if (checkPolicy == null)
             {
                 return StatusCodeReturn<IEnumerable<PostDto>>
                     ._404_NotFound("Policy not found");
             }
             var userPosts = await _postRepository.GetUserPostsByPolicyAsync(user, policy);
+            foreach (var p in userPosts)
+            {
+                SetNull(p);
+            }
             if (userPosts.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<PostDto>>
@@ -176,323 +203,227 @@ namespace SocialMedia.Service.PostService
             return StatusCodeReturn<IEnumerable<PostDto>>
                     ._200_Success("Posts found successfully", userPosts);
         }
-
-
-        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> GetPostsForFriendsAsync(SiteUser user)
+        public async Task<ApiResponse<IEnumerable<PostDto>>> GetPostsForFriendsAsync(SiteUser user)
         {
-            var publicPolicy = await _policyRepository.GetPolicyByNameAsync("public");
-            var publicPosts = await GetUserPostsByPolicyAsync(user, publicPolicy);
-            var friendsPolicy = await _policyRepository.GetPolicyByNameAsync("friends only");
-            var friendsPosts = await GetUserPostsByPolicyAsync(user, friendsPolicy);
-            var friendsOfFriendsPolicy = await _policyRepository
-                .GetPolicyByNameAsync("friends of friends");
-            var friendsOfFriendsPosts = await GetUserPostsByPolicyAsync(user, friendsOfFriendsPolicy);
-            var posts = new List<List<PostDto>>();
-            if (publicPosts.ResponseObject != null)
+            var posts = await _postRepository.GetUserPostsForFriendsAsync(user);
+            foreach (var p in posts)
             {
-                posts.Add(publicPosts.ResponseObject.ToList());
+                SetNull(p);
             }
-            if (friendsPosts.ResponseObject != null)
+            if (posts.ToList().Count == 0)
             {
-                posts.Add(friendsPosts.ResponseObject.ToList());
-            }
-            if (posts.Count == 0)
-            {
-                return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                return StatusCodeReturn<IEnumerable<PostDto>>
                     ._200_Success("No posts found");
             }
-            return StatusCodeReturn<IEnumerable<List<PostDto>>>
+            return StatusCodeReturn<IEnumerable<PostDto>>
                     ._200_Success("Posts found successfully", posts);
         }
 
-        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> GetPostsForFriendsOfFriendsAsync(
+        public async Task<ApiResponse<IEnumerable<PostDto>>> GetPostsForFriendsOfFriendsAsync(
             SiteUser user)
         {
-            var publicPolicy = await _policyRepository.GetPolicyByNameAsync("public");
-            var publicPosts = await GetUserPostsByPolicyAsync(user, publicPolicy);
-            
-            var friendsOfFriendsPolicy = await _policyRepository
-                .GetPolicyByNameAsync("friends of friends");
-            var friendsOfFriendsPosts = await GetUserPostsByPolicyAsync(user, friendsOfFriendsPolicy);
-            var posts = new List<List<PostDto>>();
-            if (publicPosts.ResponseObject != null)
+            var posts = await _postRepository.GetUserPostsForFriendsOfFriendsAsync(user);
+            foreach (var p in posts)
             {
-                posts.Add(publicPosts.ResponseObject.ToList());
+                SetNull(p);
             }
-            if (friendsOfFriendsPosts.ResponseObject != null)
+            if (posts.ToList().Count == 0)
             {
-                posts.Add(friendsOfFriendsPosts.ResponseObject.ToList());
-            }
-            if (posts.Count == 0)
-            {
-                return StatusCodeReturn<IEnumerable<List<PostDto>>>
+                return StatusCodeReturn<IEnumerable<PostDto>>
                     ._200_Success("No posts found");
             }
-            return StatusCodeReturn<IEnumerable<List<PostDto>>>
+            return StatusCodeReturn<IEnumerable<PostDto>>
                     ._200_Success("Posts found successfully", posts);
         }
 
-
-        public async Task<ApiResponse<IEnumerable<List<PostDto>>>> CheckFriendShipAndGetPostsAsync(
+        public async Task<ApiResponse<IEnumerable<PostDto>>> CheckFriendShipAndGetPostsAsync(
             SiteUser currentUser, SiteUser routeUser)
         {
-            var isFriend = await _friendService.IsUserFriendAsync(routeUser.Id, currentUser.Id);
-            if (isFriend.ResponseObject)
+            if(!(await IsBlockedAsync(currentUser.Id, routeUser.Id)).ResponseObject)
             {
-                return await GetPostsForFriendsAsync(routeUser);
+                var isFriend = await _friendService.IsUserFriendAsync(routeUser.Id, currentUser.Id);
+                if (isFriend.ResponseObject)
+                {
+                    return await GetPostsForFriendsAsync(routeUser);
+                }
+                var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(routeUser.Id,
+                    currentUser.Id);
+                if (isFriendOfFriend.ResponseObject)
+                {
+                    return await GetPostsForFriendsOfFriendsAsync(routeUser);
+                }
+                var policy = await _policyRepository.GetPolicyByNameAsync("public");
+                var postPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(policy.Id);
+                var publicPosts = (await GetUserPostsByPolicyAsync(routeUser, postPolicy)).ResponseObject;
+                if (publicPosts != null)
+                {
+                    foreach(var p in publicPosts)
+                    {
+                        SetNull(p);
+                    }
+                    return StatusCodeReturn<IEnumerable<PostDto>>
+                        ._200_Success("Posts found successfully", publicPosts.ToList());
+                }
+                return StatusCodeReturn<IEnumerable<PostDto>>
+                        ._404_NotFound("No posts found");
             }
-            var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(routeUser.Id, currentUser.Id);
-            if (isFriendOfFriend.ResponseObject)
-            {
-                return await GetPostsForFriendsOfFriendsAsync(routeUser);
-            }
-            var policy = await _policyRepository.GetPolicyByNameAsync("public");
-            var publicPosts = (await GetUserPostsByPolicyAsync(routeUser, policy)).ResponseObject;
-            if (publicPosts != null)
-            {
-                var posts = new List<List<PostDto>>();
-                posts.Add(publicPosts.ToList());
-                return StatusCodeReturn<IEnumerable<List<PostDto>>>
-                    ._200_Success("Posts found successfully", posts);
-            }
-            return StatusCodeReturn<IEnumerable<List<PostDto>>>
-                    ._404_NotFound("No posts found");
+            return StatusCodeReturn<IEnumerable<PostDto>>
+                    ._403_Forbidden();
         }
 
 
-        public async Task<ApiResponse<PostDto>> UpdatePostAsync(
-            SiteUser user, UpdatePostDto updatePostDto)
+        public async Task<ApiResponse<PostDto>> UpdatePostAsync(SiteUser user, UpdatePostDto updatePostDto)
         {
-            var userPost = await _userPostsRepository
-                .GetUserPostByUserAndPostIdAsync(user.Id, updatePostDto.PostId);
-            if (userPost != null)
+            var post = await _postRepository.GetPostWithImagesByPostIdAsync(updatePostDto.PostId);
+            var postImages = new List<PostImages>();
+            if (post != null)
             {
-                var postDto = await _postRepository.GetPostByIdAsync(user, updatePostDto.PostId);
-                var postImages = new List<PostImages>();
-                if (postDto != null)
+                if (post.Post.UserId == user.Id)
                 {
                     if (updatePostDto.Images != null)
                     {
-                        if (postDto.Images != null)
+                        if (post.Images != null || post.Images!.Count > 0)
                         {
-                            foreach (var p in postDto.Images)
+                            foreach (var p in post.Images)
                             {
                                 DeletePostImage(p.ImageUrl);
                             }
+                            await _postRepository.DeletePostImagesAsync(post.Post.Id);
                         }
                         foreach (var i in updatePostDto.Images)
                         {
-                            postImages.Add(new PostImages
+                            var postImage = new PostImages
                             {
                                 ImageUrl = SavePostImages(i),
                                 PostId = updatePostDto.PostId,
                                 Id = Guid.NewGuid().ToString()
-                            });
+                            };
+                            postImages.Add(postImage);
                         }
                     }
-                    var oldPost = await _postRepository.IsPostExistsAsync(postDto.PostId);
-                    var post = ConvertFromDto.ConvertFromPostDto_Update(updatePostDto,
-                        postDto, oldPost);
-                    var updatedPost = await _postRepository.UpdatePostAsync(user, post, postImages);
-                    var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
-                    userPosts.User = null;
+                    post.Post.Content = updatePostDto.PostContent;
+                    var updatedPost = await _postRepository.UpdatePostAsync(
+                            ConvertFromPostDto(post), postImages);
+                    SetNull(updatedPost);
                     return StatusCodeReturn<PostDto>
-                        ._200_Success("Post updated successfully", updatedPost);
+                            ._200_Success("Post updated successfully", updatedPost);
                 }
                 return StatusCodeReturn<PostDto>
-                ._404_NotFound("Post not found");
+                    ._403_Forbidden();
             }
             return StatusCodeReturn<PostDto>
-                ._403_Forbidden();
+            ._404_NotFound("Post not found");
         }
 
-
-        public async Task<ApiResponse<PostDto>> GetPostByIdAsync(SiteUser currentUser
-            , SiteUser routeUser, string postId)
+        public async Task<ApiResponse<bool>> UpdatePostPolicyAsync(SiteUser user,
+            UpdatePostPolicyDto updatePostPolicyDto)
         {
-            var post = await _postRepository.GetPostByIdAsync(routeUser, postId);
+            var post = await _postRepository.GetPostByIdAsync(updatePostPolicyDto.PostId);
             if (post != null)
             {
-                var userPosts = await _userPostsRepository.GetUserPostByPostIdAsync(postId);
-                userPosts.User = null;
-                var postPolicy = await _policyService.GetPolicyByIdAsync(post.PolicyId);
-                if (postPolicy.ResponseObject != null)
+                if (post.UserId == user.Id)
                 {
-                    if (postPolicy.ResponseObject.PolicyType == "PRIVATE")
+                    var policy = await _policyService.GetPolicyByIdOrNameAsync(
+                        updatePostPolicyDto.PolicyIdOrName);
+                    if (policy != null && policy.ResponseObject != null)
                     {
-                        var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(
-                            currentUser.Id, postId);
-                        if (userPost == null)
-                        {
-                            return StatusCodeReturn<PostDto>._403_Forbidden();
-                        }
-                    }
-                    else if (postPolicy.ResponseObject.PolicyType == "FRIENDS ONLY")
-                    {
-                        var isFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
-                            currentUser.Id, routeUser.Id);
-                        if (isFriend == null)
-                        {
-                            return StatusCodeReturn<PostDto>._403_Forbidden();
-                        }
-                    }
-                    else if (postPolicy.ResponseObject.PolicyType == "FRIENDS OF FRIENDS")
-                    {
-                        var isFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
-                            currentUser.Id, routeUser.Id);
-                        var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(routeUser.Id,
-                            currentUser.Id);
-                        if (isFriend == null || !isFriendOfFriend.ResponseObject)
-                        {
-                            return StatusCodeReturn<PostDto>._403_Forbidden();
-                        }
-                    }
-                    var postView = await _postViewRepository.GetPostViewByPostIdAsync(postId);
-                    if (postView == null)
-                    {
-                        await _postViewRepository.AddPostViewAsync(
-                            new PostView
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                PostId = postId,
-                                ViewNumber = 1
-                            }
-                            );
-                        return StatusCodeReturn<PostDto>
-                        ._200_Success("Post found successfully", post);
-                    }
-                    await _postViewRepository.UpdatePostViewAsync(postView);
-                    return StatusCodeReturn<PostDto>
-                        ._200_Success("Post found successfully", post);
-                }
-                return StatusCodeReturn<PostDto>
-                ._404_NotFound("Post policy not found");
-            }
-            return StatusCodeReturn<PostDto>
-                ._404_NotFound("Post not found");
-        }
-
-
-
-        public async Task<ApiResponse<bool>> UpdatePostPolicyAsync(
-            SiteUser user, UpdatePostPolicyDto updatePostPolicyDto)
-        {
-            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
-                updatePostPolicyDto.PostId);
-            if (userPost != null)
-            {
-                var policy = await _policyService.GetPolicyByIdOrNameAsync(updatePostPolicyDto.PolicyIdOrName);
-                if (policy.ResponseObject != null)
-                {
-                    var canModify = await CanModifyPostPolicyAsync(userPost, policy.ResponseObject.Id);
-                    if (canModify.ResponseObject)
-                    {
-                        var post = await _postRepository.GetPostByIdAsync(user, updatePostPolicyDto.PostId);
-                        post.PolicyId = policy.ResponseObject.Id;
-                        await _postRepository.UpdatePostPolicyAsync(user, ConvertFromPostDto(post));
+                        var postPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(
+                            policy.ResponseObject.Id);
+                        post.PostPolicyId = postPolicy.Id;
+                        await _postRepository.UpdatePostAsync(post);
                         return StatusCodeReturn<bool>
                             ._200_Success("Post policy updated successfully", true);
                     }
-                    return canModify;
+                    return StatusCodeReturn<bool>
+                            ._404_NotFound("Policy not found", false);
                 }
                 return StatusCodeReturn<bool>
-                ._404_NotFound("Policy not found");
+                            ._403_Forbidden();
             }
             return StatusCodeReturn<bool>
-                ._404_NotFound("Post not found for this user");
+                            ._404_NotFound("Post not found", false);
         }
 
-        public async Task<ApiResponse<bool>> UpdatePostReactPolicyAsync(
-            SiteUser user, UpdatePostReactPolicyDto updatePostReactPolicy)
+        public async Task<ApiResponse<bool>> UpdatePostReactPolicyAsync(SiteUser user,
+            UpdatePostReactPolicyDto updatePostReactPolicy)
         {
-            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
-                updatePostReactPolicy.PostId);
-            if (userPost != null)
+            var post = await _postRepository.GetPostByIdAsync(updatePostReactPolicy.PostId);
+            if (post != null)
             {
-                var policy = await _policyService.GetPolicyByIdOrNameAsync(updatePostReactPolicy.PolicyIdOrName);
-                if (policy.ResponseObject != null)
+                if (post.UserId == user.Id)
                 {
-                    var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(
-                        policy.ResponseObject.Id);
-                    if (reactPolicy != null)
+                    var policy = await _policyService.GetPolicyByIdOrNameAsync(
+                        updatePostReactPolicy.PolicyIdOrName);
+                    if (policy != null && policy.ResponseObject != null)
                     {
-                        var post = await _postRepository.GetPostByIdAsync(user, updatePostReactPolicy.PostId);
-                        post.ReactPolicyId = reactPolicy.Id;
-                        await _postRepository.UpdatePostReactPolicyAsync(user, ConvertFromPostDto(post));
+                        var postReactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(
+                            policy.ResponseObject.Id);
+                        if (postReactPolicy != null)
+                        {
+                            post.ReactPolicyId = postReactPolicy.Id;
+                            await _postRepository.UpdatePostAsync(post);
+                            return StatusCodeReturn<bool>
+                                ._200_Success("Post react policy updated successfully", true);
+                        }
                         return StatusCodeReturn<bool>
-                        ._200_Success("Post react policy updated successfully", true);
+                            ._404_NotFound("Post react policy not found", false);
                     }
                     return StatusCodeReturn<bool>
-                ._404_NotFound("React policy not found");
+                            ._404_NotFound("Policy not found", false);
                 }
                 return StatusCodeReturn<bool>
-                ._404_NotFound("Policy not found");
+                            ._403_Forbidden();
             }
             return StatusCodeReturn<bool>
-                ._404_NotFound("Post not found for this user");
+                            ._404_NotFound("Post not found", false);
         }
 
         public async Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync(
             SiteUser user, UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
         {
-            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(user.Id,
-                updatePostCommentPolicyDto.PostId);
-            if (userPost != null)
+            var post = await _postRepository.GetPostByIdAsync(updatePostCommentPolicyDto.PostId);
+            if (post != null)
             {
-                var policy = await _policyService.GetPolicyByIdOrNameAsync(
-                    updatePostCommentPolicyDto.PolicyIdOrName);
-                if (policy.ResponseObject != null)
+                if (post.UserId == user.Id)
                 {
-                    var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(
-                        policy.ResponseObject.Id);
-                    if (commentPolicy != null)
+                    var policy = await _policyService.GetPolicyByIdOrNameAsync(
+                        updatePostCommentPolicyDto.PolicyIdOrName);
+                    if (policy != null && policy.ResponseObject != null)
                     {
-                        var post = await _postRepository.GetPostByIdAsync(user, updatePostCommentPolicyDto.PostId);
-                        post.CommentPolicyId = commentPolicy.Id;
-                        await _postRepository.UpdatePostCommentPolicyAsync(user, ConvertFromPostDto(post));
+                        var postCommentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(
+                            policy.ResponseObject.Id);
+                        if (postCommentPolicy != null)
+                        {
+                            post.CommentPolicyId = postCommentPolicy.Id;
+                            await _postRepository.UpdatePostAsync(post);
+                            return StatusCodeReturn<bool>
+                                ._200_Success("Post comment policy updated successfully", true);
+                        }
                         return StatusCodeReturn<bool>
-                        ._200_Success("Post comment policy updated successfully", true);
+                            ._404_NotFound("Post comment policy not found", false);
                     }
                     return StatusCodeReturn<bool>
-                ._404_NotFound("Comment policy not found");
+                            ._404_NotFound("Policy not found", false);
                 }
                 return StatusCodeReturn<bool>
-                ._404_NotFound("Policy not found");
+                            ._403_Forbidden();
             }
             return StatusCodeReturn<bool>
-                ._404_NotFound("Post not found for this user");
+                            ._404_NotFound("Post not found", false);
         }
 
-        public async Task<ApiResponse<bool>> MakePostsFriendsOnlyAsync(SiteUser user)
+        public async Task<ApiResponse<bool>> UpdateUserPostsPolicyToLockedProfileAsync(SiteUser user)
         {
-            var userPosts = await _postRepository.GetUserPostsAsync(user);
-            if (userPosts != null)
-            {
-                await UpdatePostsToFriendsOnlyAsync(user, userPosts);
-                return StatusCodeReturn<bool>
-                    ._200_Success("Posts policy updated successfully", true);
-            }
+            await _postRepository.UpdateUserPostsPolicyToLockedAccountAsync(user.Id);
             return StatusCodeReturn<bool>
-                ._404_NotFound("No posts found for this user");
+                ._200_Success("Posts policy updated successfully to locked account", true);
         }
 
-        private async Task<ApiResponse<bool>> UpdatePostsToFriendsOnlyAsync(SiteUser user
-            , IEnumerable<PostDto> posts)
+        public async Task<ApiResponse<bool>> UpdateUserPostsPolicyToUnLockedProfileAsync(SiteUser user)
         {
-            var policy = await _policyRepository.GetPolicyByNameAsync("friends only");
-            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
-            foreach(var postDto in posts)
-            {
-                postDto.PolicyId = policy.Id;
-                postDto.ReactPolicyId = reactPolicy.Id;
-                postDto.CommentPolicyId = commentPolicy.Id;
-                var post = ConvertFromPostDto(postDto);
-                await _postRepository.UpdatePostPoliciesAsync(post, policy.Id, reactPolicy.Id,
-                    commentPolicy.Id);
-            }
+            await _postRepository.UpdateUserPostsPolicyToUnLockedAccountAsync(user.Id);
             return StatusCodeReturn<bool>
-                ._200_Success("Posts policy updated successfully", true);
+                ._200_Success("Posts policy updated successfully to unlocked account", true);
         }
 
         private string SavePostImages(IFormFile image)
@@ -523,51 +454,79 @@ namespace SocialMedia.Service.PostService
             }
             return false;
         }
-
-        
-        private Post ConvertFromPostDto(PostDto post)
+        private async Task<ApiResponse<bool>> CheckPostPolicyAsync(SiteUser user, Post post)
         {
-            return new Post
+            var postPolicy = await _postsPolicyRepository.GetPostPolicyByIdAsync(post.PostPolicyId);
+            var policy = await _policyRepository.GetPolicyByIdAsync(postPolicy.PolicyId);
+            if (post.UserId != user.Id)
             {
-                Id = post.PostId,
-                CommentPolicyId = post.CommentPolicyId,
-                PolicyId = post.PolicyId,
-                ReactPolicyId = post.ReactPolicyId,
-                UpdatedAt = DateTime.Now,
-            };
-        }
-
-        private async Task<ApiResponse<GroupPost>> IsGroupPostAsync(UserPosts userPost)
-        {
-            var isGroupPost = await _groupPostsRepository.GetGroupPostByPostIdAsync(userPost.PostId);
-            if (isGroupPost != null)
-            {
-                return StatusCodeReturn<GroupPost>
-                    ._200_Success("Group post", isGroupPost);
-            }
-            return StatusCodeReturn<GroupPost>
-                    ._404_NotFound("Not group post");
-        }
-
-        private async Task<ApiResponse<bool>> CanModifyPostPolicyAsync(UserPosts userPost, string policyId)
-        {
-            var isGroupPost = await IsGroupPostAsync(userPost);
-            if (isGroupPost != null && isGroupPost.ResponseObject != null)
-            {
-                var newPolicy = await _policyRepository.GetPolicyByIdAsync(policyId);
-                if (newPolicy.PolicyType != "PUBLIC")
+                if (policy.PolicyType == "PRIVATE")
                 {
                     return StatusCodeReturn<bool>
                         ._403_Forbidden();
                 }
-                return StatusCodeReturn<bool>
-                    ._200_Success("Ok", true);
+                else if (policy.PolicyType == "FRIENDS ONLY")
+                {
+                    var isFriend = await _friendService.IsUserFriendAsync(user.Id, post.UserId);
+                    if (isFriend != null && !isFriend.ResponseObject)
+                    {
+                        return StatusCodeReturn<bool>
+                        ._403_Forbidden();
+                    }
+                }
+                else if (policy.PolicyType == "FRIEND OF FRIEND")
+                {
+                    var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(user.Id, post.UserId);
+                    if (isFriendOfFriend != null && !isFriendOfFriend.ResponseObject)
+                    {
+                        return StatusCodeReturn<bool>
+                        ._403_Forbidden();
+                    }
+                }
             }
             return StatusCodeReturn<bool>
-                    ._200_Success("Ok", true);
+                ._200_Success("Success", true);
         }
 
+        private async Task<ApiResponse<bool>> IsBlockedAsync(string userId1, string userId2)
+        {
+            var isBlocked = await _blockService.GetBlockByUserIdAndBlockedUserIdAsync(userId1, userId2);
+            if (isBlocked != null && isBlocked.ResponseObject != null && isBlocked.IsSuccess)
+            {
+                return StatusCodeReturn<bool>
+                    ._200_Success("Blocked", true);
+            }
+            return StatusCodeReturn<bool>
+                    ._200_Success("Not blocked", false);
+        }
 
+        private Post ConvertFromPostDto(PostDto post)
+        {
+            return post.Post;
+        }
 
+        private void SetNull(PostDto post)
+        {
+            post.Post.User = null;
+            post.Post.UserPosts = null;
+            post.Post.SavedPosts = null;
+            post.Post.ReactPolicy = null;
+            post.Post.PostViews = null;
+            post.Post.PostReacts = null;
+            post.Post.PostPolicy = null;
+            post.Post.PostImages = null;
+            post.Post.PostComments = null;
+            post.Post.PagePosts = null;
+            post.Post.GroupPosts = null;
+            post.Post.CommentPolicy = null;
+            if (post.Images != null)
+            {
+                foreach(var p in post.Images)
+                {
+                    p.Post = null;
+                }
+            }
+        }
+        
     }
 }

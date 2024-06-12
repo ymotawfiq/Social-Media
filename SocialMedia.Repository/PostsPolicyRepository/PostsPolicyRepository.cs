@@ -3,18 +3,17 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Data.Models;
-using Twilio.Jwt.Taskrouter;
 
-namespace SocialMedia.Repository.AccountPostsPolicyRepository
+namespace SocialMedia.Repository.PostsPolicyRepository
 {
-    public class AccountPostsPolicyRepository : IAccountPostsPolicyRepository
+    public class PostsPolicyRepository : IPostsPolicyRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        public AccountPostsPolicyRepository(ApplicationDbContext _dbContext)
+        public PostsPolicyRepository(ApplicationDbContext _dbContext)
         {
             this._dbContext = _dbContext;
         }
-        public async Task<AccountPostsPolicy> AddAccountPostPolicyAsync(AccountPostsPolicy postPolicy)
+        public async Task<PostsPolicy> AddPostPolicyAsync(PostsPolicy postPolicy)
         {
             try
             {
@@ -28,11 +27,11 @@ namespace SocialMedia.Repository.AccountPostsPolicyRepository
             }
         }
 
-        public async Task<AccountPostsPolicy> DeleteAccountPostPolicyByIdAsync(string postPolicyId)
+        public async Task<PostsPolicy> DeletePostPolicyByIdAsync(string postPolicyId)
         {
             try
             {
-                var postPolicy = await GetAccountPostPolicyByIdAsync(postPolicyId);
+                var postPolicy = await GetPostPolicyByIdAsync(postPolicyId);
                 _dbContext.PostPolicies.Remove(postPolicy);
                 await SaveChangesAsync();
                 return postPolicy;
@@ -43,11 +42,11 @@ namespace SocialMedia.Repository.AccountPostsPolicyRepository
             }
         }
 
-        public async Task<AccountPostsPolicy> DeleteAccountPostPolicyByPolicyIdAsync(string policyId)
+        public async Task<PostsPolicy> DeletePostPolicyByPolicyIdAsync(string policyId)
         {
             try
             {
-                var postPolicy = await GetAccountPostPolicyByPolicyIdAsync(policyId);
+                var postPolicy = await GetPostPolicyByPolicyIdAsync(policyId);
                 _dbContext.PostPolicies.Remove(postPolicy);
                 await SaveChangesAsync();
                 return postPolicy;
@@ -58,7 +57,7 @@ namespace SocialMedia.Repository.AccountPostsPolicyRepository
             }
         }
 
-        public async Task<IEnumerable<AccountPostsPolicy>> GetAccountPostPoliciesAsync()
+        public async Task<IEnumerable<PostsPolicy>> GetPostPoliciesAsync()
         {
             try
             {
@@ -70,7 +69,7 @@ namespace SocialMedia.Repository.AccountPostsPolicyRepository
             }
         }
 
-        public async Task<AccountPostsPolicy> GetAccountPostPolicyByIdAsync(string postPolicyId)
+        public async Task<PostsPolicy> GetPostPolicyByIdAsync(string postPolicyId)
         {
             try
             {
@@ -83,7 +82,7 @@ namespace SocialMedia.Repository.AccountPostsPolicyRepository
             }
         }
 
-        public async Task<AccountPostsPolicy> GetAccountPostPolicyByPolicyIdAsync(string policyId)
+        public async Task<PostsPolicy> GetPostPolicyByPolicyIdAsync(string policyId)
         {
             try
             {
@@ -101,11 +100,11 @@ namespace SocialMedia.Repository.AccountPostsPolicyRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<AccountPostsPolicy> UpdateAccountPostPolicyAsync(AccountPostsPolicy postPolicy)
+        public async Task<PostsPolicy> UpdatePostPolicyAsync(PostsPolicy postPolicy)
         {
             try
             {
-                var oldPostPolicy = await GetAccountPostPolicyByIdAsync(postPolicy.Id);
+                var oldPostPolicy = await GetPostPolicyByIdAsync(postPolicy.Id);
                 oldPostPolicy.PolicyId = postPolicy.PolicyId;
                 _dbContext.PostPolicies.Update(oldPostPolicy);
                 await SaveChangesAsync();

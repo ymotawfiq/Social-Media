@@ -43,7 +43,7 @@ namespace SocialMedia.Service.PagePostsService
                     {
                         Id = Guid.NewGuid().ToString(),
                         PageId = addPagePostDto.PageId,
-                        PostId = postDto.ResponseObject.PostId
+                        PostId = postDto.ResponseObject.Post.Id
                     });
                     newPagePost.Page = null;
                     newPagePost.Post = null;

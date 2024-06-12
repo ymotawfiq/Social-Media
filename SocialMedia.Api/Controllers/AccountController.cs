@@ -516,74 +516,8 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPut("updateUserAccountPolicy")]
-        public async Task<IActionResult> UpdateUserPolicyAsync
-            ([FromBody] UpdateUserPolicyDto updateUserPolicyDto)
-        {
-            try
-            {
-                if (HttpContext.User != null && HttpContext.User.Identity != null
-                    && HttpContext.User.Identity.Name != null)
-                {
-                    var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    if (currentUser != null)
-                    {
-                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                            updateUserPolicyDto.UserIdOrUserNameOrEmail);
-                        if (routeUser != null)
-                        {
-                            if (routeUser.Id == currentUser.Id)
-                            {
-                                var accountPolicy = await _accountPolicyService
-                                    .GetAccountPolicyByPolicyAsync(updateUserPolicyDto.PolicyIdOrName);
-                                if (accountPolicy.ResponseObject != null)
-                                {
-                                    var userPolicy = await _accountPolicyService.GetAccountPolicyByIdAsync(
-                                        routeUser.AccountPolicyId);
-                                    if (userPolicy.ResponseObject != null)
-                                    {
-                                        var policy = await _policyRepository.GetPolicyByIdAsync(userPolicy
-                                            .ResponseObject.PolicyId);
-                                        if (policy != null)
-                                        {
-                                            var updatedPolicy = await _policyRepository.GetPolicyByIdAsync(
-                                                    accountPolicy.ResponseObject.PolicyId);
-                                            if (policy.PolicyType == "PUBLIC" 
-                                                && updatedPolicy.PolicyType == "PRIVATE")
-                                            {
-                                                var response = await _userManagementService
-                                                    .UpdateAccountPolicyToPrivateAsync(routeUser,
-                                                    updateUserPolicyDto);
-                                                return Ok(response);
-                                            }
-                                        }
-                                    }
-                                    routeUser.AccountPolicyId = accountPolicy.ResponseObject.Id;
-                                    await _userManager.UpdateAsync(routeUser);
-                                    return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
-                                        ._200_Success("Account policy updated successfully"));
-                                }
-                                return StatusCode(StatusCodes.Status404NotFound, 
-                                    StatusCodeReturn<string>._404_NotFound("Account policy"));
-                            }
-                            return StatusCode(StatusCodes.Status403Forbidden, 
-                                StatusCodeReturn<string>._403_Forbidden());
-                        }
-                        return StatusCode(StatusCodes.Status404NotFound, 
-                            StatusCodeReturn<string>._404_NotFound("User not found"));
-                    }
-                }
-                return StatusCode(StatusCodes.Status401Unauthorized, 
-                    StatusCodeReturn<string>._401_UnAuthorized());
-            }
-            catch(Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    StatusCodeReturn<string>._500_ServerError(ex.Message));
-            }
-        }
 
-        [Authorize(Roles = "Admin,User")]
+        [Authorize(Roles = "User")]
         [HttpPut("updateAccountInfo")]
         public async Task<IActionResult> UpdateAccountInfoAsync(
             [FromBody] UpdateAccountInfoDto updateAccountDto)
@@ -623,20 +557,20 @@ namespace SocialMedia.Api.Controllers
         {
             var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                 updateAccountRolesDto.UserNameOrEmail);
-            if (user == null)
+            if (user != null)
             {
-                return StatusCode(StatusCodes.Status404NotFound, 
-                    StatusCodeReturn<string>._404_NotFound("User"));
+                await _userManagementService.AssignRolesToUserAsync(updateAccountRolesDto.Roles, user);
+                await _userManager.UpdateAsync(user);
+                return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
+                    ._200_Success("Account roles updated successfully"));
             }
-            await _userManagementService.AssignRolesToUserAsync(updateAccountRolesDto.Roles, user);
-            await _userManager.UpdateAsync(user);
-            return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<string>
-                ._200_Success("Account roles updated successfully"));
+            return StatusCode(StatusCodes.Status404NotFound,
+                    StatusCodeReturn<string>._404_NotFound("User not found"));
         }
 
 
-        [HttpPut("updateAccountGenericPolicy")]
-        public async Task<IActionResult> UpdateAccountPolicyAsync([FromBody] string policyIdOrName)
+        [HttpPut("lockProfile")]
+        public async Task<IActionResult> LockProfileAsync()
         {
             try
             {
@@ -646,8 +580,7 @@ namespace SocialMedia.Api.Controllers
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var response = await _userManagementService.UpdateAccountPolicyAsync(
-                            user, policyIdOrName);
+                        var response = await _userManagementService.LockProfileAsync(user);
                         return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
@@ -663,7 +596,34 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPut("updateAccountGenericReactPolicy")]
+        [HttpPut("unlockProfile")]
+        public async Task<IActionResult> UnLockProfileAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _userManagementService.UnLockProfileAsync(user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("updateUserAccountReactPolicy")]
         public async Task<IActionResult> UpdateAccountReactPolicyAsync([FromBody] string policyIdOrName)
         {
             try
@@ -691,7 +651,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPut("updateAccountGenericPostsPolicy")]
+        [HttpPut("updateUserAccountPostsPolicy")]
         public async Task<IActionResult> UpdateAccountPostsPolicyAsync([FromBody] string policyIdOrName)
         {
             try
@@ -719,7 +679,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPut("updateAccountGenericCommentPolicy")]
+        [HttpPut("updateUserAccountCommentPolicy")]
         public async Task<IActionResult> UpdateAccountCommentPolicyAsync([FromBody] string policyIdOrName)
         {
             try

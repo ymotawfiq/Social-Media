@@ -140,6 +140,17 @@ namespace SocialMedia.Service.GenericReturn
             };
         }
 
+        public static ApiResponse<T> _400_BadRequest(string msg, T o)
+        {
+            return new ApiResponse<T>
+            {
+                IsSuccess = false,
+                Message = msg,
+                StatusCode = 400,
+                ResponseObject = o
+            };
+        }
+
         public static ApiResponse<T> _406_NotAcceptable()
         {
             return new ApiResponse<T>

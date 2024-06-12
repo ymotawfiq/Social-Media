@@ -52,7 +52,7 @@ namespace SocialMedia.Service.GroupPostsService
                     {
                         GroupId = addGroupPostDto.GroupId,
                         Id = Guid.NewGuid().ToString(),
-                        PostId = newPost.ResponseObject!.PostId,
+                        PostId = newPost.ResponseObject!.Post.Id,
                         UserId = user.Id
                     });
                     SetNull(groupPost);

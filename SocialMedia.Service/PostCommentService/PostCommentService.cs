@@ -404,7 +404,7 @@ namespace SocialMedia.Service.PostCommentService
                     post.CommentPolicyId);
                 if (commentPolicy != null)
                 {
-                    var policy = await _policyRepository.GetPolicyByIdAsync(post.PolicyId);
+                    var policy = await _policyRepository.GetPolicyByIdAsync(commentPolicy.PolicyId);
                     if (policy != null)
                     {
                         if(policy.PolicyType == "PRIVATE")

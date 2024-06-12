@@ -27,11 +27,10 @@ namespace SocialMedia.Service.UserAccountService
         Task<ApiResponse<ResetEmailDto>> GenerateResetEmailTokenAsync(ResetEmailObjectDto resetEmailObjectDto);
         Task<ApiResponse<string>> EnableTwoFactorAuthenticationAsync(string email);
         Task<ApiResponse<string>> DeleteAccountAsync(string userNameOrEmail);
-        Task<ApiResponse<bool>> UpdateAccountPolicyToPrivateAsync(SiteUser siteUser,
-            UpdateUserPolicyDto updateUserPolicyDto);
         Task<ApiResponse<bool>> UpdateAccountCommentPolicyAsync(SiteUser user, string policyIdOrName);
         Task<ApiResponse<bool>> UpdateAccountReactPolicyAsync(SiteUser user, string policyIdOrName);
-        Task<ApiResponse<bool>> UpdateAccountPolicyAsync(SiteUser user, string policyIdOrName);
+        Task<ApiResponse<bool>> LockProfileAsync(SiteUser user);
+        Task<ApiResponse<bool>> UnLockProfileAsync(SiteUser user);
         Task<ApiResponse<bool>> UpdateAccountPostsPolicyAsync(SiteUser user, string policyIdOrName);
     }
 }

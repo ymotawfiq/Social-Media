@@ -6,9 +6,9 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PostPolicyConfigurations : IEntityTypeConfiguration<AccountPostsPolicy>
+    public class PostPolicyConfigurations : IEntityTypeConfiguration<PostsPolicy>
     {
-        public void Configure(EntityTypeBuilder<AccountPostsPolicy> builder)
+        public void Configure(EntityTypeBuilder<PostsPolicy> builder)
         {
             builder.HasKey(e => e.Id);
             builder.Property(e => e.PolicyId).IsRequired().HasColumnName("Policy Id");

@@ -168,66 +168,21 @@ namespace SocialMedia.Data.Extensions
         }
 
 
-        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, Policy policy,
-            ReactPolicy reactPolicy, CommentPolicy commentPolicy)
+        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, PostsPolicy postsPolicy,
+            ReactPolicy reactPolicy, CommentPolicy commentPolicy, SiteUser user)
         {
             return new Post
             {
                 Id = Guid.NewGuid().ToString(),
                 CommentPolicyId = commentPolicy.Id!,
-                PolicyId = policy.Id!,
+                PostPolicyId = postsPolicy.Id!,
                 PostedAt = DateTime.Now,
                 Content = createPostDto.PostContent,
                 ReactPolicyId = reactPolicy.Id!,
-                UpdatedAt = DateTime.Now
+                UpdatedAt = DateTime.Now,
+                UserId = user.Id
             };
         }
-
-        public static Post ConvertFromPostDto_Update(UpdatePostDto updatePostDto, PostDto postDto,
-            Post oldPost)
-        {
-            return new Post
-            {
-                Id = postDto.PostId,
-                CommentPolicyId = postDto.CommentPolicyId,
-                PolicyId = postDto.PolicyId,
-                PostedAt = oldPost.PostedAt,
-                Content = updatePostDto.PostContent,
-                ReactPolicyId = postDto.ReactPolicyId,
-                UpdatedAt = DateTime.Now
-            };
-        }
-
-
-        public static Post ConvertFromPostPolicy_Update(UpdatePostPolicyDto updatePostPolicyDto)
-        {
-            return new Post
-            {
-                Id = updatePostPolicyDto.PostId,
-                PolicyId = updatePostPolicyDto.PolicyIdOrName,
-            };
-        }
-
-        public static Post ConvertFromPostReactPolicy_Update(UpdatePostReactPolicyDto updatePostReactPolicy)
-        {
-            return new Post
-            {
-                Id = updatePostReactPolicy.PostId,
-                PolicyId = updatePostReactPolicy.PolicyIdOrName,
-            };
-        }
-
-
-        public static Post ConvertFromPostCommentPolicy_Update(
-            UpdatePostCommentPolicyDto updatePostCommentPolicyDto)
-        {
-            return new Post
-            {
-                Id = updatePostCommentPolicyDto.PostId,
-                PolicyId = updatePostCommentPolicyDto.PolicyIdOrName,
-            };
-        }
-
 
         public static FriendListPolicy ConvertFriendListPolicyDto_Update(
             UpdateFriendListPolicyDto updateFriendListPolicyDto)
@@ -249,20 +204,20 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
-        public static AccountPostsPolicy ConvertAccountPostsPolicyDto_Add(
+        public static PostsPolicy ConvertAccountPostsPolicyDto_Add(
             AddAccountPostsPolicyDto addAccountPostsPolicyDto)
         {
-            return new AccountPostsPolicy
+            return new PostsPolicy
             {
                 Id = Guid.NewGuid().ToString(),
                 PolicyId = addAccountPostsPolicyDto.PolicyIdOrName
             };
         }
 
-        public static AccountPostsPolicy ConvertAccountPostsPolicyDto_Update(
+        public static PostsPolicy ConvertAccountPostsPolicyDto_Update(
             UpdateAccountPostsPolicyDto updateAccountPostsPolicyDto)
         {
-            return new AccountPostsPolicy
+            return new PostsPolicy
             {
                 Id = updateAccountPostsPolicyDto.Id,
                 PolicyId = updateAccountPostsPolicyDto.PolicyIdOrName

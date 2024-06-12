@@ -17,9 +17,10 @@ namespace SocialMedia.Data.Models.Authentication
         public string? AccountPostPolicyId { get; set; } = null!;
         public string? ReactPolicyId { get; set; } = null!;
         public string? CommentPolicyId { get; set; } = null!;
+        public List<Post>? Posts { get; set; }
         public AccountPolicy? AccountPolicy { get; set; }
         public ReactPolicy? ReactPolicy { get; set; }
-        public AccountPostsPolicy? PostPolicy { get; set; }
+        public PostsPolicy? PostPolicy { get; set; }
         public CommentPolicy? CommentPolicy { get; set; }
         public FriendListPolicy? FriendListPolicy { get; set; }
         public List<FriendRequest>? FriendRequests { get; set; }
