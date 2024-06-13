@@ -17,12 +17,15 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.Email).IsRequired().HasColumnName("Email");
             builder.Property(e => e.UserName).IsRequired().HasColumnName("User Name");
             builder.Property(e => e.DisplayName).IsRequired().HasColumnName("Display Name");
-            builder.HasOne(e => e.AccountPolicy).WithMany(e => e.Users).HasForeignKey(e => e.AccountPolicyId);
-            builder.HasOne(e => e.ReactPolicy).WithMany(e => e.Users).HasForeignKey(e => e.ReactPolicyId);
-            builder.HasOne(e => e.CommentPolicy).WithMany(e => e.Users).HasForeignKey(e => e.CommentPolicyId);
-            builder.HasOne(e => e.CommentPolicy).WithMany(e => e.Users).HasForeignKey(e => e.CommentPolicyId);
-            builder.HasOne(e => e.PostPolicy).WithMany(e => e.Users).HasForeignKey(e => e.AccountPostPolicyId);
-            builder.HasOne(e => e.FriendListPolicy).WithMany(e => e.Users)
+            builder.HasOne(e => e.AccountPolicy).WithMany(e => e.UserAccountPolicies)
+                .HasForeignKey(e => e.AccountPolicyId);
+            builder.HasOne(e => e.ReactPolicy).WithMany(e => e.UserReactPolicies)
+                .HasForeignKey(e => e.ReactPolicyId);
+            builder.HasOne(e => e.CommentPolicy).WithMany(e => e.UserCommentPolicies)
+                .HasForeignKey(e => e.CommentPolicyId);
+            builder.HasOne(e => e.PostPolicy).WithMany(e => e.UserPostPolicies)
+                .HasForeignKey(e => e.AccountPostPolicyId);
+            builder.HasOne(e => e.FriendListPolicy).WithMany(e => e.UserFriendListPolicies)
                 .HasForeignKey(e => e.FriendListPolicyId);
             builder.Property(e => e.AccountPolicyId).HasColumnName("Account Policy Id");
             builder.Property(e => e.ReactPolicyId).HasColumnName("React Policy Id");

@@ -9,7 +9,6 @@ using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostReactsRepository;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.ReactPolicyRepository;
 using SocialMedia.Repository.ReactRepository;
 using SocialMedia.Repository.SpecialPostsReactsRepository;
 using SocialMedia.Repository.UserPostsRepository;
@@ -25,12 +24,11 @@ namespace SocialMedia.Service.PostReactsService
         private readonly IReactRepository _reactRepository;
         private readonly IBlockRepository _blockRepository;
         private readonly IUserPostsRepository _userPostsRepository;
-        private readonly IReactPolicyRepository _reactPolicyRepository;
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendService _friendService;
         private readonly ISpecialPostsReactsRepository _specialPostsReactsRepository;
         public PostReactsService(IPostReactsRepository _postReactsRepository,
-            IPostRepository _postRepository, IReactPolicyRepository _reactPolicyRepository, 
+            IPostRepository _postRepository, 
             IReactRepository _reactRepository, IBlockRepository _blockRepository,
             IUserPostsRepository _userPostsRepository, IPolicyRepository _policyRepository,
             IFriendService _friendService, ISpecialPostsReactsRepository _specialPostsReactsRepository)
@@ -40,7 +38,6 @@ namespace SocialMedia.Service.PostReactsService
             this._reactRepository = _reactRepository;
             this._blockRepository = _blockRepository;
             this._userPostsRepository = _userPostsRepository;
-            this._reactPolicyRepository = _reactPolicyRepository;
             this._policyRepository = _policyRepository;
             this._friendService = _friendService;
             this._specialPostsReactsRepository = _specialPostsReactsRepository;
@@ -316,46 +313,39 @@ namespace SocialMedia.Service.PostReactsService
             var post = await _postRepository.GetPostByIdAsync(postId);
             if (post != null)
             {
-                var reactPolicy = await _reactPolicyRepository.GetReactPolicyByIdAsync(
-                    post.ReactPolicyId);
-                if (reactPolicy != null)
+                var policy = await _policyRepository.GetPolicyByIdAsync(post.ReactPolicyId);
+                if (policy != null)
                 {
-                    var policy = await _policyRepository.GetPolicyByIdAsync(reactPolicy.PolicyId);
-                    if (policy != null)
+                    if (policy.PolicyType == "PRIVATE")
                     {
-                        if (policy.PolicyType == "PRIVATE")
+                        return StatusCodeReturn<PostReacts>
+                            ._403_Forbidden();
+                    }
+                    else if (policy.PolicyType == "FRIENDS ONLY")
+                    {
+                        var isFriend = await _friendService.IsUserFriendAsync(userId,
+                            userWhoWantsToReactId);
+                        if (isFriend == null || !isFriend!.ResponseObject)
                         {
                             return StatusCodeReturn<PostReacts>
-                                ._403_Forbidden();
+                            ._403_Forbidden();
                         }
-                        else if (policy.PolicyType == "FRIENDS ONLY")
+                    }
+                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
+                    {
+                        var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(userId,
+                            userWhoWantsToReactId);
+                        if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
                         {
-                            var isFriend = await _friendService.IsUserFriendAsync(userId,
-                                userWhoWantsToReactId);
-                            if (isFriend == null || !isFriend!.ResponseObject)
-                            {
-                                return StatusCodeReturn<PostReacts>
-                                ._403_Forbidden();
-                            }
+                            return StatusCodeReturn<PostReacts>
+                            ._403_Forbidden();
                         }
-                        else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                        {
-                            var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(userId,
-                                userWhoWantsToReactId);
-                            if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
-                            {
-                                return StatusCodeReturn<PostReacts>
-                                ._403_Forbidden();
-                            }
-                        }
-                        return StatusCodeReturn<PostReacts>
-                            ._200_Success("You can react", new PostReacts { });
                     }
                     return StatusCodeReturn<PostReacts>
-                        ._404_NotFound("Policy not found");
+                        ._200_Success("You can react", new PostReacts { });
                 }
                 return StatusCodeReturn<PostReacts>
-                        ._404_NotFound("React policy not found");
+                    ._404_NotFound("Policy not found");
             }
             return StatusCodeReturn<PostReacts>
                         ._404_NotFound("Post not found");

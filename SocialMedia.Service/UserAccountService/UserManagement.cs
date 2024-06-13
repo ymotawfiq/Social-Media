@@ -4,26 +4,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using SocialMedia.Data.DTOs;
 using SocialMedia.Data.DTOs.Authentication.EmailConfirmation;
 using SocialMedia.Data.DTOs.Authentication.Login;
 using SocialMedia.Data.DTOs.Authentication.Register;
 using SocialMedia.Data.DTOs.Authentication.ResetEmail;
 using SocialMedia.Data.DTOs.Authentication.ResetPassword;
 using SocialMedia.Data.DTOs.Authentication.User;
-using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Service.AccountPolicyService;
-using SocialMedia.Service.CommentPolicyService;
-using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
-using SocialMedia.Service.PostService;
-using SocialMedia.Service.PostsPolicyService;
-using SocialMedia.Service.ReactPolicyService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -33,19 +25,16 @@ namespace SocialMedia.Service.UserAccountService
 {
     public class UserManagement : IUserManagement
     {
+
+        private readonly Policies policies = new();
+
         private readonly UserManager<SiteUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly SignInManager<SiteUser> _signInManager;
-        private readonly IAccountPolicyService _accountPolicyService;
-        private readonly ICommentPolicyService _commentPolicyService;
-        private readonly IReactPolicyService _reactPolicyService;
         private readonly IPostRepository _postRepository;
-        private readonly IPostsPolicyService _postsPolicyService;
-        private readonly IFriendListPolicyService _friendListPolicyService;
         private readonly UserManagerReturn _userManagerReturn;
         private readonly IPolicyRepository _policyRepository;
-        private readonly IPostService _postService;
         private readonly IPolicyService _policyService;
         public UserManagement
             (
@@ -53,15 +42,9 @@ namespace SocialMedia.Service.UserAccountService
             RoleManager<IdentityRole> _roleManager,
             IConfiguration _configuration,
             SignInManager<SiteUser> _signInManager,
-            IAccountPolicyService _accountPolicyService,
             IPostRepository _postRepository,
-            IPostsPolicyService _postsPolicyService,
-            IFriendListPolicyService _friendListPolicyService,
             UserManagerReturn _userManagerReturn,
-            IReactPolicyService _reactPolicyService,
-            ICommentPolicyService _commentPolicyService,
             IPolicyRepository _policyRepository,
-            IPostService _postService,
             IPolicyService _policyService
             )
         {
@@ -69,15 +52,9 @@ namespace SocialMedia.Service.UserAccountService
             this._roleManager = _roleManager;
             this._userManager = _userManager;
             this._signInManager = _signInManager;
-            this._accountPolicyService = _accountPolicyService;
             this._postRepository = _postRepository;
-            this._postsPolicyService = _postsPolicyService;
-            this._friendListPolicyService = _friendListPolicyService;
             this._userManagerReturn = _userManagerReturn;
-            this._commentPolicyService = _commentPolicyService;
-            this._reactPolicyService = _reactPolicyService;
             this._policyRepository = _policyRepository;
-            this._postService = _postService;
             this._policyService = _policyService;
         }
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
@@ -425,95 +402,100 @@ namespace SocialMedia.Service.UserAccountService
         public async Task<ApiResponse<bool>> UpdateAccountCommentPolicyAsync(SiteUser user, 
             string policyIdOrName)
         {
-            var commentPolicy = await _commentPolicyService
-                .GetCommentPolicyAsync(policyIdOrName);
+            var commentPolicy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
             if (commentPolicy != null && commentPolicy.ResponseObject != null)
             {
-                user.CommentPolicyId = commentPolicy.ResponseObject.Id;
-                await _userManager.UpdateAsync(user);
+                if (policies.CommentPolicies.Contains(commentPolicy.ResponseObject.PolicyType))
+                {
+                    user.CommentPolicyId = commentPolicy.ResponseObject.Id;
+                    await _userManager.UpdateAsync(user);
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Accont comment policy updated successfully", true);
+                }
                 return StatusCodeReturn<bool>
-                    ._200_Success("Accont comment policy updated successfully", true);
+                    ._403_Forbidden("Invalid policy");
             }
             return StatusCodeReturn<bool>
-                    ._404_NotFound("Accont policy not found");
+                    ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<bool>> UpdateAccountReactPolicyAsync(SiteUser user,
             string policyIdOrName)
         {
-            var reactPolicy = await _reactPolicyService
-                .GetReactPolicyAsync(policyIdOrName);
+            var reactPolicy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
             if (reactPolicy != null && reactPolicy.ResponseObject != null)
             {
-                user.ReactPolicyId = reactPolicy.ResponseObject.Id;
-                await _userManager.UpdateAsync(user);
+                if (policies.ReactPolicies.Contains(reactPolicy.ResponseObject.PolicyType))
+                {
+                    user.ReactPolicyId = reactPolicy.ResponseObject.Id;
+                    await _userManager.UpdateAsync(user);
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Accont react policy updated successfully", true);
+                }
                 return StatusCodeReturn<bool>
-                    ._200_Success("Accont react policy updated successfully", true);
+                    ._403_Forbidden("Invalid policy");
             }
             return StatusCodeReturn<bool>
-                    ._404_NotFound("Accont policy not found");
+                    ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<bool>> UpdateAccountPostsPolicyAsync(SiteUser user,
             string policyIdOrName)
         {
-            var accountPostsPolicy = await _postsPolicyService
-                .GetAccountPostPolicyAsync(policyIdOrName);
+            var accountPostsPolicy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
             if (accountPostsPolicy != null && accountPostsPolicy.ResponseObject != null)
             {
-                user.AccountPostPolicyId = accountPostsPolicy.ResponseObject.Id;
-                await _userManager.UpdateAsync(user);
+                if (policies.AccountPostPolicies.Contains(accountPostsPolicy.ResponseObject.PolicyType))
+                {
+                    user.AccountPostPolicyId = accountPostsPolicy.ResponseObject.Id;
+                    await _userManager.UpdateAsync(user);
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Accont posts policy updated successfully", true);
+                }
                 return StatusCodeReturn<bool>
-                    ._200_Success("Accont posts policy updated successfully", true);
+                     ._403_Forbidden("Invalid policy");
             }
             return StatusCodeReturn<bool>
-                    ._404_NotFound("Accont policy not found");
+                    ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<bool>> LockProfileAsync(SiteUser user)
         {
-            var policy = await _policyRepository.GetPolicyByNameAsync("private");
-            var privateAccountPolicy = (await _accountPolicyService.GetAccountPolicyByPolicyAsync("private"))
-                .ResponseObject!;
-            if ((await CheckLockUnLockPoliciesAsync(policy)).ResponseObject)
+            var privatePolicy = await _policyRepository.GetPolicyByNameAsync("private");
+            var friendsPolicy = await _policyRepository.GetPolicyByNameAsync("friends only");
+            if (privatePolicy != null)
             {
-                if (privateAccountPolicy.Id != user.AccountPolicyId)
+                if(user.AccountPolicyId != privatePolicy.Id)
                 {
-                    user.ReactPolicyId = (await _reactPolicyService.GetReactPolicyAsync("friends only"))
-                        .ResponseObject!.Id;
-                    user.CommentPolicyId = (await _commentPolicyService.GetCommentPolicyAsync("friends only"))
-                        .ResponseObject!.Id;
-                    user.AccountPostPolicyId = (await _postsPolicyService
-                        .GetAccountPostPolicyAsync("friends only")).ResponseObject!.Id;
-                    user.AccountPolicyId = privateAccountPolicy.Id;
-                    await _userManager.UpdateAsync(user);
-                    await _postRepository.UpdateUserPostsPolicyToLockedAccountAsync(user.Id);
+                    if (friendsPolicy != null)
+                    {
+                        user.ReactPolicyId = user.CommentPolicyId = user.AccountPostPolicyId
+                            = user.FriendListPolicyId = friendsPolicy.Id;
+                        user.AccountPolicyId = privatePolicy.Id;
+                        await _userManager.UpdateAsync(user);
+                        await _postRepository.UpdateUserPostsPolicyToLockedAccountAsync(user.Id);
+                        return StatusCodeReturn<bool>
+                            ._200_Success("Profile locked successfully", true);
+                    }
                     return StatusCodeReturn<bool>
-                        ._200_Success("Profile locked successfully", true);
-                   
+                            ._404_NotFound("Friends only policy not found", false);
                 }
                 return StatusCodeReturn<bool>
-                    ._403_Forbidden("Account already locked");
+                        ._403_Forbidden("Account already locked");
             }
-            return await CheckLockUnLockPoliciesAsync(policy);
+            return StatusCodeReturn<bool>
+                        ._404_NotFound("Private policy not found", false);
         }
 
         public async Task<ApiResponse<bool>> UnLockProfileAsync(SiteUser user)
         {
-            var policy = await _policyRepository.GetPolicyByNameAsync("public");
-            var publicAccountPolicy = (await _accountPolicyService.GetAccountPolicyByPolicyAsync("public"))
-                .ResponseObject!;
-            if ((await CheckLockUnLockPoliciesAsync(policy)).ResponseObject)
+            var publicPolicy = await _policyRepository.GetPolicyByNameAsync("public");
+            if (publicPolicy != null)
             {
-                if (publicAccountPolicy.Id != user.AccountPolicyId)
+                if(user.AccountPolicyId != publicPolicy.Id)
                 {
-                    user.ReactPolicyId = (await _reactPolicyService.GetReactPolicyAsync("public"))
-                    .ResponseObject!.Id;
-                    user.CommentPolicyId = (await _commentPolicyService.GetCommentPolicyAsync("public"))
-                        .ResponseObject!.Id;
-                    user.AccountPostPolicyId = (await _postsPolicyService
-                        .GetAccountPostPolicyAsync("public")).ResponseObject!.Id;
-                    user.AccountPolicyId = publicAccountPolicy.Id;
+                    user.ReactPolicyId = user.CommentPolicyId = user.AccountPostPolicyId
+                    = user.FriendListPolicyId = user.AccountPolicyId = publicPolicy.Id;
                     await _userManager.UpdateAsync(user);
                     await _postRepository.UpdateUserPostsPolicyToUnLockedAccountAsync(user.Id);
                     return StatusCodeReturn<bool>
@@ -522,7 +504,8 @@ namespace SocialMedia.Service.UserAccountService
                 return StatusCodeReturn<bool>
                         ._403_Forbidden("Account already public");
             }
-            return await CheckLockUnLockPoliciesAsync(policy);
+            return StatusCodeReturn<bool>
+                        ._404_NotFound("Public policy not found", false);
         }
 
 
@@ -588,111 +571,30 @@ namespace SocialMedia.Service.UserAccountService
 
         private async Task<ApiResponse<SiteUser>> CheckPoliciesAndCreateUserAsync(RegisterDto registerDto)
         {
-            var accountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync("public");
-            if (accountPolicy != null && accountPolicy.ResponseObject != null)
+            var policy = await _policyService.GetPolicyByNameAsync("public");
+            if (policy != null && policy.ResponseObject != null)
             {
-                var reactPolicy = await _reactPolicyService.GetReactPolicyAsync("public");
-                if (reactPolicy != null && reactPolicy.ResponseObject != null)
+                var user = new SiteUser
                 {
-                    var commentPolicy = await _commentPolicyService.GetCommentPolicyAsync("public");
-                    if (commentPolicy != null && commentPolicy.ResponseObject != null)
-                    {
-                        var postPolicy = await _postsPolicyService.GetAccountPostPolicyAsync("public");
-                        if (postPolicy != null && postPolicy.ResponseObject != null)
-                        {
-                            var friendListPolicy = await _friendListPolicyService.GetFriendListPolicyAsync(
-                                "public");
-                            if (friendListPolicy != null && friendListPolicy.ResponseObject != null)
-                            {
-                                var user = new SiteUser
-                                {
-                                    Email = registerDto.Email,
-                                    UserName = registerDto.UserName,
-                                    DisplayName = registerDto.DisplayName,
-                                    FirstName = registerDto.FirstName,
-                                    LastName = registerDto.LastName,
-                                    SecurityStamp = Guid.NewGuid().ToString(),
-                                    IsFriendListPrivate = true,
-                                    AccountPolicyId = accountPolicy.ResponseObject.Id,
-                                    AccountPostPolicyId = postPolicy.ResponseObject.Id,
-                                    ReactPolicyId = reactPolicy.ResponseObject.Id,
-                                    CommentPolicyId = commentPolicy.ResponseObject.Id,
-                                    FriendListPolicyId = friendListPolicy.ResponseObject.Id
-                                };
-                                return StatusCodeReturn<SiteUser>
-                                    ._200_Success("User generated successfully", user);
-                            }
-                            return StatusCodeReturn<SiteUser>
-                                ._404_NotFound("Friend list policy not found");
-                        }
-                        return StatusCodeReturn<SiteUser>
-                            ._404_NotFound("Post policy not found");
-                    }
-                    return StatusCodeReturn<SiteUser>
-                            ._404_NotFound("Comment policy not found");
-                }
+                    Email = registerDto.Email,
+                    UserName = registerDto.UserName,
+                    DisplayName = registerDto.DisplayName,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    AccountPolicyId = policy.ResponseObject.Id,
+                    AccountPostPolicyId = policy.ResponseObject.Id,
+                    ReactPolicyId = policy.ResponseObject.Id,
+                    CommentPolicyId = policy.ResponseObject.Id,
+                    FriendListPolicyId = policy.ResponseObject.Id
+                };
                 return StatusCodeReturn<SiteUser>
-                            ._404_NotFound("React policy not found");
+                    ._200_Success("User generated successfully", user);
             }
             return StatusCodeReturn<SiteUser>
-                            ._404_NotFound("Account policy not found");
+                            ._404_NotFound("Policy not found");
         }
 
-        private async Task<ApiResponse<bool>> CheckLockUnLockPoliciesAsync(Policy policy)
-        {
-            if (policy.PolicyType == "PUBLIC")
-            {
-                var publicAccountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync(
-                    policy.Id);
-                if (publicAccountPolicy != null)
-                {
-                    var publicCommentPolicy = await _commentPolicyService.GetCommentPolicyAsync("public");
-                    if (publicCommentPolicy != null)
-                    {
-                        var publicReactPolicy = await _reactPolicyService.GetReactPolicyAsync("public");
-                        if (publicReactPolicy != null)
-                        {
-                            return StatusCodeReturn<bool>
-                                ._200_Success("Success", true);
-                        }
-                        return StatusCodeReturn<bool>
-                            ._404_NotFound("Public react policy not found");
-                    }
-                    return StatusCodeReturn<bool>
-                            ._404_NotFound("Public comment policy not found");
-                }
-                return StatusCodeReturn<bool>
-                            ._404_NotFound("Public account policy not found");
-            }
-            else if (policy.PolicyType == "PRIVATE")
-            {
-                var privateAccountPolicy = await _accountPolicyService.GetAccountPolicyByPolicyAsync(
-                    policy.Id);
-                if (privateAccountPolicy != null)
-                {
-                    var friendsOnlyCommentPolicy = await _commentPolicyService.GetCommentPolicyAsync(
-                        "friends only");
-                    if (friendsOnlyCommentPolicy != null)
-                    {
-                        var friendsOnlyReactPolicy = await _reactPolicyService.GetReactPolicyAsync(
-                            "friends only");
-                        if (friendsOnlyReactPolicy != null)
-                        {
-                            return StatusCodeReturn<bool>
-                                ._200_Success("Success", true);
-                        }
-                        return StatusCodeReturn<bool>
-                            ._404_NotFound("Friends only react policy not found", false);
-                    }
-                    return StatusCodeReturn<bool>
-                            ._404_NotFound("Friends only comment policy not found", false);
-                }
-                return StatusCodeReturn<bool>
-                            ._404_NotFound("Private account policy not found", false);
-            }
-            return StatusCodeReturn<bool>
-                ._400_BadRequest("Unknown policy", false);
-        }
 
         #endregion
 

@@ -47,7 +47,9 @@ namespace SocialMedia.Repository.BlockRepository
         {
             try
             {
-                return (await _dbContext.Blocks.Where(e => e.Id == blockId).FirstOrDefaultAsync())!;
+                var block = (await _dbContext.Blocks.Where(e => e.Id == blockId).FirstOrDefaultAsync())!;
+                block.User = null;
+                return block;
             }
             catch (Exception)
             {

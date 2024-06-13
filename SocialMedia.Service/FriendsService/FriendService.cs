@@ -8,7 +8,6 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FriendsRepository;
 using SocialMedia.Repository.PolicyRepository;
-using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.GenericReturn;
 
 namespace SocialMedia.Service.FriendsService
@@ -16,15 +15,12 @@ namespace SocialMedia.Service.FriendsService
     public class FriendService : IFriendService
     {
         private readonly IFriendsRepository _friendsRepository;
-        private readonly IFriendListPolicyService _friendListPolicyService;
         private readonly IBlockRepository _blockRepository;
         private readonly IPolicyRepository _policyRepository;
-        public FriendService(IFriendsRepository _friendsRepository,
-            IFriendListPolicyService _friendListPolicyService, IBlockRepository _blockRepository,
+        public FriendService(IFriendsRepository _friendsRepository,IBlockRepository _blockRepository,
             IPolicyRepository _policyRepository)
         {
             this._friendsRepository = _friendsRepository;
-            this._friendListPolicyService = _friendListPolicyService;
             this._blockRepository = _blockRepository;
             this._policyRepository = _policyRepository;
         }
@@ -74,52 +70,40 @@ namespace SocialMedia.Service.FriendsService
             SiteUser user1)
         {
             var friends = await _friendsRepository.GetAllUserFriendsAsync(user.Id);
-            foreach(var friend in friends)
+            var policy = await _policyRepository.GetPolicyByIdAsync(user.FriendListPolicyId);
+            if (policy != null)
             {
-                friend.User = null;
-            }
-            var freindListPolicy = await _friendListPolicyService.GetFriendListPolicyAsync(
-                user.FriendListPolicyId!);
-            if (freindListPolicy != null && freindListPolicy.ResponseObject != null)
-            {
-                var policy = await _policyRepository.GetPolicyByIdAsync(
-                    freindListPolicy.ResponseObject.PolicyId);
-                if (policy != null)
+                if(user.Id == user1.Id || policy.PolicyType == "PUBLIC")
                 {
-                    if(user.Id == user1.Id || policy.PolicyType == "PUBLIC")
+                    if (friends.ToList().Count == 0)
                     {
-                        if (friends.ToList().Count == 0)
-                        {
-                            return StatusCodeReturn<IEnumerable<Friend>>
-                                ._200_Success("No friends found");
-                        }
                         return StatusCodeReturn<IEnumerable<Friend>>
-                                ._200_Success("Friends found successfully", friends);
+                            ._200_Success("No friends found");
                     }
-                    else if(policy.PolicyType == "FRIENDS ONLY")
+                    return StatusCodeReturn<IEnumerable<Friend>>
+                            ._200_Success("Friends found successfully", friends);
+                }
+                else if(policy.PolicyType == "FRIENDS ONLY")
+                {
+                    var isFriend = await IsUserFriendAsync(user.Id, user1.Id);
+                    if(isFriend==null || !isFriend.ResponseObject)
                     {
-                        var isFriend = await IsUserFriendAsync(user.Id, user1.Id);
-                        if(isFriend==null || !isFriend.ResponseObject)
-                        {
-                            return StatusCodeReturn<IEnumerable<Friend>>
-                                ._403_Forbidden();
-                        }
-                    }
-                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                    {
-                        var isFriend = await IsUserFriendOfFriendAsync(user.Id, user1.Id);
-                        if (isFriend == null || !isFriend.ResponseObject)
-                        {
-                            return StatusCodeReturn<IEnumerable<Friend>>
-                                ._403_Forbidden();
-                        }
+                        return StatusCodeReturn<IEnumerable<Friend>>
+                            ._403_Forbidden();
                     }
                 }
-                return StatusCodeReturn<IEnumerable<Friend>>
-                    ._404_NotFound("Policy not found");
+                else if (policy.PolicyType == "FRIENDS OF FRIENDS")
+                {
+                    var isFriend = await IsUserFriendOfFriendAsync(user.Id, user1.Id);
+                    if (isFriend == null || !isFriend.ResponseObject)
+                    {
+                        return StatusCodeReturn<IEnumerable<Friend>>
+                            ._403_Forbidden();
+                    }
+                }
             }
             return StatusCodeReturn<IEnumerable<Friend>>
-                    ._404_NotFound("Friend list policy not found");
+                ._404_NotFound("Policy not found");
         }
 
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user)

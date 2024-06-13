@@ -21,7 +21,7 @@ namespace SocialMedia.Repository.PostRepository
         Task<IEnumerable<PostDto>> GetUserPostsAsync(SiteUser user);
         Task<IEnumerable<PostDto>> GetUserPostsForFriendsAsync(SiteUser user);
         Task<IEnumerable<PostDto>> GetUserPostsForFriendsOfFriendsAsync(SiteUser user);
-        Task<IEnumerable<PostDto>> GetUserPostsByPolicyAsync(SiteUser user, PostsPolicy policy);
+        Task<IEnumerable<PostDto>> GetUserPostsByPolicyAsync(SiteUser user, Policy policy);
         Task SaveChangesAsync();
 
 

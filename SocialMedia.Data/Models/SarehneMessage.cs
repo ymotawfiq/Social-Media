@@ -13,6 +13,6 @@ namespace SocialMedia.Data.Models
         public string MessagePolicyId { get; set; } = null!;
         public DateTime SentAt { get; set; }
         public SiteUser? User { get; set; }
-        public SarehneMessagePolicy? SarehneMessagePolicy { get; set; }
+        public Policy? SarehneMessagePolicy { get; set; }
     }
 }

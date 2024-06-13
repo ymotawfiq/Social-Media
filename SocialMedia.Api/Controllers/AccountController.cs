@@ -13,11 +13,8 @@ using SocialMedia.Data.DTOs.Authentication.User;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.MessageModel;
-using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.ReactPolicyRepository;
-using SocialMedia.Service.AccountPolicyService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
@@ -32,33 +29,24 @@ namespace SocialMedia.Api.Controllers
         private readonly IUserManagement _userManagementService;
         private readonly IEmailService _emailService;
         private readonly UserManager<SiteUser> _userManager;
-        private readonly IAccountPolicyService _accountPolicyService;
         private readonly IPolicyRepository _policyRepository;
         private readonly IPostRepository _postRepository;
-        private readonly IReactPolicyRepository _reactPolicyRepository;
-        private readonly ICommentPolicyRepository _commentPolicyRepository;
         private readonly UserManagerReturn _userManagerReturn;
         public AccountController
             (
             IUserManagement _userManagementService,
             IEmailService _emailService,
             UserManager<SiteUser> _userManager,
-            IAccountPolicyService _accountPolicyService,
             IPolicyRepository _policyRepository,
             IPostRepository _postRepository,
-            IReactPolicyRepository _reactPolicyRepository,
-            ICommentPolicyRepository _commentPolicyRepository,
             UserManagerReturn _userManagerReturn
             )
         {
             this._userManagementService = _userManagementService;
             this._emailService = _emailService;
             this._userManager = _userManager;
-            this._accountPolicyService = _accountPolicyService;
             this._policyRepository = _policyRepository;
             this._postRepository = _postRepository;
-            this._reactPolicyRepository = _reactPolicyRepository;
-            this._commentPolicyRepository = _commentPolicyRepository;
             this._userManagerReturn = _userManagerReturn;
         }
 

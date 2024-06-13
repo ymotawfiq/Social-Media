@@ -110,66 +110,9 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
-        public static ReactPolicy ConvertFromReactPolicyDto_Add(AddReactPolicyDto addReactPolicyDto)
-        {
-            return new ReactPolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addReactPolicyDto.PolicyId
-            };
-        }
 
-
-        public static ReactPolicy ConvertFromReactPolicyDto_Update(UpdateReactPolicyDto updateReactPolicyDto)
-        {
-            return new ReactPolicy
-            {
-                Id = updateReactPolicyDto.Id,
-                PolicyId = updateReactPolicyDto.PolicyId
-            };
-        }
-
-        public static CommentPolicy ConvertFromCommentPolicyDto_Add(AddCommentPolicyDto addCommentPolicyDto)
-        {
-            return new CommentPolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addCommentPolicyDto.PolicyIdOrName
-            };
-        }
-
-        public static CommentPolicy ConvertFromCommentPolicyDto_Update(
-            UpdateCommentPolicyDto updateCommentPolicyDto)
-        {
-            return new CommentPolicy
-            {
-                Id = updateCommentPolicyDto.Id,
-                PolicyId = updateCommentPolicyDto.PolicyIdOrName
-            };
-        }
-
-        public static AccountPolicy ConvertFromAccountPolicyDto_Add(AddAccountPolicyDto addAccountPolicyDto)
-        {
-            return new AccountPolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addAccountPolicyDto.PolicyIdOrName
-            };
-        }
-
-        public static AccountPolicy ConvertFromAccountPolicyDto_Update(
-            UpdateAccountPolicyDto updateAccountPolicyDto)
-        {
-            return new AccountPolicy
-            {
-                Id = updateAccountPolicyDto.Id,
-                PolicyId = updateAccountPolicyDto.PolicyIdOrName
-            };
-        }
-
-
-        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, PostsPolicy postsPolicy,
-            ReactPolicy reactPolicy, CommentPolicy commentPolicy, SiteUser user)
+        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, Policy postsPolicy,
+            Policy reactPolicy, Policy commentPolicy, SiteUser user)
         {
             return new Post
             {
@@ -181,46 +124,6 @@ namespace SocialMedia.Data.Extensions
                 ReactPolicyId = reactPolicy.Id!,
                 UpdatedAt = DateTime.Now,
                 UserId = user.Id
-            };
-        }
-
-        public static FriendListPolicy ConvertFriendListPolicyDto_Update(
-            UpdateFriendListPolicyDto updateFriendListPolicyDto)
-        {
-            return new FriendListPolicy
-            {
-                PolicyId = updateFriendListPolicyDto.PolicyIdOrName,
-                Id = updateFriendListPolicyDto.Id
-            };
-        }
-
-        public static FriendListPolicy ConvertFriendListPolicyDto_Add(
-            AddFriendListPolicyDto addFriendListPolicyDto)
-        {
-            return new FriendListPolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addFriendListPolicyDto.PolicyIdOrName,
-            };
-        }
-
-        public static PostsPolicy ConvertAccountPostsPolicyDto_Add(
-            AddAccountPostsPolicyDto addAccountPostsPolicyDto)
-        {
-            return new PostsPolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addAccountPostsPolicyDto.PolicyIdOrName
-            };
-        }
-
-        public static PostsPolicy ConvertAccountPostsPolicyDto_Update(
-            UpdateAccountPostsPolicyDto updateAccountPostsPolicyDto)
-        {
-            return new PostsPolicy
-            {
-                Id = updateAccountPostsPolicyDto.Id,
-                PolicyId = updateAccountPostsPolicyDto.PolicyIdOrName
             };
         }
 
@@ -465,7 +368,7 @@ namespace SocialMedia.Data.Extensions
 
         public static SarehneMessage ConvertFromSendSarehneMessageDto(
             SendSarahaMessageDto sendSarahaMessageDto, SiteUser user, SiteUser receiver, 
-                SarehneMessagePolicy policy)
+                Policy policy)
         {
             if (sendSarahaMessageDto.ShareYourName && user != null)
             {
@@ -498,25 +401,6 @@ namespace SocialMedia.Data.Extensions
             return sarehneMessage;
         }
 
-        public static SarehneMessagePolicy ConvertFromSarehneMessagePolicyDto_Add(
-            AddSarehneMessagePolicyDto addSarehneMessagePolicyDto)
-        {
-            return new SarehneMessagePolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addSarehneMessagePolicyDto.PolicyIdOrName
-            };
-        }
-
-        public static SarehneMessagePolicy ConvertFromSarehneMessagePolicyDto_Update(
-            UpdateSarehneMessagePolicyToAnotherDto updateSarehneMessagePolicyToAnotherDto)
-        {
-            return new SarehneMessagePolicy
-            {
-                Id = updateSarehneMessagePolicyToAnotherDto.Id,
-                PolicyId = updateSarehneMessagePolicyToAnotherDto.PolicyIdOrName
-            };
-        }
 
     }
 }

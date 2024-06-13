@@ -42,15 +42,10 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new FollowerConfigurations())
                    .ApplyConfiguration(new BlockConfigurations())
                    .ApplyConfiguration(new PolicyConfigurations())
-                   .ApplyConfiguration(new ReactPolicyConfigurations())
-                   .ApplyConfiguration(new CommentPolicyConfigurations())
                    .ApplyConfiguration(new PostConfigurations())
                    .ApplyConfiguration(new UserPostsConfigurations())
                    .ApplyConfiguration(new PostImagesConfigurations())
-                   .ApplyConfiguration(new AccountPolicyConfigurations())
                    .ApplyConfiguration(new PostViewConfigurations())
-                   .ApplyConfiguration(new FriendListPolicyConfigurations())
-                   .ApplyConfiguration(new PostPolicyConfigurations())
                    .ApplyConfiguration(new SavedPostsConfigurations())
                    .ApplyConfiguration(new UserSavedPostsFoldersConfigurations())
                    .ApplyConfiguration(new SpecialPostReactsConfigurations())
@@ -69,8 +64,7 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new GroupAccessRequestConfigurations())
                    .ApplyConfiguration(new GroupMemberRoleConfigurations())
                    .ApplyConfiguration(new GroupPostsConfigurations())
-                   .ApplyConfiguration(new SarehneMessagesConfigurations())
-                   .ApplyConfiguration(new SarehneMessagePolicyConfigurations());
+                   .ApplyConfiguration(new SarehneMessagesConfigurations());
         }
 
 
@@ -80,15 +74,10 @@ namespace SocialMedia.Data
         public DbSet<Follower> Followers { get; set; }
         public DbSet<Block> Blocks { get; set; }
         public DbSet<Policy> Policies { get; set; }
-        public DbSet<ReactPolicy> ReactPolicies { get; set; }
-        public DbSet<CommentPolicy> CommentPolicies { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<UserPosts> UserPosts { get; set; }
         public DbSet<PostImages> PostImages { get; set; }
-        public DbSet<AccountPolicy> AccountPolicies { get; set; }
         public DbSet<PostView> PostViews { get; set; }
-        public DbSet<FriendListPolicy> FriendListPolicies { get; set; }
-        public DbSet<PostsPolicy> PostPolicies { get; set; }
         public DbSet<SavedPosts> SavedPosts { get; set; }
         public DbSet<UserSavedPostsFolders> UserSavedPostsFolders { get; set; }
         public DbSet<SpecialPostReacts> SpecialPostReacts { get; set; }
@@ -108,7 +97,6 @@ namespace SocialMedia.Data
         public DbSet<GroupMemberRole> GroupMemberRoles { get; set; }
         public DbSet<GroupPost> GroupPosts { get; set; }
         public DbSet<SarehneMessage> SarehneMessages { get; set; }
-        public DbSet<SarehneMessagePolicy> SarehneMessagePolicies { get; set; }
 
     }
 }

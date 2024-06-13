@@ -17,7 +17,7 @@ namespace SocialMedia.Service.PostService
         Task<ApiResponse<bool>> UpdateUserPostsPolicyToUnLockedProfileAsync(SiteUser user);
         Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsAsync(SiteUser user);
         Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsAsync(SiteUser user, SiteUser routeUser);
-        Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsByPolicyAsync(SiteUser user, PostsPolicy policy);
+        Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsByPolicyAsync(SiteUser user, Policy policy);
         Task<ApiResponse<IEnumerable<PostDto>>> GetPostsForFriendsAsync(SiteUser user);
         Task<ApiResponse<IEnumerable<PostDto>>>CheckFriendShipAndGetPostsAsync(
             SiteUser currentUser, SiteUser RouteUser);

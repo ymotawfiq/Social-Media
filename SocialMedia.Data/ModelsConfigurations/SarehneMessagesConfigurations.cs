@@ -16,7 +16,7 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.Message).IsRequired().HasColumnName("Message")
                 .HasMaxLength(1000);
             builder.Property(e => e.SenderName).IsRequired().HasDefaultValue("Anonymous");
-            builder.HasOne(e => e.SarehneMessagePolicy).WithMany(e => e.SarehneMessages)
+            builder.HasOne(e => e.SarehneMessagePolicy).WithMany(e => e.SarehneMessagePolicies)
                 .HasForeignKey(e => e.MessagePolicyId);
             builder.Property(e => e.MessagePolicyId).IsRequired().HasColumnName("Message Policy Id");
             builder.Property(e => e.SentAt).IsRequired().HasDefaultValue(DateTime.Now);

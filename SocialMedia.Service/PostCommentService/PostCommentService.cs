@@ -7,12 +7,10 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.BlockRepository;
-using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostCommentsRepository;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.UserPostsRepository;
-using SocialMedia.Service.FriendListPolicyService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 
@@ -26,12 +24,11 @@ namespace SocialMedia.Service.PostCommentService
         private readonly IUserPostsRepository _userPostsRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IPolicyRepository _policyRepository;
-        private readonly ICommentPolicyRepository _commentPolicyRepository;
         private readonly IFriendService _friendService;
         public PostCommentService(IPostCommentsRepository _postCommentsRepository,
             IPostRepository _postRepository, IWebHostEnvironment _webHostEnvironment, 
             IBlockRepository _blockRepository, IPolicyRepository _policyRepository, 
-            IUserPostsRepository _userPostsRepository, ICommentPolicyRepository _commentPolicyRepository,
+            IUserPostsRepository _userPostsRepository,
             IFriendService _friendService)
         {
             this._postCommentsRepository = _postCommentsRepository;
@@ -40,7 +37,6 @@ namespace SocialMedia.Service.PostCommentService
             this._userPostsRepository = _userPostsRepository;
             this._webHostEnvironment = _webHostEnvironment;
             this._policyRepository = _policyRepository;
-            this._commentPolicyRepository = _commentPolicyRepository;
             this._friendService = _friendService;
         }
         public async Task<ApiResponse<PostComment>> AddPostCommentAsync(AddPostCommentDto addPostCommentDto,
@@ -400,46 +396,39 @@ namespace SocialMedia.Service.PostCommentService
             var post = await _postRepository.GetPostByIdAsync(postId);
             if (post != null)
             {
-                var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByIdAsync(
-                    post.CommentPolicyId);
-                if (commentPolicy != null)
+                var policy = await _policyRepository.GetPolicyByIdAsync(post.CommentPolicyId);
+                if (policy != null)
                 {
-                    var policy = await _policyRepository.GetPolicyByIdAsync(commentPolicy.PolicyId);
-                    if (policy != null)
+                    if(policy.PolicyType == "PRIVATE")
                     {
-                        if(policy.PolicyType == "PRIVATE")
+                        return StatusCodeReturn<PostComment>
+                            ._403_Forbidden();
+                    }
+                    else if(policy.PolicyType == "FRIENDS ONLY")
+                    {
+                        var isFriend = await _friendService.IsUserFriendAsync(userId,
+                            userWhoWantsToCommentId);
+                        if (isFriend == null || !isFriend!.ResponseObject)
                         {
                             return StatusCodeReturn<PostComment>
-                                ._403_Forbidden();
+                            ._403_Forbidden("Friends only");
                         }
-                        else if(policy.PolicyType == "FRIENDS ONLY")
+                    }
+                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
+                    {
+                        var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(userId,
+                            userWhoWantsToCommentId);
+                        if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
                         {
-                            var isFriend = await _friendService.IsUserFriendAsync(userId,
-                                userWhoWantsToCommentId);
-                            if (isFriend == null || !isFriend!.ResponseObject)
-                            {
-                                return StatusCodeReturn<PostComment>
-                                ._403_Forbidden("Friends only");
-                            }
+                            return StatusCodeReturn<PostComment>
+                            ._403_Forbidden("friends of friends only");
                         }
-                        else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                        {
-                            var isFriendOfFriend = await _friendService.IsUserFriendOfFriendAsync(userId,
-                                userWhoWantsToCommentId);
-                            if (isFriendOfFriend == null || !isFriendOfFriend!.ResponseObject)
-                            {
-                                return StatusCodeReturn<PostComment>
-                                ._403_Forbidden("friends of friends only");
-                            }
-                        }
-                        return StatusCodeReturn<PostComment>
-                            ._200_Success("You can comment", new PostComment { });
                     }
                     return StatusCodeReturn<PostComment>
-                        ._404_NotFound("Policy not found");
+                        ._200_Success("You can comment", new PostComment { });
                 }
                 return StatusCodeReturn<PostComment>
-                        ._404_NotFound("Comment policy not found");
+                    ._404_NotFound("Policy not found");
             }
             return StatusCodeReturn<PostComment>
                         ._404_NotFound("Post not found");

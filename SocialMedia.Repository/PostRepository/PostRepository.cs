@@ -5,10 +5,7 @@ using SocialMedia.Data;
 using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.CommentPolicyRepository;
 using SocialMedia.Repository.PolicyRepository;
-using SocialMedia.Repository.PostsPolicyRepository;
-using SocialMedia.Repository.ReactPolicyRepository;
 
 namespace SocialMedia.Repository.PostRepository
 {
@@ -16,18 +13,10 @@ namespace SocialMedia.Repository.PostRepository
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IPolicyRepository _policyRepository;
-        private readonly IReactPolicyRepository _reactPolicyRepository;
-        private readonly ICommentPolicyRepository _commentPolicyRepository;
-        private readonly IPostsPolicyRepository _postsPolicyRepository;
-        public PostRepository(ApplicationDbContext _dbContext, IPolicyRepository _policyRepository,
-            IReactPolicyRepository _reactPolicyRepository, ICommentPolicyRepository _commentPolicyRepository,
-            IPostsPolicyRepository _postsPolicyRepository)
+        public PostRepository(ApplicationDbContext _dbContext, IPolicyRepository _policyRepository)
         {
             this._dbContext = _dbContext;
             this._policyRepository = _policyRepository;
-            this._reactPolicyRepository = _reactPolicyRepository;
-            this._commentPolicyRepository = _commentPolicyRepository;
-            this._postsPolicyRepository = _postsPolicyRepository;
         }
 
         public async Task<PostDto> AddPostAsync(Post post, List<PostImages> postImages)
@@ -77,19 +66,28 @@ namespace SocialMedia.Repository.PostRepository
         }
         public async Task<Post> GetPostByIdAsync(string postId)
         {
-            return (await _dbContext.Posts.Where(e => e.Id == postId).FirstOrDefaultAsync())!;
+            return (await _dbContext.Posts.Where(e => e.Id == postId).
+                Select(e=>new Post
+                {
+                    Id = e.Id,
+                    UserId = e.UserId,
+                    CommentPolicyId = e.CommentPolicyId,
+                    Content = e.Content,
+                    PostedAt = e.PostedAt,
+                    PostPolicyId = e.PostPolicyId,
+                    ReactPolicyId = e.ReactPolicyId
+                }).FirstOrDefaultAsync())!;
         }
         public async Task<IEnumerable<PostDto>> GetUserPostsForFriendsAsync(SiteUser user)
         {
             List<PostDto> friendsPosts = new();
             var policy = await _policyRepository.GetPolicyByNameAsync("private");
-            var postPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(policy.Id);
-            var posts = from p in await _dbContext.Posts.ToListAsync()
-                        where p.PostPolicyId != postPolicy.Id
+            var posts = from p in await GetUserPostsAsync(user)
+                        where p.Post.PostPolicyId != policy.Id
                         select p;
             foreach (var p in posts)
             {
-                friendsPosts.Add(await GetPostWithImagesByPostIdAsync(p.Id));
+                friendsPosts.Add(await GetPostWithImagesByPostIdAsync(p.Post.Id));
             }
             return friendsPosts;
         }
@@ -99,16 +97,13 @@ namespace SocialMedia.Repository.PostRepository
             List<PostDto> friendsOfFriendsPosts = new();
             var friendsOfFriendsPolicy = await _policyRepository.GetPolicyByNameAsync("friends of friends");
             var publicPolicy = await _policyRepository.GetPolicyByNameAsync("public");
-            var publicPostPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(publicPolicy.Id);
-            var friendsOfFriendsPostPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(
-                friendsOfFriendsPolicy.Id);
-            var posts = from p in await _dbContext.Posts.ToListAsync()
-                        where p.PostPolicyId == publicPostPolicy.Id 
-                        || p.PostPolicyId == friendsOfFriendsPostPolicy.Id
+            var posts = from p in await GetUserPostsAsync(user)
+                        where p.Post.PostPolicyId == publicPolicy.Id 
+                        || p.Post.PostPolicyId == friendsOfFriendsPolicy.Id
                         select p;
             foreach (var p in posts)
             {
-                friendsOfFriendsPosts.Add(await GetPostWithImagesByPostIdAsync(p.Id));
+                friendsOfFriendsPosts.Add(await GetPostWithImagesByPostIdAsync(p.Post.Id));
             }
             return friendsOfFriendsPosts;
         }
@@ -145,13 +140,28 @@ namespace SocialMedia.Repository.PostRepository
         {
             try
             {
-                var posts = from p in await _dbContext.Posts.ToListAsync()
-                            where p.UserId == user.Id
-                            select p;
+                var posts = await _dbContext.Posts.Where(e => e.UserId == user.Id)
+                    .Select(e => new Post
+                    {
+                        Id = e.Id,
+                        UserId = e.UserId,
+                        CommentPolicyId = e.CommentPolicyId,
+                        Content = e.Content,
+                        PostedAt = e.PostedAt,
+                        PostPolicyId = e.PostPolicyId,
+                        ReactPolicyId = e.ReactPolicyId,
+                    }).ToListAsync();
+                            
                 var postsDto = new List<PostDto>();
                 foreach (var p in posts)
                 {
-                    var postImages = await _dbContext.PostImages.Where(e => e.PostId == p.Id).ToListAsync();
+                    var postImages = await _dbContext.PostImages.Where(e => e.PostId == p.Id)
+                        .Select(e=>new PostImages
+                        {
+                            Id = e.Id,
+                            PostId = e.PostId,
+                            ImageUrl = e.ImageUrl
+                        }).ToListAsync();
                     postsDto.Add(CreatePostDtoObject(p, postImages));
                 }
                 return postsDto;
@@ -161,7 +171,7 @@ namespace SocialMedia.Repository.PostRepository
                 throw;
             }
         }
-        public async Task<IEnumerable<PostDto>> GetUserPostsByPolicyAsync(SiteUser user, PostsPolicy policy)
+        public async Task<IEnumerable<PostDto>> GetUserPostsByPolicyAsync(SiteUser user, Policy policy)
         {
             return from i in await GetUserPostsAsync(user)
                    where i.Post.PostPolicyId == policy.Id
@@ -170,26 +180,20 @@ namespace SocialMedia.Repository.PostRepository
         public async Task<bool> UpdateUserPostsPolicyToLockedAccountAsync(string userId)
         {
             var policy = await _policyRepository.GetPolicyByNameAsync("friends only");
-            var postPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(policy.Id);
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
-            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
             await _dbContext.Posts.Where(e => e.UserId == userId)
-                .ExecuteUpdateAsync(e => e.SetProperty(p => p.PostPolicyId, postPolicy.Id)
-                .SetProperty(p => p.ReactPolicyId, reactPolicy.Id)
-                .SetProperty(p => p.CommentPolicyId, commentPolicy.Id));
+                .ExecuteUpdateAsync(e => e.SetProperty(p => p.PostPolicyId, policy.Id)
+                .SetProperty(p => p.ReactPolicyId, policy.Id)
+                .SetProperty(p => p.CommentPolicyId, policy.Id));
             await SaveChangesAsync();
             return true;
         }
         public async Task<bool> UpdateUserPostsPolicyToUnLockedAccountAsync(string userId)
         {
             var policy = await _policyRepository.GetPolicyByNameAsync("public");
-            var postPolicy = await _postsPolicyRepository.GetPostPolicyByPolicyIdAsync(policy.Id);
-            var reactPolicy = await _reactPolicyRepository.GetReactPolicyByPolicyIdAsync(policy.Id);
-            var commentPolicy = await _commentPolicyRepository.GetCommentPolicyByPolicyIdAsync(policy.Id);
             await _dbContext.Posts.Where(e => e.UserId == userId)
-                .ExecuteUpdateAsync(e => e.SetProperty(p => p.PostPolicyId, postPolicy.Id)
-                .SetProperty(p => p.ReactPolicyId, reactPolicy.Id)
-                .SetProperty(p => p.CommentPolicyId, commentPolicy.Id));
+                .ExecuteUpdateAsync(e => e.SetProperty(p => p.PostPolicyId, policy.Id)
+                .SetProperty(p => p.ReactPolicyId, policy.Id)
+                .SetProperty(p => p.CommentPolicyId, policy.Id));
             await SaveChangesAsync();
             return true;
         }
@@ -207,7 +211,16 @@ namespace SocialMedia.Repository.PostRepository
             {
                 return new PostDto
                 {
-                    Post = post,
+                    Post = new Post
+                    {
+                        Id = post.Id,
+                        UserId = post.UserId,
+                        CommentPolicyId = post.CommentPolicyId,
+                        Content = post.Content,
+                        PostedAt = post.PostedAt,
+                        PostPolicyId = post.PostPolicyId,
+                        ReactPolicyId = post.ReactPolicyId
+                    },
                     Images = postImages
                 };
             }

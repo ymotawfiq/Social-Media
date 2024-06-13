@@ -16,9 +16,9 @@ namespace SocialMedia.Data.Models
         public DateTime PostedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public SiteUser? User { get; set; }
-        public PostsPolicy? PostPolicy { get; set; }
-        public ReactPolicy? ReactPolicy { get; set; }
-        public CommentPolicy? CommentPolicy { get; set; }
+        public Policy? PostPolicy { get; set; }
+        public Policy? ReactPolicy { get; set; }
+        public Policy? CommentPolicy { get; set; }
         public List<UserPosts>? UserPosts { get; set; }
         public List<PostImages>? PostImages { get; set; }
         public List<PostView>? PostViews { get; set; }

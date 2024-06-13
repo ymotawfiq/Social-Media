@@ -4,7 +4,6 @@ using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.SarehneMessagePolicyRepository;
 using SocialMedia.Repository.SarehneRepository;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PolicyService;
@@ -13,17 +12,16 @@ namespace SocialMedia.Service.SarehneService
 {
     public class SarehneService : ISarehneService
     {
+        private readonly Policies policies = new();
         private readonly ISarehneRepository _sarehneRepository;
         private readonly UserManagerReturn _userManagerReturn;
         private readonly IPolicyService _policyService;
-        private readonly ISarehneMessagePolicyRepository _sarehneMessagePolicyRepository;
         public SarehneService(ISarehneRepository _sarehneRepository, UserManagerReturn _userManagerReturn,
-            IPolicyService _policyService, ISarehneMessagePolicyRepository _sarehneMessagePolicyRepository)
+            IPolicyService _policyService)
         {
             this._sarehneRepository = _sarehneRepository;
             this._userManagerReturn = _userManagerReturn;
             this._policyService = _policyService;
-            this._sarehneMessagePolicyRepository = _sarehneMessagePolicyRepository;
         }
 
         public async Task<ApiResponse<SarehneMessage>> DeleteMessageAsync(string messageId, SiteUser user)
@@ -53,21 +51,15 @@ namespace SocialMedia.Service.SarehneService
                 var policy = await _policyService.GetPolicyByNameAsync("public");
                 if (policy != null && policy.ResponseObject != null)
                 {
-                    var messagePolicy = await _sarehneMessagePolicyRepository.GetPolicyByPolicyIdAsync(
-                    policy.ResponseObject.Id);
-                    if (messagePolicy != null)
+                    if (message.ReceiverId == user.Id 
+                    || message.MessagePolicyId == policy.ResponseObject.Id)
                     {
-                        if (message.ReceiverId == user.Id || message.MessagePolicyId == messagePolicy.Id)
-                        {
-                            SetNull(message);
-                            return StatusCodeReturn<SarehneMessage>
-                                ._200_Success("Message found successfully", message);
-                        }
+                        SetNull(message);
                         return StatusCodeReturn<SarehneMessage>
-                            ._403_Forbidden();
+                            ._200_Success("Message found successfully", message);
                     }
                     return StatusCodeReturn<SarehneMessage>
-                    ._404_NotFound("Message policy not found");
+                        ._403_Forbidden();
                 }
                 return StatusCodeReturn<SarehneMessage>
                     ._404_NotFound("Policy not found");
@@ -97,25 +89,18 @@ namespace SocialMedia.Service.SarehneService
             var policy = await _policyService.GetPolicyByNameAsync("public");
             if(policy!=null && policy.ResponseObject != null)
             {
-                var messagePolicy = await _sarehneMessagePolicyRepository.GetPolicyByPolicyIdAsync(
-                    policy.ResponseObject.Id);
-                if (messagePolicy != null)
+                var messages = await _sarehneRepository.GetMessagesAsync(user.Id, policy.ResponseObject.Id);
+                foreach(var m in messages)
                 {
-                    var messages = await _sarehneRepository.GetMessagesAsync(user.Id, messagePolicy.Id);
-                    foreach(var m in messages)
-                    {
-                        SetNull(m);
-                    }
-                    if (messages.ToList().Count == 0)
-                    {
-                        return StatusCodeReturn<IEnumerable<SarehneMessage>>
-                            ._200_Success("No public messages found", messages);
-                    }
+                    SetNull(m);
+                }
+                if (messages.ToList().Count == 0)
+                {
                     return StatusCodeReturn<IEnumerable<SarehneMessage>>
-                            ._200_Success("Public messages found successfully", messages);
+                        ._200_Success("No public messages found", messages);
                 }
                 return StatusCodeReturn<IEnumerable<SarehneMessage>>
-                            ._404_NotFound("Message policy not found");
+                        ._200_Success("Public messages found successfully", messages);
             }
             return StatusCodeReturn<IEnumerable< SarehneMessage >>
                             ._404_NotFound("Policy not found");
@@ -135,18 +120,12 @@ namespace SocialMedia.Service.SarehneService
                 var policy = await _policyService.GetPolicyByNameAsync("private");
                 if(policy!=null && policy.ResponseObject != null)
                 {
-                    var messagePolicy = await _sarehneMessagePolicyRepository.GetPolicyByPolicyIdAsync(
-                    policy.ResponseObject.Id);
-                    if (messagePolicy != null)
-                    {
-                        var newMessage = await _sarehneRepository.SendMessageAsync(ConvertFromDto
-                        .ConvertFromSendSarehneMessageDto(sendSarahaMessageDto, user!, receiver, messagePolicy));
-                        SetNull(newMessage);
-                        return StatusCodeReturn<SarehneMessage>
-                            ._201_Created("Message sent successfully", newMessage);
-                    }
+                    var newMessage = await _sarehneRepository.SendMessageAsync(ConvertFromDto
+                    .ConvertFromSendSarehneMessageDto(sendSarahaMessageDto, user!, receiver, 
+                    policy.ResponseObject));
+                    SetNull(newMessage);
                     return StatusCodeReturn<SarehneMessage>
-                        ._404_NotFound("Message policy not found");
+                        ._201_Created("Message sent successfully", newMessage);
                 }
                 return StatusCodeReturn<SarehneMessage>
                         ._404_NotFound("Policy not found");
@@ -165,13 +144,11 @@ namespace SocialMedia.Service.SarehneService
                     updateSarehneMessagePolicyDto.PolicyIdOrName);
                 if(policy!=null && policy.ResponseObject != null)
                 {
-                    var messagePolicy = await _sarehneMessagePolicyRepository.GetPolicyByPolicyIdAsync(
-                        policy.ResponseObject.Id);
-                    if (messagePolicy != null)
+                    if (policies.SarehneMessagePolicies.Contains(policy.ResponseObject.PolicyType))
                     {
-                        if(user.Id == message.ReceiverId)
+                        if (user.Id == message.ReceiverId)
                         {
-                            updateSarehneMessagePolicyDto.PolicyIdOrName = messagePolicy.Id;
+                            updateSarehneMessagePolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
                             var updatedMessage = await _sarehneRepository.UpdateMessagePolicyAsync(
                                 ConvertFromDto.ConvertFromUpdateSarehneMessagePolicyDto(
                                     updateSarehneMessagePolicyDto, message));
@@ -183,7 +160,7 @@ namespace SocialMedia.Service.SarehneService
                             ._403_Forbidden();
                     }
                     return StatusCodeReturn<SarehneMessage>
-                            ._404_NotFound("Message policy not found");
+                            ._403_Forbidden("Invalid policy");
                 }
                 return StatusCodeReturn<SarehneMessage>
                             ._404_NotFound("Policy not found");

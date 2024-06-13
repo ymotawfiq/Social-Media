@@ -11,18 +11,17 @@ namespace SocialMedia.Data.Models.Authentication
         public string DisplayName { get; set; } = null!;
         public string? RefreshToken { get; set; } = null!;
         public DateTime? RefreshTokenExpiry { get; set; }
-        public bool IsFriendListPrivate { get; set; }
-        public string? FriendListPolicyId { get; set; } = null!;
-        public string? AccountPolicyId { get; set; } = null!;
-        public string? AccountPostPolicyId { get; set; } = null!;
-        public string? ReactPolicyId { get; set; } = null!;
-        public string? CommentPolicyId { get; set; } = null!;
+        public string FriendListPolicyId { get; set; } = null!;
+        public string AccountPolicyId { get; set; } = null!;
+        public string AccountPostPolicyId { get; set; } = null!;
+        public string ReactPolicyId { get; set; } = null!;
+        public string CommentPolicyId { get; set; } = null!;
         public List<Post>? Posts { get; set; }
-        public AccountPolicy? AccountPolicy { get; set; }
-        public ReactPolicy? ReactPolicy { get; set; }
-        public PostsPolicy? PostPolicy { get; set; }
-        public CommentPolicy? CommentPolicy { get; set; }
-        public FriendListPolicy? FriendListPolicy { get; set; }
+        public Policy? AccountPolicy { get; set; }
+        public Policy? ReactPolicy { get; set; }
+        public Policy? PostPolicy { get; set; }
+        public Policy? CommentPolicy { get; set; }
+        public Policy? FriendListPolicy { get; set; }
         public List<FriendRequest>? FriendRequests { get; set; }
         public List<Friend>? Friends { get; set; }
         public List<Follower>? Followers { get; set; }
