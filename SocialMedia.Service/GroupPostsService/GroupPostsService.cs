@@ -5,7 +5,6 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.GroupMemberRepository;
-using SocialMedia.Repository.GroupPolicyRepository;
 using SocialMedia.Repository.GroupPostsRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.PostRepository;
@@ -22,16 +21,14 @@ namespace SocialMedia.Service.GroupPostsService
         private readonly IPostService _postService;
         private readonly IGroupRepository _groupRepository;
         private readonly IPolicyService _policyService;
-        private readonly IGroupPolicyRepository _groupPolicyRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
         public GroupPostsService(IGroupPostsRepository _groupPostsRepository, IPostService _postService,
             IGroupRepository _groupRepository, IPolicyService _policyService,
-            IGroupPolicyRepository _groupPolicyRepository, IGroupMemberRepository _groupMemberRepository)
+            IGroupMemberRepository _groupMemberRepository)
         {
             this._groupPostsRepository = _groupPostsRepository;
             this._groupRepository = _groupRepository;
             this._postService = _postService;
-            this._groupPolicyRepository = _groupPolicyRepository;
             this._policyService = _policyService;
             this._groupMemberRepository = _groupMemberRepository;
         }
@@ -89,9 +86,8 @@ namespace SocialMedia.Service.GroupPostsService
             var groupPost = await _groupPostsRepository.GetGroupPostByIdAsync(groupPostId);
             if (groupPost != null)
             {
-                var policy = await _policyService.GetPolicyByIdAsync((await _groupPolicyRepository
-                    .GetGroupPolicyByIdAsync((await _groupRepository
-                    .GetGroupByIdAsync(groupPost.GroupId)).GroupPolicyId)).PolicyId);
+                var policy = await _policyService.GetPolicyByIdAsync((await _groupRepository
+                    .GetGroupByIdAsync(groupPost.GroupId)).GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
@@ -116,9 +112,8 @@ namespace SocialMedia.Service.GroupPostsService
             var groupPost = await _groupPostsRepository.GetGroupPostByIdAsync(groupPostId);
             if (groupPost != null)
             {
-                var policy = await _policyService.GetPolicyByIdAsync((await _groupPolicyRepository
-                    .GetGroupPolicyByIdAsync((await _groupRepository
-                    .GetGroupByIdAsync(groupPost.GroupId)).GroupPolicyId)).PolicyId);
+                var policy = await _policyService.GetPolicyByIdAsync((await _groupRepository
+                    .GetGroupByIdAsync(groupPost.GroupId)).GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
@@ -154,8 +149,7 @@ namespace SocialMedia.Service.GroupPostsService
             var group = await _groupRepository.GetGroupByIdAsync(groupId);
             if (group != null)
             {
-                var policy = await _policyService.GetPolicyByIdAsync((await _groupPolicyRepository
-                    .GetGroupPolicyByIdAsync(group.GroupPolicyId)).PolicyId);
+                var policy = await _policyService.GetPolicyByIdAsync(group.GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     return await CheckPolicyAndGetPostsAsync(policy, groupId, user);
@@ -172,8 +166,7 @@ namespace SocialMedia.Service.GroupPostsService
             var group = await _groupRepository.GetGroupByIdAsync(groupId);
             if (group != null)
             {
-                var policy = await _policyService.GetPolicyByIdAsync((await _groupPolicyRepository
-                    .GetGroupPolicyByIdAsync(group.GroupPolicyId)).PolicyId);
+                var policy = await _policyService.GetPolicyByIdAsync(group.GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     if(policy.ResponseObject.PolicyType == "PUBLIC")

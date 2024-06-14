@@ -6,9 +6,9 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PagePostsConfigurations : IEntityTypeConfiguration<PagePosts>
+    public class PagePostsConfigurations : IEntityTypeConfiguration<PagePost>
     {
-        public void Configure(EntityTypeBuilder<PagePosts> builder)
+        public void Configure(EntityTypeBuilder<PagePost> builder)
         {
             builder.HasKey(e => e.Id);
             builder.HasOne(e => e.Page).WithMany(e => e.PagePosts).HasForeignKey(e => e.PageId);

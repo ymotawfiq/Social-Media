@@ -19,7 +19,13 @@ namespace SocialMedia.Repository.GroupPostsRepository
             {
                 await _dbContext.GroupPosts.AddAsync(groupPost);
                 await SaveChangesAsync();
-                return groupPost;
+                return new GroupPost
+                {
+                    Id = groupPost.Id,
+                    GroupId = groupPost.GroupId,
+                    PostId = groupPost.PostId,
+                    UserId = groupPost.UserId
+                };
             }
             catch (Exception)
             {
@@ -46,7 +52,13 @@ namespace SocialMedia.Repository.GroupPostsRepository
         {
             try
             {
-                return (await _dbContext.GroupPosts.Where(e => e.Id == groupPostId).FirstOrDefaultAsync())!;
+                return (await _dbContext.GroupPosts.Select(e=>new GroupPost
+                {
+                    UserId = e.UserId,
+                    PostId = e.PostId,
+                    GroupId = e.GroupId,
+                    Id = e.Id
+                }).Where(e => e.Id == groupPostId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -56,7 +68,13 @@ namespace SocialMedia.Repository.GroupPostsRepository
 
         public async Task<GroupPost> GetGroupPostByPostIdAsync(string postId)
         {
-            return (await _dbContext.GroupPosts.Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
+            return (await _dbContext.GroupPosts.Select(e => new GroupPost
+            {
+                UserId = e.UserId,
+                PostId = e.PostId,
+                GroupId = e.GroupId,
+                Id = e.Id
+            }).Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
         }
 
         public async Task<IEnumerable<GroupPost>> GetGroupPostsAsync(string groupId)
@@ -65,7 +83,13 @@ namespace SocialMedia.Repository.GroupPostsRepository
             {
                 return from p in await _dbContext.GroupPosts.ToListAsync()
                        where p.GroupId == groupId
-                       select p;
+                       select (new GroupPost
+                       {
+                           Id = p.Id,
+                           GroupId = p.GroupId,
+                           PostId = p.PostId,
+                           UserId = p.UserId
+                       });
             }
             catch (Exception)
             {

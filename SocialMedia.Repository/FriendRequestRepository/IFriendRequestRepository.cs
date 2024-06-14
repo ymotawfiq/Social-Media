@@ -13,8 +13,8 @@ namespace SocialMedia.Repository.FriendRequestRepository
         Task<FriendRequest> GetFriendRequestByUserAndPersonIdAsync(string userId, string personId);
         Task<FriendRequest> DeleteFriendRequestByAsync(string friendRequestId);
         Task<IEnumerable<FriendRequest>> GetAllFriendRequestsAsync();
-        Task<IEnumerable<FriendRequest>> GetAllFriendRequestsByUserIdAsync(string userId);
-        Task<IEnumerable<FriendRequest>> GetAllFriendRequestsByUserNameAsync(string userName);
+        Task<IEnumerable<FriendRequest>> GetSentFriendRequestsByUserIdAsync(string userId);
+        Task<IEnumerable<FriendRequest>> GetReceivedFriendRequestsByUserIdAsync(string userId);
         Task SaveChangesAsync();
     }
 }

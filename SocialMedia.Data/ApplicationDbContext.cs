@@ -43,13 +43,10 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new BlockConfigurations())
                    .ApplyConfiguration(new PolicyConfigurations())
                    .ApplyConfiguration(new PostConfigurations())
-                   .ApplyConfiguration(new UserPostsConfigurations())
                    .ApplyConfiguration(new PostImagesConfigurations())
                    .ApplyConfiguration(new PostViewConfigurations())
                    .ApplyConfiguration(new SavedPostsConfigurations())
                    .ApplyConfiguration(new UserSavedPostsFoldersConfigurations())
-                   .ApplyConfiguration(new SpecialPostReactsConfigurations())
-                   .ApplyConfiguration(new SpecialCommentReactsConfigurations())
                    .ApplyConfiguration(new PostReactsConfigurations())
                    .ApplyConfiguration(new PostCommentsConfigurations())
                    .ApplyConfiguration(new PostCommentReplayConfigurations())
@@ -57,7 +54,6 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new UserPageConfiguration())
                    .ApplyConfiguration(new PagePostsConfigurations())
                    .ApplyConfiguration(new PageFollowersConfigurations())
-                   .ApplyConfiguration(new GroupPolicyConfigurations())
                    .ApplyConfiguration(new GroupRoleConfigurations())
                    .ApplyConfiguration(new GroupConfigurations())
                    .ApplyConfiguration(new GroupMembersConfigurations())
@@ -75,21 +71,17 @@ namespace SocialMedia.Data
         public DbSet<Block> Blocks { get; set; }
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Post> Posts { get; set; }
-        public DbSet<UserPosts> UserPosts { get; set; }
         public DbSet<PostImages> PostImages { get; set; }
         public DbSet<PostView> PostViews { get; set; }
         public DbSet<SavedPosts> SavedPosts { get; set; }
         public DbSet<UserSavedPostsFolders> UserSavedPostsFolders { get; set; }
-        public DbSet<SpecialPostReacts> SpecialPostReacts { get; set; }
-        public DbSet<SpecialCommentReacts> SpecialCommentReacts { get; set; }
         public DbSet<PostReacts> PostReacts { get; set; }
         public DbSet<PostComment> PostComments { get; set; }
         public DbSet<PostCommentReplay> PostCommentReplay { get; set; }
         public DbSet<Page> Pages { get; set; }
         public DbSet<UserPage> UserPages { get; set; }
-        public DbSet<PagePosts> PagePosts { get; set; }
+        public DbSet<PagePost> PagePosts { get; set; }
         public DbSet<PageFollower> PageFollowers { get; set; }
-        public DbSet<GroupPolicy> GroupPolicies { get; set; }
         public DbSet<GroupRole> GroupRoles { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMember> GroupMembers { get; set; }

@@ -9,7 +9,7 @@ namespace SocialMedia.Data.Models
         public string Description { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public List<UserPage>? UserPages { get; set; }
-        public List<PagePosts>? PagePosts { get; set; }
+        public List<PagePost>? PagePosts { get; set; }
         public List<PageFollower>? PageFollowers { get; set; }
     }
 }

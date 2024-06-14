@@ -17,9 +17,14 @@ namespace SocialMedia.Repository.ReactRepository
         {
             try
             {
+                react.ReactValue = react.ReactValue.ToUpper();
                 await _dbContext.Reacts.AddAsync(react);
                 await SaveChangesAsync();
-                return react;
+                return new React
+                {
+                    Id = react.Id,
+                    ReactValue = react.ReactValue
+                };
             }
             catch (Exception)
             {
@@ -46,7 +51,11 @@ namespace SocialMedia.Repository.ReactRepository
         {
             try
             {
-                return await _dbContext.Reacts.ToListAsync();
+                return await _dbContext.Reacts.Select(e=>new React
+                {
+                    ReactValue = e.ReactValue,
+                    Id = e.Id
+                }).ToListAsync();
             }
             catch (Exception)
             {
@@ -58,7 +67,11 @@ namespace SocialMedia.Repository.ReactRepository
         {
             try
             {
-                return (await _dbContext.Reacts.Where(e => e.Id == reactId).FirstOrDefaultAsync())!;
+                return (await _dbContext.Reacts.Select(e => new React
+                {
+                    ReactValue = e.ReactValue,
+                    Id = e.Id
+                }).Where(e => e.Id == reactId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -82,6 +95,7 @@ namespace SocialMedia.Repository.ReactRepository
         {
             try
             {
+                react.ReactValue = react.ReactValue.ToUpper();
                 var react1 = await GetReactByIdAsync(react.Id);
                 react1.ReactValue = react.ReactValue;
                 await SaveChangesAsync();

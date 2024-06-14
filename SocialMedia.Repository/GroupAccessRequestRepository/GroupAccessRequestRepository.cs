@@ -19,7 +19,12 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
             {
                 await _dbContext.GroupAccessRequests.AddAsync(request);
                 await SaveChangesAsync();
-                return request;
+                return new GroupAccessRequest
+                {
+                    UserId = request.UserId,
+                    Id = request.Id,
+                    GroupId = request.GroupId
+                };
             }
             catch (Exception)
             {
@@ -54,7 +59,12 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
         {
             try
             {
-                return (await _dbContext.GroupAccessRequests.Where(e => e.GroupId == groupId)
+                return (await _dbContext.GroupAccessRequests.Select(e => new GroupAccessRequest
+                {
+                    GroupId = e.GroupId,
+                    UserId = e.UserId,
+                    Id = e.Id
+                }).Where(e => e.GroupId == groupId)
                     .Where(e=>e.UserId==userId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -67,8 +77,12 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
         {
             try
             {
-                return (await _dbContext.GroupAccessRequests.Where(e => e.Id == groupAccessRequestId)
-                    .FirstOrDefaultAsync())!;
+                return (await _dbContext.GroupAccessRequests.Select(e => new GroupAccessRequest
+                {
+                    GroupId = e.GroupId,
+                    UserId = e.UserId,
+                    Id = e.Id
+                }).Where(e => e.Id == groupAccessRequestId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -82,7 +96,12 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
             {
                 return from g in await _dbContext.GroupAccessRequests.ToListAsync()
                        where g.GroupId == groupId
-                       select g;
+                       select (new GroupAccessRequest
+                       {
+                           UserId = g.UserId,
+                           GroupId = g.GroupId,
+                           Id = g.Id
+                       });
             }
             catch (Exception)
             {
@@ -96,7 +115,12 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
             {
                 return from g in await _dbContext.GroupAccessRequests.ToListAsync()
                        where g.UserId == userId
-                       select g;
+                       select (new GroupAccessRequest
+                       {
+                           UserId = g.UserId,
+                           GroupId = g.GroupId,
+                           Id = g.Id
+                       });
             }
             catch (Exception)
             {

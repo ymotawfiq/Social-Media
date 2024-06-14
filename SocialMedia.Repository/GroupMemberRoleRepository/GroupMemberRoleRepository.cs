@@ -19,7 +19,12 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
             {
                 await _dbContext.GroupMemberRoles.AddAsync(groupMemberRole);
                 await SaveChangesAsync();
-                return groupMemberRole;
+                return new GroupMemberRole
+                {
+                    Id = groupMemberRole.Id,
+                    GroupMemberId = groupMemberRole.GroupMemberId,
+                    RoleId = groupMemberRole.RoleId
+                };
             }
             catch (Exception)
             {
@@ -61,7 +66,12 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
         {
             try
             {
-                return (await _dbContext.GroupMemberRoles.Where(e => e.RoleId == roleId)
+                return (await _dbContext.GroupMemberRoles.Select(e=>new GroupMemberRole
+                {
+                    RoleId = e.RoleId,
+                    Id = e.Id,
+                    GroupMemberId = e.GroupMemberId
+                }).Where(e => e.RoleId == roleId)
                     .Where(e=>e.GroupMemberId==groupMemberId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -74,7 +84,12 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
         {
             try
             {
-                return (await _dbContext.GroupMemberRoles.Where(e => e.Id == groupMemberRoleId)
+                return (await _dbContext.GroupMemberRoles.Select(e => new GroupMemberRole
+                {
+                    RoleId = e.RoleId,
+                    Id = e.Id,
+                    GroupMemberId = e.GroupMemberId
+                }).Where(e => e.Id == groupMemberRoleId)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -89,7 +104,12 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
             {
                 return from r in await _dbContext.GroupMemberRoles.ToListAsync()
                        where r.GroupMemberId == groupMemberId
-                       select r;
+                       select (new GroupMemberRole
+                       {
+                           GroupMemberId = r.GroupMemberId,
+                           Id = r.Id,
+                           RoleId = r.RoleId
+                       });
             }
             catch (Exception)
             {

@@ -7,9 +7,9 @@ namespace SocialMedia.Repository.PagePostsRepository
 {
     public interface IPagePostsRepository
     {
-        Task<PagePosts> AddPagePostAsync(PagePosts pagePosts);
-        Task<PagePosts> GetPagePostByIdAsync(string pagePostId);
-        Task<PagePosts> DeletePagePostByIdAsync(string pagePostId);
+        Task<PagePost> AddPagePostAsync(PagePost pagePosts);
+        Task<PagePost> GetPagePostByIdAsync(string pagePostId);
+        Task<PagePost> DeletePagePostByIdAsync(string pagePostId);
         Task SaveChangesAsync();
     }
 }

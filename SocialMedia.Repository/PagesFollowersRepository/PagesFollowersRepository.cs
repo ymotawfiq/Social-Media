@@ -19,7 +19,12 @@ namespace SocialMedia.Repository.PagesFollowersRepository
             {
                 await _dbContext.PageFollowers.AddAsync(pageFollower);
                 await SaveChangesAsync();
-                return pageFollower;
+                return new PageFollower
+                {
+                    PageId = pageFollower.PageId,
+                    Id = pageFollower.Id,
+                    FollowerId = pageFollower.FollowerId
+                };
             }
             catch (Exception)
             {
@@ -31,7 +36,12 @@ namespace SocialMedia.Repository.PagesFollowersRepository
         {
             try
             {
-                return (await _dbContext.PageFollowers.Where(e=>e.Id==pageFollowerId)
+                return (await _dbContext.PageFollowers.Select(e=>new PageFollower
+                {
+                    FollowerId = e.FollowerId,
+                    Id = e.Id,
+                    PageId = e.PageId
+                }).Where(e=>e.Id==pageFollowerId)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -45,8 +55,12 @@ namespace SocialMedia.Repository.PagesFollowersRepository
         {
             try
             {
-                return (await _dbContext.PageFollowers.Where(e => e.PageId == pageId)
-                    .Where(e=>e.FollowerId==followerId).FirstOrDefaultAsync())!;
+                return (await _dbContext.PageFollowers.Select(e => new PageFollower
+                {
+                    FollowerId = e.FollowerId,
+                    Id = e.Id,
+                    PageId = e.PageId
+                }).Where(e => e.PageId == pageId).Where(e=>e.FollowerId==followerId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -58,7 +72,12 @@ namespace SocialMedia.Repository.PagesFollowersRepository
         {
             return from p in await _dbContext.PageFollowers.ToListAsync()
                    where p.PageId == pageId
-                   select p;
+                   select (new PageFollower
+                   {
+                       PageId = p.PageId,
+                       Id = p.Id,
+                       FollowerId = p.FollowerId
+                   });
         }
 
         public async Task SaveChangesAsync()

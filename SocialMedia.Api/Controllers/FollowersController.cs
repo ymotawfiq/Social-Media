@@ -18,13 +18,10 @@ namespace SocialMedia.Api.Controllers
     {
 
         private readonly IFollowerService _followerService;
-        private readonly UserManager<SiteUser> _userManager;
         private readonly UserManagerReturn _userManagerReturn;
-        public FollowersController(IFollowerService _followerService, UserManager<SiteUser> _userManager,
-            UserManagerReturn _userManagerReturn)
+        public FollowersController(IFollowerService _followerService,UserManagerReturn _userManagerReturn)
         {
             this._followerService = _followerService;
-            this._userManager = _userManager;
             this._userManagerReturn = _userManagerReturn;
         }
 
@@ -37,21 +34,27 @@ namespace SocialMedia.Api.Controllers
                 if(HttpContext.User!=null && HttpContext.User.Identity!=null
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var follower = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
                     var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         followDto.UserIdOrUserNameOrEmail);
-                    if(follower!=null && user != null)
+                    if(follower!=null)
                     {
-                        if (user.Id != follower.Id)
+                        if (user != null)
                         {
-                            var response = await _followerService.FollowAsync(followDto, follower);
-                            return Ok(response);
+                            if (user.Id != follower.Id)
+                            {
+                                var response = await _followerService.FollowAsync(followDto, follower);
+                                return Ok(response);
+                            }
+                            return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                                ._403_Forbidden());
                         }
-                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                            ._403_Forbidden());
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User you want to follow not found"));
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
-                    ._404_NotFound("User you want to follow not found"));
+                    ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
@@ -74,18 +77,23 @@ namespace SocialMedia.Api.Controllers
                         userIdOrUserNameOrEmail);
                 var follower = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
                         followerIdOrUserNameOrEmail);
-                if (user != null && follower != null)
+                if (follower != null)
                 {
-                    if (user.Id != follower.Id)
+                    if (user != null)
                     {
-                        var response = await _followerService.FollowAsync(user, follower);
-                        return Ok(response);
+                        if (user.Id != follower.Id)
+                        {
+                            var response = await _followerService.FollowAsync(user, follower);
+                            return Ok(response);
+                        }
+                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                        ._403_Forbidden());
                     }
-                    return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                    ._403_Forbidden());
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User you want to follow not found"));
                 }
-                return StatusCode(StatusCodes.Status406NotAcceptable, StatusCodeReturn<string>
-                    ._406_NotAcceptable());
+                return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
 
             }
             catch (Exception ex)
@@ -103,10 +111,11 @@ namespace SocialMedia.Api.Controllers
                 if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var response = await _followerService.GetAllFollowers(user!.Id);
+                        var response = await _followerService.GetAllFollowers(user.Id);
                         return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
@@ -128,23 +137,32 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
+                var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(userIdOrName);
                 if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name!=null)
                 {
-                    var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                        userIdOrName);
-                    if (currentUser != null && user != null)
-                    {
-                        var response = await _followerService.GetAllFollowers(user.Id);
-                        return Ok(response);
+                    var currentUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (currentUser != null)
+                    { 
+                        if (user != null)
+                        {
+                            var response = await _followerService.GetAllFollowers(user.Id, currentUser);
+                            return Ok(response);
+                        }
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("User you want to get followers not found"));
                     }
-                    return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                    ._403_Forbidden());
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                    ._404_NotFound("User not found"));
                 }
-
-                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
-                    ._401_UnAuthorized());
+                if (user != null)
+                {
+                    var response = await _followerService.GetAllFollowers(user.Id);
+                    return Ok(response);
+                }
+                return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("User you want to get followers not found"));
             }
             catch (Exception ex)
             {
@@ -161,22 +179,22 @@ namespace SocialMedia.Api.Controllers
                 if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var follower = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                        unFollowDto.UserIdOrUserNameOrEmail); 
-                    if (user != null && follower!=null)
+                    var follower = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (follower != null)
                     {
-                        if(user.Id != follower.Id)
+                        var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        unFollowDto.UserIdOrUserNameOrEmail);
+                        if (user != null)
                         {
                             var response = await _followerService.UnfollowAsync(unFollowDto, follower);
                             return Ok(response);
-                              
                         }
-                        return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                            ._403_Forbidden());
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("User you want to unfollow not found"));
                     }
-                    return StatusCode(StatusCodes.Status406NotAcceptable, StatusCodeReturn<string>
-                    ._406_NotAcceptable());
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                            ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());

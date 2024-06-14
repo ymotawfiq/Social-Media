@@ -10,7 +10,6 @@ using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostCommentsRepository;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 
@@ -21,20 +20,17 @@ namespace SocialMedia.Service.PostCommentService
         private readonly IPostCommentsRepository _postCommentsRepository;
         private readonly IPostRepository _postRepository;
         private readonly IBlockRepository _blockRepository;
-        private readonly IUserPostsRepository _userPostsRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendService _friendService;
         public PostCommentService(IPostCommentsRepository _postCommentsRepository,
             IPostRepository _postRepository, IWebHostEnvironment _webHostEnvironment, 
             IBlockRepository _blockRepository, IPolicyRepository _policyRepository, 
-            IUserPostsRepository _userPostsRepository,
             IFriendService _friendService)
         {
             this._postCommentsRepository = _postCommentsRepository;
             this._postRepository = _postRepository;
             this._blockRepository = _blockRepository;
-            this._userPostsRepository = _userPostsRepository;
             this._webHostEnvironment = _webHostEnvironment;
             this._policyRepository = _policyRepository;
             this._friendService = _friendService;
@@ -45,8 +41,7 @@ namespace SocialMedia.Service.PostCommentService
             var post = await _postRepository.GetPostByIdAsync(addPostCommentDto.PostId);
             if (post != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(
-                    addPostCommentDto.PostId);
+                var userPost = await _postRepository.GetPostByIdAsync(addPostCommentDto.PostId);
                 if (userPost != null)
                 {
                     var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
@@ -81,7 +76,7 @@ namespace SocialMedia.Service.PostCommentService
             var postComment = await _postCommentsRepository.GetPostCommentByIdAsync(postCommentId);
             if (postComment != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postComment.PostId);
+                var userPost = await _postRepository.GetPostByIdAsync(postComment.PostId);
                 if (userPost != null)
                 {
                     if (postComment.UserId == user.Id || userPost.UserId == user.Id)
@@ -116,7 +111,7 @@ namespace SocialMedia.Service.PostCommentService
                 postId, user.Id);
             if (postComment != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postComment.PostId);
+                var userPost = await _postRepository.GetPostByIdAsync(postComment.PostId);
                 if (userPost != null)
                 {
                     if (postComment.UserId == user.Id || userPost.UserId == user.Id)
@@ -153,7 +148,7 @@ namespace SocialMedia.Service.PostCommentService
             {
                 if(postComment.UserId == user.Id)
                 {
-                    var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postComment.PostId);
+                    var userPost = await _postRepository.GetPostByIdAsync(postComment.PostId);
                     if (userPost != null)
                     {
                         var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
@@ -213,7 +208,7 @@ namespace SocialMedia.Service.PostCommentService
             var postComment = await _postCommentsRepository.GetPostCommentByIdAsync(postCommentId);
             if (postComment != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postComment.PostId);
+                var userPost = await _postRepository.GetPostByIdAsync(postComment.PostId);
                 if (userPost != null)
                 {
                     var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
@@ -240,7 +235,7 @@ namespace SocialMedia.Service.PostCommentService
             var post = await _postRepository.GetPostByIdAsync(postId);
             if (post != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postId);
+                var userPost = await _postRepository.GetPostByIdAsync(postId);
                 if (userPost != null)
                 {
                     var postComment = await _postCommentsRepository.GetPostCommentByPostIdAndUserIdAsync(
@@ -290,7 +285,7 @@ namespace SocialMedia.Service.PostCommentService
             var post = await _postRepository.GetPostByIdAsync(postId);
             if (post != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(postId);
+                var userPost = await _postRepository.GetPostByIdAsync(postId);
                 if (userPost != null)
                 {
                     var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
@@ -349,8 +344,7 @@ namespace SocialMedia.Service.PostCommentService
                     updatePostCommentDto.PostId, user.Id);
                 if (postComment != null)
                 {
-                    var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(
-                        updatePostCommentDto.PostId);
+                    var userPost = await _postRepository.GetPostByIdAsync(updatePostCommentDto.PostId);
                     if (userPost != null)
                     {
                         var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(

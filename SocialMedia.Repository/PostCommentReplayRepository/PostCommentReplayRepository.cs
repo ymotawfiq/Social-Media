@@ -19,7 +19,15 @@ namespace SocialMedia.Repository.PostCommentReplayRepository
             {
                 await _dbContext.PostCommentReplay.AddAsync(postCommentReplay);
                 await SaveChangesAsync();
-                return postCommentReplay;
+                return new PostCommentReplay
+                {
+                    Id = postCommentReplay.Id,
+                    PostCommentId = postCommentReplay.PostCommentId,
+                    PostCommentReplayId = postCommentReplay.PostCommentReplayId,
+                    Replay = postCommentReplay.Replay,
+                    ReplayImage = postCommentReplay.ReplayImage,
+                    UserId = postCommentReplay.UserId
+                };
             }
             catch (Exception)
             {
@@ -46,7 +54,15 @@ namespace SocialMedia.Repository.PostCommentReplayRepository
         {
             try
             {
-                return (await _dbContext.PostCommentReplay.Where(e => e.Id == postCommentReplayId)
+                return (await _dbContext.PostCommentReplay.Select(e=>new PostCommentReplay
+                {
+                    Id = e.Id,
+                    PostCommentId = e.PostCommentId,
+                    PostCommentReplayId = e.PostCommentReplayId,
+                    Replay = e.Replay,
+                    ReplayImage = e.ReplayImage,
+                    UserId = e.UserId
+                }).Where(e => e.Id == postCommentReplayId)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -61,7 +77,15 @@ namespace SocialMedia.Repository.PostCommentReplayRepository
             {
                 return from c in await _dbContext.PostCommentReplay.ToListAsync()
                        where c.PostCommentId == postCommentId
-                       select c;
+                       select (new PostCommentReplay
+                       {
+                            Id = c.Id,
+                            PostCommentId = c.PostCommentId,
+                            PostCommentReplayId = c.PostCommentReplayId,
+                            Replay = c.Replay,
+                            ReplayImage = c.ReplayImage,
+                            UserId = c.UserId
+                       });
             }
             catch (Exception)
             {
@@ -75,7 +99,15 @@ namespace SocialMedia.Repository.PostCommentReplayRepository
             {
                 return from c in await _dbContext.PostCommentReplay.ToListAsync()
                        where c.PostCommentReplayId == replayId
-                       select c;
+                       select (new PostCommentReplay
+                       {
+                           Id = c.Id,
+                           PostCommentId = c.PostCommentId,
+                           PostCommentReplayId = c.PostCommentReplayId,
+                           Replay = c.Replay,
+                           ReplayImage = c.ReplayImage,
+                           UserId = c.UserId
+                       });
             }
             catch (Exception)
             {

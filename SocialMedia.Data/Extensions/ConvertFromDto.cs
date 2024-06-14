@@ -27,14 +27,14 @@ namespace SocialMedia.Data.Extensions
         }
 
         public static FriendRequest ConvertFromFriendRequestDto_Add(
-            AddFriendRequestDto addFriendRequestDto, SiteUser userWhoReceived)
+            AddFriendRequestDto addFriendRequestDto, SiteUser userWhoSent)
         {
             return new FriendRequest
             {
                 Id = Guid.NewGuid().ToString(),
                 IsAccepted = false,
-                UserWhoReceivedId = userWhoReceived.Id,
-                UserWhoSendId = addFriendRequestDto.PersonIdOrUserNameOrEmail
+                UserWhoReceivedId = addFriendRequestDto.PersonIdOrUserNameOrEmail,
+                UserWhoSendId = userWhoSent.Id
             };
         }
 
@@ -127,45 +127,7 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
-        public static SpecialPostReacts ConvertSpecialPostReactsDto_Add(
-            AddSpecialPostsReactsDto addSpecialPostsReactsDto)
-        {
-            return new SpecialPostReacts
-            {
-                Id = Guid.NewGuid().ToString(),
-                ReactId = addSpecialPostsReactsDto.ReactId
-            };
-        }
 
-        public static SpecialPostReacts ConvertSpecialPostReactsDto_Update(
-            UpdateSpecialPostsReactsDto updateSpecialPostsReactsDto)
-        {
-            return new SpecialPostReacts
-            {
-                Id = updateSpecialPostsReactsDto.Id,
-                ReactId = updateSpecialPostsReactsDto.ReactId
-            };
-        }
-
-        public static SpecialCommentReacts ConvertSpecialCommentReactsDto_Add(
-                AddSpecialCommentReactsDto addSpecialCommentReactsDto)
-        {
-            return new SpecialCommentReacts
-            {
-                Id = Guid.NewGuid().ToString(),
-                ReactId = addSpecialCommentReactsDto.ReactId
-            };
-        }
-
-        public static SpecialCommentReacts ConvertSpecialCommentReactsDto_Update(
-            UpdateSpecialCommentReactsDto updateSpecialCommentReactsDto)
-        {
-            return new SpecialCommentReacts
-            {
-                Id = updateSpecialCommentReactsDto.Id,
-                ReactId = updateSpecialCommentReactsDto.ReactId
-            };
-        }
 
         public static PostReacts ConvertFromPostReactsDto_Add(AddPostReactDto addPostReactDto, SiteUser user)
         {
@@ -173,11 +135,10 @@ namespace SocialMedia.Data.Extensions
             {
                 Id = Guid.NewGuid().ToString(),
                 PostId = addPostReactDto.PostId,
-                SpecialPostReactId = addPostReactDto.ReactId,
+                PostReactId = addPostReactDto.ReactId,
                 UserId = user.Id
             };
         }
-
 
         public static PostComment ConvertFromPostCommentDto_Add(AddPostCommentDto addPostCommentDto, 
             SiteUser user, string imageUniqueName)
@@ -283,25 +244,6 @@ namespace SocialMedia.Data.Extensions
                 FollowerId = followPageUserDto.UserIdOrUserNameOrEmail,
                 PageId = followPageUserDto.PageId,
                 Id = Guid.NewGuid().ToString()
-            };
-        }
-
-
-        public static GroupPolicy ConvertFromGroupPolicyDto_Add(AddGroupPolicyDto addGroupPolicyDto)
-        {
-            return new GroupPolicy
-            {
-                Id = Guid.NewGuid().ToString(),
-                PolicyId = addGroupPolicyDto.PolicyIdOrName
-            };
-        }
-
-        public static GroupPolicy ConvertFromGroupPolicyDto_Update(UpdateGroupPolicyDto updateGroupPolicyDto)
-        {
-            return new GroupPolicy
-            {
-                Id = updateGroupPolicyDto.Id,
-                PolicyId = updateGroupPolicyDto.PolicyIdOrName
             };
         }
 

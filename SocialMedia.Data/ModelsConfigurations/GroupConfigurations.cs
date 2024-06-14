@@ -13,7 +13,8 @@ namespace SocialMedia.Data.ModelsConfigurations
             builder.Property(e => e.Name).IsRequired().HasMaxLength(50);
             builder.Property(e => e.Description).IsRequired().HasMaxLength(1000);
             builder.HasOne(e => e.User).WithMany(e => e.Groups).HasForeignKey(e => e.CreatedUserId);
-            builder.HasOne(e => e.GroupPolicy).WithMany(e => e.Groups).HasForeignKey(e => e.GroupPolicyId);
+            builder.HasOne(e => e.GroupPolicy).WithMany(e => e.GroupPolicies)
+                .HasForeignKey(e => e.GroupPolicyId);
             builder.Property(e => e.CreatedUserId).IsRequired().HasColumnName("Group Creator Id");
             builder.Property(e => e.GroupPolicyId).IsRequired().HasColumnName("Group Policy Id");
         }

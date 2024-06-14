@@ -13,7 +13,6 @@ using SocialMedia.Repository.PolicyRepository;
 using SocialMedia.Repository.PostCommentReplayRepository;
 using SocialMedia.Repository.PostCommentsRepository;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 using System.Collections.Generic;
@@ -25,7 +24,6 @@ namespace SocialMedia.Service.PostCommentReplayService
         private readonly IPostCommentReplayRepository _postCommentReplayRepository;
         private readonly IBlockRepository _blockRepository;
         private readonly IPostCommentsRepository _postCommentsRepository;
-        private readonly IUserPostsRepository _userPostsRepository;
         private readonly IPostRepository _postRepository;
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendService _friendService;
@@ -33,7 +31,7 @@ namespace SocialMedia.Service.PostCommentReplayService
         public PostCommentReplayService(
             IPostCommentReplayRepository _postCommentReplayRepository,
             IBlockRepository _blockRepository,
-            IPostCommentsRepository _postCommentsRepository, IUserPostsRepository _userPostsRepository,
+            IPostCommentsRepository _postCommentsRepository,
             IPostRepository _postRepository, IPolicyRepository _policyRepository,
             IFriendService _friendService, IWebHostEnvironment _webHostEnvironment
             )
@@ -41,54 +39,52 @@ namespace SocialMedia.Service.PostCommentReplayService
             this._blockRepository = _blockRepository;
             this._postCommentReplayRepository = _postCommentReplayRepository;
             this._postCommentsRepository = _postCommentsRepository;
-            this._userPostsRepository = _userPostsRepository;
             this._postRepository = _postRepository;
             this._policyRepository = _policyRepository;
             this._friendService = _friendService;
             this._webHostEnvironment = _webHostEnvironment;
+        }
+        public async Task<ApiResponse<T>> CheckToReplay<T>(SiteUser user, PostComment comment)
+        {
+            if (comment != null)
+            {
+                var post = await _postRepository.GetPostByIdAsync(comment.PostId);
+                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                        user.Id, post.UserId);
+                if (isBlocked == null)
+                {
+                    return StatusCodeReturn<T>
+                        ._200_Success("Success");
+                }
+                return StatusCodeReturn<T>
+                                ._403_Forbidden();
+            }
+            return StatusCodeReturn<T>
+                ._404_NotFound("Comment not found");
         }
         public async Task<ApiResponse<PostCommentReplay>> AddCommentReplayAsync(
             AddPostCommentReplayDto addPostCommentReplayDto, SiteUser user)
         {
             var comment = await _postCommentsRepository.GetPostCommentByIdAsync(
                 addPostCommentReplayDto.PostCommentId);
-            if (comment != null)
+            if ((await CheckToReplay<PostCommentReplay>(user, comment)).IsSuccess)
             {
-                var post = await _postRepository.GetPostByIdAsync(comment.PostId);
-                if (post != null)
+                var checkPolicy = await CheckPolicyAsync(
+                    await _postRepository.GetPostByIdAsync(comment.PostId), user);
+                if (checkPolicy.IsSuccess)
                 {
-                    var userPost = await _userPostsRepository.GetUserPostByIdAsync(post.Id);
-                    if (userPost != null)
-                    {
-                        var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                            user.Id, userPost.UserId);
-                        if (isBlocked == null)
-                        {
-                            var checkPolicy = await CheckPolicyAsync(post, user);
-                            if (checkPolicy.IsSuccess)
-                            {
-                                var newCommentReplay = await _postCommentReplayRepository
-                                    .AddPostCommentReplayAsync(ConvertFromDto
-                                    .ConvertFromPostCommentReplayDto_Add(addPostCommentReplayDto,
-                                    user, SavePostImages(addPostCommentReplayDto.ReplayImage!)));
-                                MakeUnnesseryObjectsInReplaysNull(newCommentReplay);
-                                return StatusCodeReturn<PostCommentReplay>
-                                    ._201_Created("Replayed successfully", newCommentReplay);
-                            }
-                            return StatusCodeReturn<PostCommentReplay>
-                                ._403_Forbidden();
-                        }
-                        return StatusCodeReturn<PostCommentReplay>
-                                ._403_Forbidden();
-                    }
+                    var newCommentReplay = await _postCommentReplayRepository
+                        .AddPostCommentReplayAsync(ConvertFromDto
+                        .ConvertFromPostCommentReplayDto_Add(addPostCommentReplayDto,
+                        user, SavePostImages(addPostCommentReplayDto.ReplayImage!)));
+                    MakeUnnesseryObjectsInReplaysNull(newCommentReplay);
                     return StatusCodeReturn<PostCommentReplay>
-                    ._404_NotFound("User post not found");
+                        ._201_Created("Replayed successfully", newCommentReplay);
                 }
                 return StatusCodeReturn<PostCommentReplay>
-                    ._404_NotFound("Post not found");
+                    ._403_Forbidden();
             }
-            return StatusCodeReturn<PostCommentReplay>
-                    ._404_NotFound("Comment not found");
+            return await CheckToReplay<PostCommentReplay>(user, comment);
         }
 
         public async Task<ApiResponse<PostCommentReplay>> AddReplayToReplayAsync(
@@ -524,7 +520,7 @@ namespace SocialMedia.Service.PostCommentReplayService
         private async Task<ApiResponse<bool>> CheckAbilityToGetCommentReplayAsync(
             PostComment comment, SiteUser user)
         {
-            var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(comment.PostId);
+            var userPost = await _postRepository.GetPostByIdAsync(comment.PostId);
             if (userPost != null)
             {
                 var isBlockedByPostPublisher = await _blockRepository
@@ -547,10 +543,9 @@ namespace SocialMedia.Service.PostCommentReplayService
         private async Task<ApiResponse<PostCommentReplay>> CheckPolicyAsync(Post post, SiteUser user)
         {
             var policy = await _policyRepository.GetPolicyByIdAsync(post.PostPolicyId);
-
             if (policy != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                var userPost = await _postRepository.GetPostByIdAsync(post.Id);
                 if (userPost != null)
                 {
                     var isAblePolicy = await CheckUserPolicyAsync(userPost.UserId, user.Id, policy);
@@ -575,7 +570,7 @@ namespace SocialMedia.Service.PostCommentReplayService
 
             if (policy != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                var userPost = await _postRepository.GetPostByIdAsync(post.Id);
                 if (userPost != null)
                 {
                     var isAblePolicy = await CheckUserPolicyAsync(user.Id, userPost.UserId, policy);
@@ -645,7 +640,7 @@ namespace SocialMedia.Service.PostCommentReplayService
 
             if (policy != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                var userPost = await _postRepository.GetPostByIdAsync(post.Id);
                 if (userPost != null)
                 {
                     var isAblePolicy = await CheckUserPolicyAsync(user.Id, userPost.UserId, policy);
@@ -677,7 +672,7 @@ namespace SocialMedia.Service.PostCommentReplayService
             var policy = await _policyRepository.GetPolicyByIdAsync(post.CommentPolicyId);
             if (policy != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                var userPost = await _postRepository.GetPostByIdAsync(post.Id);
                 if (userPost != null)
                 {
                     var isAblePolicy = await CheckUserPolicyAsync(user.Id, userPost.Id, policy);
@@ -742,7 +737,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                 var post = await _postRepository.GetPostByIdAsync(comment.PostId);
                 if (post != null)
                 {
-                    var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                    var userPost = await _postRepository.GetPostByIdAsync(post.Id);
                     if (userPost != null)
                     {
                         var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
@@ -793,7 +788,7 @@ namespace SocialMedia.Service.PostCommentReplayService
                 var post = await _postRepository.GetPostByIdAsync(comment.PostId);
                 if (post != null)
                 {
-                    var userPost = await _userPostsRepository.GetUserPostByPostIdAsync(post.Id);
+                    var userPost = await _postRepository.GetPostByIdAsync(post.Id);
                     if (userPost != null)
                     {
                         var isBlockedByPostPublisher = await _blockRepository

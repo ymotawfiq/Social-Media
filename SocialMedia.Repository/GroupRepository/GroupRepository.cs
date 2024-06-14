@@ -21,7 +21,15 @@ namespace SocialMedia.Repository.GroupRepository
             {
                 await _dbContext.Groups.AddAsync(group);
                 await SaveChangesAsync();
-                return group;
+                return new Group
+                {
+                    Id = group.Id,
+                    CreatedAt = group.CreatedAt,
+                    CreatedUserId = group.CreatedUserId,
+                    Description = group.Description,
+                    GroupPolicyId = group.GroupPolicyId,
+                    Name = group.Name
+                };
             }
             catch (Exception)
             {
@@ -48,7 +56,15 @@ namespace SocialMedia.Repository.GroupRepository
         {
             try
             {
-                return await _dbContext.Groups.ToListAsync();
+                return await _dbContext.Groups.Select(e=>new Group
+                {
+                    Id = e.Id,
+                    CreatedAt = e.CreatedAt,
+                    CreatedUserId = e.CreatedUserId,
+                    Description = e.Description,
+                    GroupPolicyId = e.GroupPolicyId,
+                    Name = e.Name
+                }).ToListAsync();
             }
             catch (Exception)
             {
@@ -74,7 +90,15 @@ namespace SocialMedia.Repository.GroupRepository
         {
             try
             {
-                return (await _dbContext.Groups.Where(e => e.Id == groupId).FirstOrDefaultAsync())!;
+                return (await _dbContext.Groups.Select(e => new Group
+                {
+                    Id = e.Id,
+                    CreatedAt = e.CreatedAt,
+                    CreatedUserId = e.CreatedUserId,
+                    Description = e.Description,
+                    GroupPolicyId = e.GroupPolicyId,
+                    Name = e.Name
+                }).Where(e => e.Id == groupId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {

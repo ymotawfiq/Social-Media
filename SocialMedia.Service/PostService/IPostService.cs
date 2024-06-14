@@ -23,8 +23,8 @@ namespace SocialMedia.Service.PostService
             SiteUser currentUser, SiteUser RouteUser);
         Task<ApiResponse<IEnumerable<PostDto>>> GetPostsForFriendsOfFriendsAsync(SiteUser user);
         Task<ApiResponse<bool>> UpdatePostPolicyAsync(SiteUser user, UpdatePostPolicyDto updatePostPolicyDto);
-        Task<ApiResponse<bool>> UpdatePostReactPolicyAsync
-            (SiteUser user, UpdatePostReactPolicyDto updatePostReactPolicy);
+        Task<ApiResponse<bool>> UpdatePostReactPolicyAsync(SiteUser user,
+            UpdatePostReactPolicyDto updatePostReactPolicy);
         Task<ApiResponse<bool>> UpdatePostCommentPolicyAsync(SiteUser user,
             UpdatePostCommentPolicyDto updatePostCommentPolicyDto);
 

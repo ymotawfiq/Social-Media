@@ -13,7 +13,7 @@ namespace SocialMedia.Data.Models
         public string GroupPolicyId { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public SiteUser? User { get; set; }
-        public GroupPolicy? GroupPolicy { get; set; }
+        public Policy? GroupPolicy { get; set; }
         public List<GroupMember>? GroupMembers { get; set; }
         public List<GroupAccessRequest>? GroupAccessRequests { get; set; }
         public List<GroupPost>? GroupPosts { get; set; }

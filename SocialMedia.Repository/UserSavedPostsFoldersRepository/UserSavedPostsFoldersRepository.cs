@@ -20,7 +20,12 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
             {
                 await _dbContext.UserSavedPostsFolders.AddAsync(userSavedPostsFolders);
                 await SaveChangesAsync();
-                return userSavedPostsFolders;
+                return new UserSavedPostsFolders
+                {
+                    UserId = userSavedPostsFolders.UserId,
+                    Id = userSavedPostsFolders.Id,
+                    FolderName = userSavedPostsFolders.FolderName
+                };
             }
             catch (Exception)
             {
@@ -32,8 +37,7 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         {
             try
             {
-                var folder = (await _dbContext.UserSavedPostsFolders
-                    .Where(e => e.Id == folderId).FirstOrDefaultAsync())!;
+                var folder = await GetUserSavedPostsFoldersByFolderIdAsync(folderId);
                 _dbContext.UserSavedPostsFolders.Remove(folder);
                 await SaveChangesAsync();
                 return folder;
@@ -51,7 +55,12 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
             {
                 return from f in await _dbContext.UserSavedPostsFolders.ToListAsync()
                        where f.UserId == userId
-                       select f;
+                       select (new UserSavedPostsFolders
+                       {
+                           UserId = f.UserId,
+                           Id = f.Id,
+                           FolderName = f.FolderName
+                       });
             }
             catch (Exception)
             {
@@ -62,14 +71,22 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         public async Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderNameAndUserIdAsync(
             string userId, string folderName)
         {
-            return (await _dbContext.UserSavedPostsFolders.Where(e => e.UserId == userId)
-                .Where(e => e.FolderName == folderName).FirstOrDefaultAsync())!;
+            return (await _dbContext.UserSavedPostsFolders.Select(e => new UserSavedPostsFolders
+            {
+                FolderName = e.FolderName,
+                Id = e.Id,
+                UserId = e.UserId
+            }).Where(e => e.UserId == userId).Where(e => e.FolderName == folderName).FirstOrDefaultAsync())!;
         }
 
         public async Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderIdAsync(string folderId)
         {
-            return (await _dbContext.UserSavedPostsFolders
-                    .Where(e => e.Id == folderId).FirstOrDefaultAsync())!;
+            return (await _dbContext.UserSavedPostsFolders.Select(e => new UserSavedPostsFolders
+            {
+                FolderName = e.FolderName,
+                Id = e.Id,
+                UserId = e.UserId
+            }).Where(e => e.Id == folderId).FirstOrDefaultAsync())!;
         }
 
         public async Task SaveChangesAsync()
@@ -82,8 +99,7 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         {
             try
             {
-                var folder = (await _dbContext.UserSavedPostsFolders
-                    .Where(e => e.Id == userSavedPostsFolders.Id).FirstOrDefaultAsync())!;
+                var folder = await GetUserSavedPostsFoldersByFolderIdAsync(userSavedPostsFolders.Id);
                 folder.FolderName = userSavedPostsFolders.FolderName;
                 await SaveChangesAsync();
                 return folder;

@@ -1,7 +1,24 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.service\\followerservice\\followerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D2331E7-1343-4430-B575-ABC6B8A02E4C}|SocialMedia.Service\\SocialMedia.Service.csproj|solutionrelative:socialmedia.service\\followerservice\\followerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\followerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\followerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\controllers\\friendcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\friendcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.repository\\followerrepository\\followerrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4B0F97EA-06C1-4A37-B46C-BEB036CBCA28}|SocialMedia.Repository\\SocialMedia.Repository.csproj|solutionrelative:socialmedia.repository\\followerrepository\\followerrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +26,63 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FollowersController.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\FollowersController.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\FollowersController.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\FollowersController.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Controllers\\FollowersController.cs",
+              "ViewState": "AQIAAIMAAAAAAAAAAAAIwIsAAABWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-14T20:42:39.652Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FollowerRepository.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\FollowerRepository\\FollowerRepository.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Repository\\FollowerRepository\\FollowerRepository.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Repository\\FollowerRepository\\FollowerRepository.cs",
+              "RelativeToolTip": "SocialMedia.Repository\\FollowerRepository\\FollowerRepository.cs",
+              "ViewState": "AQIAABgAAAAAAAAAAAAowDUAAAA1AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-14T20:40:09.37Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "FollowerService.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\FollowerService\\FollowerService.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Service\\FollowerService\\FollowerService.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Service\\FollowerService\\FollowerService.cs",
+              "RelativeToolTip": "SocialMedia.Service\\FollowerService\\FollowerService.cs",
+              "ViewState": "AQIAAGYAAAAAAAAAAAAIwHIAAABPAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-14T18:19:45.572Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FriendController.cs",
+              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\FriendController.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\FriendController.cs",
+              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\FriendController.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Controllers\\FriendController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAGgAAABSAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-14T12:32:06.858Z",
+              "EditorCaption": ""
             }
           ]
         }

@@ -6,7 +6,6 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.PagePostsRepository;
 using SocialMedia.Repository.PageRepository;
-using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PostService;
 
@@ -17,14 +16,12 @@ namespace SocialMedia.Service.PagePostsService
         private readonly IPagePostsRepository _pagePostsRepository;
         private readonly IPostService _postService;
         private readonly IPageRepository _pageRepository;
-        private readonly IUserPostsRepository _userPostsRepository;
         public PagePostsService(IPagePostsRepository _pagePostsRepository, IPostService _postService,
-            IPageRepository _pageRepository, IUserPostsRepository _userPostsRepository)
+            IPageRepository _pageRepository)
         {
             this._pagePostsRepository = _pagePostsRepository;
             this._postService = _postService;
             this._pageRepository = _pageRepository;
-            this._userPostsRepository = _userPostsRepository;
         }
         public async Task<ApiResponse<object>> AddPagePostAsync(
             AddPagePostDto addPagePostDto, SiteUser user)
@@ -39,7 +36,7 @@ namespace SocialMedia.Service.PagePostsService
                 });
                 if (postDto.IsSuccess && postDto.ResponseObject != null && postDto != null)
                 {
-                    var newPagePost = await _pagePostsRepository.AddPagePostAsync(new Data.Models.PagePosts
+                    var newPagePost = await _pagePostsRepository.AddPagePostAsync(new Data.Models.PagePost
                     {
                         Id = Guid.NewGuid().ToString(),
                         PageId = addPagePostDto.PageId,
@@ -62,9 +59,8 @@ namespace SocialMedia.Service.PagePostsService
             var pagePost = await _pagePostsRepository.GetPagePostByIdAsync(pagePostId);
             if (pagePost != null)
             {
-                var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(
-                    user.Id, pagePost.PostId);
-                if (userPost != null)
+                var userPost = await _postService.GetPostByIdAsync(user, pagePost.PostId);
+                if (userPost != null && userPost.ResponseObject != null)
                 {
                     await _postService.DeletePostAsync(user, pagePost.PostId);
                     return StatusCodeReturn<object>
@@ -79,9 +75,8 @@ namespace SocialMedia.Service.PagePostsService
 
         public async Task<ApiResponse<object>> DeletePagePostByPostIdAsync(string postId, SiteUser user)
         {
-            var userPost = await _userPostsRepository.GetUserPostByUserAndPostIdAsync(
-                user.Id, postId);
-            if (userPost != null)
+            var userPost = await _postService.GetPostByIdAsync(user, postId);
+            if (userPost != null && userPost.ResponseObject != null)
             {
                 await _postService.DeletePostAsync(user, postId);
                 return StatusCodeReturn<object>
@@ -91,9 +86,16 @@ namespace SocialMedia.Service.PagePostsService
                 ._404_NotFound("User post not found");
         }
 
-        public Task<ApiResponse<object>> GetPagePostByIdAsync(string pagePostId)
+        public async Task<ApiResponse<object>> GetPagePostByIdAsync(string pagePostId)
         {
-            throw new NotImplementedException();
+            var pagePost = await _pagePostsRepository.GetPagePostByIdAsync(pagePostId);
+            if (pagePost != null)
+            {
+                return StatusCodeReturn<object>
+                    ._200_Success("Page post found successfully", pagePost);
+            }
+            return StatusCodeReturn<object>
+                    ._404_NotFound("Page post not found");
         }
     }
 }

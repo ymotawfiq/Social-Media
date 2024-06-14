@@ -21,8 +21,12 @@ namespace SocialMedia.Repository.FriendsRepository
         {
             await _dbContext.Friends.AddAsync(friend);
             await SaveChangesAsync();
-            friend.User = null;
-            return friend;
+            return new Friend
+            {
+                Id = friend.Id,
+                FriendId = friend.FriendId,
+                UserId = friend.UserId
+            };
         }
 
         public async Task<Friend> DeleteFriendAsync(string userId, string friendId)
@@ -49,10 +53,20 @@ namespace SocialMedia.Repository.FriendsRepository
 
         public async Task<Friend> GetFriendByUserAndFriendIdAsync(string userId, string friendId)
         {
-            var friend1 = (await _dbContext.Friends.Where(e => e.UserId == userId)
-                .Where(e => e.FriendId == friendId).FirstOrDefaultAsync())!;
-            var friend2 = (await _dbContext.Friends.Where(e => e.UserId == friendId)
-                .Where(e => e.FriendId == userId).FirstOrDefaultAsync())!;
+            var friend1 = (await _dbContext.Friends.Select(e => new Friend
+            {
+                UserId = e.UserId,
+                FriendId = e.FriendId,
+                Id = e.Id
+            }).Where(e => e.UserId == userId)
+              .Where(e => e.FriendId == friendId).FirstOrDefaultAsync())!;
+            var friend2 = (await _dbContext.Friends.Select(e => new Friend
+            {
+                UserId = e.UserId,
+                FriendId = e.FriendId,
+                Id = e.Id
+            }).Where(e => e.UserId == friendId)
+              .Where(e => e.FriendId == userId).FirstOrDefaultAsync())!;
             return friend1 == null ? friend2! : friend1;
         }
 

@@ -19,7 +19,14 @@ namespace SocialMedia.Repository.PostCommentsRepository
             {
                 await _dbContext.PostComments.AddAsync(postComments);
                 await SaveChangesAsync();
-                return postComments;
+                return new PostComment
+                {
+                    UserId = postComments.UserId,
+                    Comment = postComments.Comment,
+                    Id = postComments.Id,
+                    CommentImage = postComments.CommentImage,
+                    PostId = postComments.PostId
+                };
             }
             catch (Exception)
             {
@@ -91,7 +98,14 @@ namespace SocialMedia.Repository.PostCommentsRepository
         {
             try
             {
-                return (await _dbContext.PostComments.Where(e => e.Id == postCommentId)
+                return (await _dbContext.PostComments.Select(e=>new PostComment
+                {
+                    UserId = e.UserId,
+                    Comment = e.Comment,
+                    Id = e.Id,
+                    CommentImage = e.CommentImage,
+                    PostId = e.PostId
+                }).Where(e => e.Id == postCommentId)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -104,8 +118,14 @@ namespace SocialMedia.Repository.PostCommentsRepository
         {
             try
             {
-                return (await _dbContext.PostComments.Where(e => e.PostId == postId)
-                    .Where(e => e.UserId == userId).FirstOrDefaultAsync())!;
+                return (await _dbContext.PostComments.Select(e => new PostComment
+                {
+                    UserId = e.UserId,
+                    Comment = e.Comment,
+                    Id = e.Id,
+                    CommentImage = e.CommentImage,
+                    PostId = e.PostId
+                }).Where(e => e.PostId == postId).Where(e => e.UserId == userId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -118,8 +138,14 @@ namespace SocialMedia.Repository.PostCommentsRepository
         {
             try
             {
-                return await _dbContext.PostComments.Where(e => e.PostId == postId)
-                    .Where(e => e.UserId == userId).ToListAsync();
+                return await _dbContext.PostComments.Select(e => new PostComment
+                {
+                    UserId = e.UserId,
+                    Comment = e.Comment,
+                    Id = e.Id,
+                    CommentImage = e.CommentImage,
+                    PostId = e.PostId
+                }).Where(e => e.PostId == postId).Where(e => e.UserId == userId).ToListAsync();
             }
             catch (Exception)
             {
@@ -133,7 +159,14 @@ namespace SocialMedia.Repository.PostCommentsRepository
             {
                 return from p in await _dbContext.PostComments.ToListAsync()
                        where p.PostId == postId
-                       select p;
+                       select (new PostComment
+                       {
+                           PostId = p.PostId,
+                           Comment = p.Comment,
+                           CommentImage = p.CommentImage,
+                           Id = p.Id,
+                           UserId = p.UserId
+                       });
             }
             catch (Exception)
             {

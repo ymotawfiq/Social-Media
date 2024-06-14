@@ -11,6 +11,7 @@ namespace SocialMedia.Data.ModelsConfigurations
         {
             builder.HasKey(e => e.Id);
             builder.Property(e => e.ReactValue).IsRequired().HasColumnName("React Value");
+            builder.HasIndex(e => e.ReactValue).IsUnique();
         }
     }
 }

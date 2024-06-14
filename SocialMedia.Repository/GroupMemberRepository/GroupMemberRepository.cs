@@ -20,7 +20,12 @@ namespace SocialMedia.Repository.GroupMemberRepository
             {
                 await _dbContext.GroupMembers.AddAsync(groupMember);
                 await SaveChangesAsync();
-                return groupMember;
+                return new GroupMember
+                {
+                    Id = groupMember.Id,
+                    GroupId = groupMember.GroupId,
+                    MemberId = groupMember.MemberId
+                };
             }
             catch (Exception)
             {
@@ -46,34 +51,59 @@ namespace SocialMedia.Repository.GroupMemberRepository
 
         public async Task<GroupMember> GetGroupMemberAsync(string userId, string groupId)
         {
-            return (await _dbContext.GroupMembers.Where(e => e.GroupId == groupId)
+            return (await _dbContext.GroupMembers.Select(e=>new GroupMember
+            {
+                GroupId = e.GroupId,
+                Id = e.Id,
+                MemberId = e.MemberId
+            }).Where(e => e.GroupId == groupId)
                 .Where(e => e.MemberId == userId).FirstOrDefaultAsync())!;
         }
 
         public async Task<GroupMember> GetGroupMemberAsync(string groupMemberId)
         {
-            return (await _dbContext.GroupMembers.Where(e => e.Id == groupMemberId).FirstOrDefaultAsync())!;
+            return (await _dbContext.GroupMembers.Select(e => new GroupMember
+            {
+                GroupId = e.GroupId,
+                Id = e.Id,
+                MemberId = e.MemberId
+            }).Where(e => e.Id == groupMemberId).FirstOrDefaultAsync())!;
         }
 
         public async Task<IEnumerable<GroupMember>> GetGroupMembersAsync(string groupId)
         {
             return from g in await _dbContext.GroupMembers.Distinct().ToListAsync()
                    where g.GroupId == groupId
-                   select g;
+                   select (new GroupMember
+                   {
+                       MemberId = g.MemberId,
+                       Id = g.Id,
+                       GroupId = g.GroupId
+                   });
         }
 
         public async Task<IEnumerable<GroupMember>> GetUserGroupsAsync(string userId)
         {
             return from g in await _dbContext.GroupMembers.ToListAsync()
                    where g.MemberId == userId
-                   select g;
+                   select (new GroupMember
+                   {
+                       MemberId = g.MemberId,
+                       Id = g.Id,
+                       GroupId = g.GroupId
+                   });
         }
 
         public async Task<IEnumerable<GroupMember>> GetUserJoinedGroupsAsync(string userId)
         {
             return from g in await _dbContext.GroupMembers.ToListAsync()
                    where g.MemberId == userId
-                   select g;
+                   select (new GroupMember
+                   {
+                       MemberId = g.MemberId,
+                       Id = g.Id,
+                       GroupId = g.GroupId
+                   });
         }
 
         public async Task SaveChangesAsync()

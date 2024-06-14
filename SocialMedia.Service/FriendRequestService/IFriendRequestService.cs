@@ -12,11 +12,12 @@ namespace SocialMedia.Service.FriendRequestService
         Task<ApiResponse<FriendRequest>> AddFriendRequestAsync(
             AddFriendRequestDto addFriendRequestDto, SiteUser user);
         Task<ApiResponse<FriendRequest>> UpdateFriendRequestAsync(
-            UpdateFriendRequestDto updateFriendRequestDto);
+            UpdateFriendRequestDto updateFriendRequestDto, SiteUser user);
         Task<ApiResponse<FriendRequest>> GetFriendRequestByIdAsync(string friendRequestId, SiteUser user);
-        Task<ApiResponse<FriendRequest>> DeleteFriendRequestByAsync(SiteUser user, string friendRequestId);
+        Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(SiteUser user, string friendRequestId);
+        Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(SiteUser sender, SiteUser receiver);
         Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsAsync();
-        Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsByUserIdAsync(string userId);
-        Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsByUserNameAsync(SiteUser user);
+        Task<ApiResponse<IEnumerable<FriendRequest>>> GetSentFriendRequestsByUserIdAsync(string userId);
+        Task<ApiResponse<IEnumerable<FriendRequest>>> GetReceivedFriendRequestsByUserIdAsync(string userId);
     }
 }

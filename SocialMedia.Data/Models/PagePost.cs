@@ -2,7 +2,7 @@
 
 namespace SocialMedia.Data.Models
 {
-    public class PagePosts
+    public class PagePost
     {
         public string Id { get; set; } = null!;
         public string PageId { get; set; } = null!;

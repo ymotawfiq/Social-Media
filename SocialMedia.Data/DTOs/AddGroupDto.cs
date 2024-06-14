@@ -1,5 +1,6 @@
 ﻿
 
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace SocialMedia.Data.DTOs
@@ -16,5 +17,6 @@ namespace SocialMedia.Data.DTOs
 
         [Required]
         public string GroupPolicyIdOrName { get; set; } = null!;
+
     }
 }

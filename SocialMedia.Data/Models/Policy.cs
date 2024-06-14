@@ -16,7 +16,7 @@ namespace SocialMedia.Data.Models
         public List<SiteUser>? UserCommentPolicies { get; set; } 
         public List<SiteUser>? UserFriendListPolicies { get; set; } 
         public List<SiteUser>? UserPostPolicies { get; set; } 
-        public List<GroupPolicy>? GroupPolicies { get; set; }
+        public List<Group>? GroupPolicies { get; set; }
         public List<SarehneMessage>? SarehneMessagePolicies { get; set; } 
     }
 }

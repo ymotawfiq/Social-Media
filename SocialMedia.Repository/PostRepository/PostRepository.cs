@@ -221,13 +221,27 @@ namespace SocialMedia.Repository.PostRepository
                         PostPolicyId = post.PostPolicyId,
                         ReactPolicyId = post.ReactPolicyId
                     },
-                    Images = postImages
+                    Images = postImages.Select(e => new PostImages
+                    {
+                        PostId = e.PostId,
+                        Id = e.Id,
+                        ImageUrl = e.ImageUrl
+                    }).ToList()
                 };
             }
 
             return new PostDto
             {
-                Post = post
+                Post = new Post
+                {
+                    Id = post.Id,
+                    UserId = post.UserId,
+                    CommentPolicyId = post.CommentPolicyId,
+                    Content = post.Content,
+                    PostedAt = post.PostedAt,
+                    PostPolicyId = post.PostPolicyId,
+                    ReactPolicyId = post.ReactPolicyId
+                }
             };
         }
 

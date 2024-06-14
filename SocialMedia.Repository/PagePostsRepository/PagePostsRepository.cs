@@ -15,14 +15,19 @@ namespace SocialMedia.Repository.PagePostsRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<PagePosts> AddPagePostAsync(PagePosts pagePost)
+        public async Task<PagePost> AddPagePostAsync(PagePost pagePost)
         {
             await _dbContext.PagePosts.AddAsync(pagePost);
             await SaveChangesAsync();
-            return pagePost;
+            return new PagePost
+            {
+                Id = pagePost.Id,
+                PageId = pagePost.PageId,
+                PostId = pagePost.PostId
+            };
         }
 
-        public async Task<PagePosts> DeletePagePostByIdAsync(string pagePostId)
+        public async Task<PagePost> DeletePagePostByIdAsync(string pagePostId)
         {
             var pagePost = await GetPagePostByIdAsync(pagePostId);
             _dbContext.PagePosts.Remove(pagePost);
@@ -30,9 +35,14 @@ namespace SocialMedia.Repository.PagePostsRepository
             return pagePost;
         }
 
-        public async Task<PagePosts> GetPagePostByIdAsync(string pagePostId)
+        public async Task<PagePost> GetPagePostByIdAsync(string pagePostId)
         {
-            return (await _dbContext.PagePosts.Where(e => e.Id == pagePostId).FirstOrDefaultAsync())!;
+            return (await _dbContext.PagePosts.Select(e=>new PagePost
+            {
+                PostId = e.PostId,
+                PageId = e.PageId,
+                Id = e.Id
+            }).Where(e => e.Id == pagePostId).FirstOrDefaultAsync())!;
         }
 
         public async Task SaveChangesAsync()

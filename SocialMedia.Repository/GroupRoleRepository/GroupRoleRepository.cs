@@ -21,7 +21,11 @@ namespace SocialMedia.Repository.GroupRoleRepository
                 groupRole.RoleName = groupRole.RoleName.ToUpper();
                 await _dbContext.GroupRoles.AddAsync(groupRole);
                 await SaveChangesAsync();
-                return groupRole;
+                return new GroupRole
+                {
+                    Id = groupRole.Id,
+                    RoleName = groupRole.RoleName
+                };
             }
             catch (Exception)
             {
@@ -64,8 +68,11 @@ namespace SocialMedia.Repository.GroupRoleRepository
         {
             try
             {
-                return (await _dbContext.GroupRoles.Where(e => e.Id == groupRoleId)
-                    .FirstOrDefaultAsync())!;
+                return (await _dbContext.GroupRoles.Select(e => new GroupRole
+                {
+                    RoleName = e.RoleName,
+                    Id = e.Id
+                }).Where(e => e.Id == groupRoleId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -78,7 +85,11 @@ namespace SocialMedia.Repository.GroupRoleRepository
             try
             {
                 groupRoleName = groupRoleName.ToUpper();
-                return (await _dbContext.GroupRoles.Where(e => e.RoleName == groupRoleName)
+                return (await _dbContext.GroupRoles.Select(e=>new GroupRole
+                {
+                    RoleName = e.RoleName,
+                    Id = e.Id
+                }).Where(e => e.RoleName == groupRoleName)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -91,7 +102,11 @@ namespace SocialMedia.Repository.GroupRoleRepository
         {
             try
             {
-                return await _dbContext.GroupRoles.ToListAsync();
+                return await _dbContext.GroupRoles.Select(e => new GroupRole
+                {
+                    RoleName = e.RoleName,
+                    Id = e.Id
+                }).ToListAsync();
             }
             catch (Exception)
             {

@@ -9,10 +9,8 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         Task<UserSavedPostsFolders> AddUserSavedPostsFoldersAsync(
             UserSavedPostsFolders userSavedPostsFolders);
         Task<UserSavedPostsFolders> UpdateFolderNameAsync(UserSavedPostsFolders userSavedPostsFolders);
-        Task<UserSavedPostsFolders> DeleteUserSavedPostsFoldersByFolderIdAsync(
-            string folderId);
-        Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderIdAsync(
-            string folderId);
+        Task<UserSavedPostsFolders> DeleteUserSavedPostsFoldersByFolderIdAsync(string folderId);
+        Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderIdAsync(string folderId);
         Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderNameAndUserIdAsync(
             string userId, string folderName);
         Task<IEnumerable<UserSavedPostsFolders>> GetUserFoldersByUserId(string userId);

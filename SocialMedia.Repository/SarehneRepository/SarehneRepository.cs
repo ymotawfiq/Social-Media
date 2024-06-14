@@ -33,7 +33,15 @@ namespace SocialMedia.Repository.SarehneRepository
         {
             try
             {
-                return (await _dbContext.SarehneMessages.Where(e => e.Id == sarehneMessageId)
+                return (await _dbContext.SarehneMessages.Select(e=>new SarehneMessage
+                {
+                    Id = e.Id,
+                    Message = e.Message,
+                    MessagePolicyId = e.MessagePolicyId,
+                    ReceiverId = e.ReceiverId,
+                    SenderName = e.SenderName,
+                    SentAt = e.SentAt
+                }).Where(e => e.Id == sarehneMessageId)
                      .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -46,14 +54,30 @@ namespace SocialMedia.Repository.SarehneRepository
         {
             return from m in await _dbContext.SarehneMessages.ToListAsync()
                    where m.ReceiverId == userId
-                   select m;
+                   select (new SarehneMessage
+                   {
+                       Id = m.Id,
+                       Message = m.Message,
+                       MessagePolicyId = m.MessagePolicyId,
+                       ReceiverId = m.ReceiverId,
+                       SenderName = m.SenderName,
+                       SentAt = m.SentAt
+                   });
         }
 
         public async Task<IEnumerable<SarehneMessage>> GetMessagesAsync(string userId, string policyId)
         {
             return from m in await _dbContext.SarehneMessages.ToListAsync()
                    where m.ReceiverId == userId && m.MessagePolicyId == policyId
-                   select m;
+                   select (new SarehneMessage
+                   {
+                       Id = m.Id,
+                       Message = m.Message,
+                       MessagePolicyId = m.MessagePolicyId,
+                       ReceiverId = m.ReceiverId,
+                       SenderName = m.SenderName,
+                       SentAt = m.SentAt
+                   });
         }
 
         public async Task SaveChangesAsync()
@@ -65,7 +89,15 @@ namespace SocialMedia.Repository.SarehneRepository
         {
             await _dbContext.SarehneMessages.AddAsync(sarehneMessage);
             await SaveChangesAsync();
-            return sarehneMessage;
+            return new SarehneMessage
+            {
+                Id = sarehneMessage.Id,
+                Message = sarehneMessage.Message,
+                MessagePolicyId = sarehneMessage.MessagePolicyId,
+                ReceiverId = sarehneMessage.ReceiverId,
+                SenderName = sarehneMessage.SenderName,
+                SentAt = sarehneMessage.SentAt
+            };
         }
 
         public async Task<SarehneMessage> UpdateMessagePolicyAsync(SarehneMessage sarehneMessage)

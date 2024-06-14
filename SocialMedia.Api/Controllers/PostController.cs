@@ -4,7 +4,6 @@ using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.UserPostsRepository;
 using SocialMedia.Service.BlockService;
 using SocialMedia.Service.GenericReturn;
 using SocialMedia.Service.PostService;
@@ -18,18 +17,16 @@ namespace SocialMedia.Api.Controllers
         private readonly IPostService _postService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IPostRepository _postRepository;
-        private readonly IUserPostsRepository _userPostsRepository;
         private readonly IBlockService _blockService;
         private readonly UserManagerReturn _userManagerReturn;
         public PostController(IPostService _postService, UserManager<SiteUser> _userManager,
             IPostRepository _postRepository,
-            IUserPostsRepository _userPostsRepository, IBlockService _blockService, 
+            IBlockService _blockService, 
              UserManagerReturn _userManagerReturn)
         {
             this._postService = _postService;
             this._userManager = _userManager;
             this._postRepository = _postRepository;
-            this._userPostsRepository = _userPostsRepository;
             this._blockService = _blockService;
             this._userManagerReturn = _userManagerReturn;
         }

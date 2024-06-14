@@ -32,15 +32,20 @@ namespace SocialMedia.Api.Controllers
                     && HttpContext.User.Identity.Name != null)
                 {
                     var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var userByUserName = await _userManager.FindByNameAsync(userName);
-                    if (user != null && userByUserName != null)
+                    if (user != null)
                     {
-                        var response = await _friendService.GetAllUserFriendsAsync(user,
+                        var userByUserName = await _userManager.FindByNameAsync(userName);
+                        if (userByUserName != null)
+                        {
+                            var response = await _friendService.GetAllUserFriendsAsync(user,
                             userByUserName);
-                        return Ok(response);
+                            return Ok(response);
+                        }
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User you want to get friend list not found"));
                     }
-                    return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
-                    ._403_Forbidden());
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());
@@ -87,15 +92,20 @@ namespace SocialMedia.Api.Controllers
                         && HttpContext.User.Identity.Name != null)
                     {
                         var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                            friendIdOrUserNameOrEmail);
-                        if (user != null && routeUser != null)
+                        if (user != null)
                         {
-                            var response = await _friendService.DeleteFriendAsync(user.Id, routeUser.Id);
-                            return Ok(response);
+                            var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                            friendIdOrUserNameOrEmail);
+                            if (routeUser != null)
+                            {
+                                var response = await _friendService.DeleteFriendAsync(user.Id, routeUser.Id);
+                                return Ok(response);
+                            }
+                            return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User not found in your friend list"));
                         }
-                        return StatusCode(StatusCodes.Status406NotAcceptable, StatusCodeReturn<string>
-                            ._406_NotAcceptable());
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User not found"));
                     }
                     return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                     ._401_UnAuthorized());

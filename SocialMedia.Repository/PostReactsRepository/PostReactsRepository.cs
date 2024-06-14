@@ -19,7 +19,13 @@ namespace SocialMedia.Repository.PostReactsRepository
             {
                 await _dbContext.PostReacts.AddAsync(postReacts);
                 await SaveChangesAsync();
-                return postReacts;
+                return new PostReacts
+                {
+                    UserId = postReacts.UserId,
+                    Id = postReacts.Id,
+                    PostId = postReacts.PostId,
+                    PostReactId = postReacts.PostReactId
+                };
             }
             catch (Exception)
             {
@@ -62,7 +68,13 @@ namespace SocialMedia.Repository.PostReactsRepository
             try
             {
                 return (await _dbContext.PostReacts.Where(e => e.Id == Id)
-                    .FirstOrDefaultAsync())!;
+                    .Select(e => new PostReacts
+                    {
+                        Id = e.Id,
+                        UserId = e.UserId,
+                        PostId = e.PostId,
+                        PostReactId = e.PostReactId
+                    }).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -75,7 +87,13 @@ namespace SocialMedia.Repository.PostReactsRepository
             try
             {
                 return (await _dbContext.PostReacts.Where(e => e.PostId == postId)
-                    .Where(e => e.UserId == userId).FirstOrDefaultAsync())!;
+                    .Where(e => e.UserId == userId).Select(e => new PostReacts
+                    {
+                        Id = e.Id,
+                        UserId = e.UserId,
+                        PostId = e.PostId,
+                        PostReactId = e.PostReactId
+                    }).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -89,7 +107,13 @@ namespace SocialMedia.Repository.PostReactsRepository
             {
                 return from p in await _dbContext.PostReacts.ToListAsync()
                        where p.PostId == postId
-                       select p;
+                       select (new PostReacts
+                       {
+                           Id = p.Id,
+                           PostReactId = p.PostReactId,
+                           PostId = p.PostId,
+                           UserId = p.UserId
+                       });
             }
             catch (Exception)
             {
@@ -103,7 +127,13 @@ namespace SocialMedia.Repository.PostReactsRepository
             {
                 return from p in await _dbContext.PostReacts.ToListAsync()
                        where p.UserId == userId
-                       select p;
+                       select (new PostReacts
+                       {
+                           Id = p.Id,
+                           PostReactId = p.PostReactId,
+                           PostId = p.PostId,
+                           UserId = p.UserId
+                       });
             }
             catch (Exception)
             {
@@ -121,7 +151,7 @@ namespace SocialMedia.Repository.PostReactsRepository
             try
             {
                 var oldPostReact = await GetPostReactByIdAsync(postReacts.Id);
-                oldPostReact.SpecialPostReactId = postReacts.SpecialPostReactId;
+                oldPostReact.PostReactId = postReacts.PostReactId;
                 await SaveChangesAsync();
                 return oldPostReact;
             }

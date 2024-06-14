@@ -19,7 +19,12 @@ namespace SocialMedia.Repository.PostViewRepository
             {
                 await _dbContext.PostViews.AddAsync(postView);
                 await SaveChangesAsync();
-                return postView;
+                return new PostView
+                {
+                    Id = postView.Id,
+                    PostId = postView.PostId,
+                    ViewNumber = postView.ViewNumber
+                };
             }
             catch (Exception)
             {
@@ -31,7 +36,12 @@ namespace SocialMedia.Repository.PostViewRepository
         {
             try
             {
-                return (await _dbContext.PostViews.Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
+                return (await _dbContext.PostViews.Select(e=>new PostView
+                {
+                    ViewNumber = e.ViewNumber,
+                    PostId = e.PostId,
+                    Id = e.Id
+                }).Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -45,7 +55,12 @@ namespace SocialMedia.Repository.PostViewRepository
             {
                 return from v in await _dbContext.PostViews.ToListAsync()
                        where v.PostId == postId
-                       select v;
+                       select (new PostView
+                       {
+                           Id = v.Id,
+                           PostId = v.PostId,
+                           ViewNumber = v.ViewNumber
+                       });
             }
             catch (Exception)
             {

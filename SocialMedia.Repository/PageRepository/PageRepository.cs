@@ -24,32 +24,52 @@ namespace SocialMedia.Repository.PageRepository
                 Id = Guid.NewGuid().ToString()
             });
             await SaveChangesAsync();
-            return page;
+            return new Page
+            {
+                Id = page.Id,
+                Name = page.Name,
+                Description = page.Description,
+                CreatedAt = page.CreatedAt
+            };
         }
 
         public async Task<Page> DeletePageByIdAsync(string pageId)
         {
             var existPage = await GetPageByIdAsync(pageId);
-            var userPage = (await _dbContext.UserPages.Where(e => e.PageId == pageId).FirstOrDefaultAsync())!;
             _dbContext.Pages.Remove(existPage);
-            _dbContext.UserPages.Remove(userPage!);
             await SaveChangesAsync();
             return existPage;
         }
 
         public async Task<Page> GetPageByIdAsync(string pageId)
         {
-            return (await _dbContext.Pages.Where(e => e.Id == pageId).FirstOrDefaultAsync())!;
+            return (await _dbContext.Pages.Select(e=>new Page
+            {
+                CreatedAt = e.CreatedAt,
+                Description = e.Description,
+                Name = e.Name,
+                Id = e.Id
+            }).Where(e => e.Id == pageId).FirstOrDefaultAsync())!;
         }
 
         public async Task<IEnumerable<UserPage>> GetPagesByUserIdAsync(string userId)
         {
-            return await _dbContext.UserPages.Where(e => e.UserId == userId).ToListAsync();
+            return await _dbContext.UserPages.Select(e => new UserPage
+            {
+                PageId = e.PageId,
+                UserId = e.UserId,
+                Id = e.Id
+            }).Where(e => e.UserId == userId).ToListAsync();
         }
 
         public async Task<UserPage> GetUserPageByPageIdAsync(string pageId)
         {
-            return (await _dbContext.UserPages.Where(e => e.PageId == pageId).FirstOrDefaultAsync())!;
+            return (await _dbContext.UserPages.Select(e => new UserPage
+            {
+                PageId = e.PageId,
+                UserId = e.UserId,
+                Id = e.Id
+            }).Where(e => e.PageId == pageId).FirstOrDefaultAsync())!;
         }
 
         public async Task SaveChangesAsync()

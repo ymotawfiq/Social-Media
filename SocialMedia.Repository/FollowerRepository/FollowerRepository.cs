@@ -1,20 +1,16 @@
 ﻿
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Data.Models;
-using SocialMedia.Data.Models.Authentication;
 
 namespace SocialMedia.Repository.FollowerRepository
 {
     public class FollowerRepository : IFollowerRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly UserManager<SiteUser> _userManager;
-        public FollowerRepository(ApplicationDbContext _dbContext, UserManager<SiteUser> _userManager)
+        public FollowerRepository(ApplicationDbContext _dbContext)
         {
             this._dbContext = _dbContext;
-            this._userManager = _userManager;
         }
         public async Task<Follower> FollowAsync(Follower follower)
         {
@@ -22,8 +18,12 @@ namespace SocialMedia.Repository.FollowerRepository
             {
                 await _dbContext.Followers.AddAsync(follower);
                 await SaveChangesAsync();
-                follower.User = null;
-                return follower;
+                return new Follower
+                {
+                    Id = follower.Id,
+                    UserId = follower.UserId,
+                    FollowerId = follower.FollowerId
+                };
             }
             catch (Exception)
             {
@@ -46,8 +46,12 @@ namespace SocialMedia.Repository.FollowerRepository
 
         public async Task<Follower> GetFollowingByUserIdAndFollowerIdAsync(string userId, string followerId)
         {
-            return (await _dbContext.Followers.Where(e => e.UserId == userId)
-                .Where(e => e.FollowerId == followerId).FirstOrDefaultAsync())!;
+            return (await _dbContext.Followers.Select(e => new Follower
+            {
+                Id = e.Id,
+                FollowerId = e.FollowerId,
+                UserId = e.UserId
+            }).Where(e => e.FollowerId == followerId).Where(e=>e.UserId==userId).FirstOrDefaultAsync())!;
         }
 
         public async Task SaveChangesAsync()
@@ -57,9 +61,8 @@ namespace SocialMedia.Repository.FollowerRepository
 
         public async Task<Follower> UnfollowAsync(string userId, string followerId)
         {
-            var followingInfo = await _dbContext.Followers.Where(e => e.UserId == userId)
-                .Where(e => e.FollowerId == followerId).FirstOrDefaultAsync();
-            _dbContext.Followers.Remove(followingInfo!);
+            var followingInfo = await GetFollowingByUserIdAndFollowerIdAsync(userId, followerId);
+            _dbContext.Followers.Remove(followingInfo);
             await SaveChangesAsync();
             followingInfo!.User = null;
             return followingInfo;

@@ -2,10 +2,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
-using SocialMedia.Data.DTOs;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.Authentication;
-using static NuGet.Packaging.PackagingConstants;
 
 namespace SocialMedia.Repository.SavePostsRepository
 {
@@ -21,9 +19,14 @@ namespace SocialMedia.Repository.SavePostsRepository
         {
             try
             {
-                return (await _dbContext.SavedPosts.Where(e => e.UserId == user.Id)
-                    .Where(e => e.FolderId == folderId).Where(e => e.PostId == postId)
-                    .FirstOrDefaultAsync())!;
+                return (await _dbContext.SavedPosts.Select(e=>new SavedPosts
+                {
+                    FolderId = e.FolderId,
+                    Id = e.Id,
+                    PostId = e.PostId,
+                    UserId = e.UserId
+                }).Where(e => e.UserId == user.Id).Where(e => e.FolderId == folderId)
+                .Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -35,8 +38,13 @@ namespace SocialMedia.Repository.SavePostsRepository
         {
             try
             {
-                return (await _dbContext.SavedPosts.Where(e => e.UserId == user.Id)
-                    .Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
+                return (await _dbContext.SavedPosts.Select(e => new SavedPosts
+                {
+                    FolderId = e.FolderId,
+                    Id = e.Id,
+                    PostId = e.PostId,
+                    UserId = e.UserId
+                }).Where(e => e.UserId == user.Id).Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -55,7 +63,13 @@ namespace SocialMedia.Repository.SavePostsRepository
             {
                 await _dbContext.SavedPosts.AddAsync(savedPosts);
                 await SaveChangesAsync();
-                return savedPosts;
+                return new SavedPosts
+                {
+                    FolderId = savedPosts.FolderId,
+                    Id = savedPosts.Id,
+                    PostId = savedPosts.PostId,
+                    UserId = savedPosts.UserId
+                };
             }
             catch (Exception)
             {
@@ -67,7 +81,13 @@ namespace SocialMedia.Repository.SavePostsRepository
         {
             try
             {
-                var savedPost = (await _dbContext.SavedPosts.Where(e => e.PostId == postId)
+                var savedPost = (await _dbContext.SavedPosts.Select(e => new SavedPosts
+                {
+                    FolderId = e.FolderId,
+                    Id = e.Id,
+                    PostId = e.PostId,
+                    UserId = e.UserId
+                }).Where(e => e.PostId == postId)
                     .Where(e=>e.UserId==user.Id).FirstOrDefaultAsync())!;
                 _dbContext.SavedPosts.Remove(savedPost);
                 await SaveChangesAsync();

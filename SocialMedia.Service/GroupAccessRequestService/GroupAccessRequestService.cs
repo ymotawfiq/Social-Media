@@ -7,7 +7,6 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.GroupAccessRequestRepository;
 using SocialMedia.Repository.GroupMemberRepository;
 using SocialMedia.Repository.GroupMemberRoleRepository;
-using SocialMedia.Repository.GroupPolicyRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
 using SocialMedia.Repository.PolicyRepository;
@@ -21,19 +20,17 @@ namespace SocialMedia.Service.GroupAccessRequestService
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly IGroupRepository _groupRepository;
         private readonly IPolicyRepository _policyRepository;
-        private readonly IGroupPolicyRepository _groupPolicyRepository;
         private readonly IGroupRoleRepository _groupRoleRepository;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         public GroupAccessRequestService(IGroupAccessRequestRepository _groupAccessRequestRepository,
             IGroupMemberRepository _groupMemberRepository, IGroupRepository _groupRepository,
-            IPolicyRepository _policyRepository, IGroupPolicyRepository _groupPolicyRepository,
+            IPolicyRepository _policyRepository,
             IGroupRoleRepository _groupRoleRepository, IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupAccessRequestRepository = _groupAccessRequestRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._groupRepository = _groupRepository;
             this._policyRepository = _policyRepository;
-            this._groupPolicyRepository = _groupPolicyRepository;
             this._groupRoleRepository = _groupRoleRepository;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
 
@@ -51,7 +48,7 @@ namespace SocialMedia.Service.GroupAccessRequestService
                     return StatusCodeReturn<object>
                         ._403_Forbidden();
                 }
-                var groupPolicy = await _groupPolicyRepository.GetGroupPolicyByIdAsync(group.GroupPolicyId);
+                var groupPolicy = await _policyRepository.GetPolicyByIdAsync(group.GroupPolicyId);
                 if (groupPolicy != null)
                 {
                     return await CheckGroupPolicyAndApplyRequestAsync(groupPolicy, group, user);
@@ -93,10 +90,9 @@ namespace SocialMedia.Service.GroupAccessRequestService
         }
 
         private async Task<ApiResponse<object>> CheckGroupPolicyAndApplyRequestAsync(
-            GroupPolicy groupPolicy, Group group, SiteUser user)
+            Policy groupPolicy, Group group, SiteUser user)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(groupPolicy.PolicyId);
-            if (policy.PolicyType == "PUBLIC")
+            if (groupPolicy.PolicyType == "PUBLIC")
             {
                 var userRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("user");
                 if (userRole != null)

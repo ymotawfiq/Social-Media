@@ -32,68 +32,55 @@ namespace SocialMedia.Service.FriendRequestService
             this._blockRepository = _blockRepository;
         }
 
+
+
         public async Task<ApiResponse<FriendRequest>> AddFriendRequestAsync(
             AddFriendRequestDto addFriendRequestDto, SiteUser user)
         {
-            var askToFriendUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                addFriendRequestDto.PersonIdOrUserNameOrEmail);
-            if (askToFriendUser != null)
+            var check = await CheckAbilityToSendRequestAsync<FriendRequest>(addFriendRequestDto, user);
+            if (check.IsSuccess)
             {
-                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                    user.Id, askToFriendUser.Id);
-                if(isBlocked == null)
-                {
-                    var isYouFriends = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
-                    user.Id, askToFriendUser.Id);
-                    if (isYouFriends == null)
-                    {
-                        var isFriendRequestSent = await _friendRequestRepository
-                            .GetFriendRequestByUserAndPersonIdAsync(user.Id, askToFriendUser.Id);
-                        if (isFriendRequestSent == null)
-                        {
-                            var newFriendRequest = await _friendRequestRepository.AddFriendRequestAsync(
-                                    ConvertFromDto.ConvertFromFriendRequestDto_Add(addFriendRequestDto, user));
-                            newFriendRequest.User = null;
-                            return StatusCodeReturn<FriendRequest>
-                                ._200_Success("Friend request send successfully", newFriendRequest);
-                        }
-                        return StatusCodeReturn<FriendRequest>
-                            ._403_Forbidden("Friend request already sent before");
-                    }
-                    return StatusCodeReturn<FriendRequest>
-                    ._403_Forbidden("You are friends");
-                }
+                addFriendRequestDto.PersonIdOrUserNameOrEmail = (await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(addFriendRequestDto.PersonIdOrUserNameOrEmail)).Id;
+                var friendRequest = await _friendRequestRepository.AddFriendRequestAsync(
+                    ConvertFromDto.ConvertFromFriendRequestDto_Add(addFriendRequestDto, user));
                 return StatusCodeReturn<FriendRequest>
-                    ._403_Forbidden();
+                    ._201_Created("Friend request sent ssuccessfully", friendRequest);
             }
-            return StatusCodeReturn<FriendRequest>
-                        ._404_NotFound("User you want to send friend request not found");
+            return check;
         }
 
-        public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestByAsync(
+        public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(
             SiteUser user, string friendRequestId)
         {
             var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
             if (friendRequest != null)
             {
-                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                    friendRequest.UserWhoReceivedId, friendRequest.UserWhoSendId);
-                if (isBlocked == null)
+                if (friendRequest.UserWhoSendId == user.Id
+                || friendRequest.UserWhoReceivedId == user.Id)
                 {
-                    if (friendRequest.UserWhoSendId == user.Id
-                    || friendRequest.UserWhoReceivedId == user.Id)
-                    {
-                        await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequestId);
-                        return StatusCodeReturn<FriendRequest>
-                                ._200_Success("Friend request deleted successfully");
-                    }
+                    await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequestId);
                     return StatusCodeReturn<FriendRequest>
-                        ._403_Forbidden();
+                            ._200_Success("Friend request deleted successfully");
                 }
                 return StatusCodeReturn<FriendRequest>
-                        ._403_Forbidden();
+                    ._403_Forbidden();
             }
 
+            return StatusCodeReturn<FriendRequest>
+                ._404_NotFound("Friend request not found");
+        }
+
+        public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(SiteUser sender, SiteUser receiver)
+        {
+            var friendRequest = await _friendRequestRepository.GetFriendRequestByUserAndPersonIdAsync(
+                sender.Id, receiver.Id);
+            if (friendRequest != null)
+            {
+                await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequest.Id);
+                return StatusCodeReturn<FriendRequest>
+                        ._200_Success("Friend request deleted successfully");
+            }
             return StatusCodeReturn<FriendRequest>
                 ._404_NotFound("Friend request not found");
         }
@@ -108,35 +95,7 @@ namespace SocialMedia.Service.FriendRequestService
             }
 
             return StatusCodeReturn<IEnumerable<FriendRequest>>
-                    ._200_Success("No friend requests found", friendRequsts);
-        }
-
-        public async Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsByUserIdAsync(
-            string userId)
-        {
-            var userFriendRequsts = await _friendRequestRepository.GetAllFriendRequestsByUserIdAsync(userId);
-            if (userFriendRequsts.ToList().Count == 0)
-            {
-                return StatusCodeReturn<IEnumerable<FriendRequest>>
-                    ._200_Success("No friend requests found");
-            }
-
-            return StatusCodeReturn<IEnumerable<FriendRequest>>
-                    ._200_Success("No friend requests found", userFriendRequsts);
-        }
-
-        public async Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsByUserNameAsync(
-            SiteUser user)
-        {
-            var userFriendRequsts = await _friendRequestRepository.GetAllFriendRequestsByUserIdAsync(user.Id);
-            if (userFriendRequsts.ToList().Count == 0)
-            {
-                return StatusCodeReturn<IEnumerable<FriendRequest>>
-                    ._200_Success("No friend requests found");
-            }
-
-            return StatusCodeReturn<IEnumerable<FriendRequest>>
-                    ._200_Success("No friend requests found", userFriendRequsts);
+                    ._200_Success("Friend requests found successfully", friendRequsts);
         }
 
         public async Task<ApiResponse<FriendRequest>> GetFriendRequestByIdAsync(
@@ -145,36 +104,55 @@ namespace SocialMedia.Service.FriendRequestService
             var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
             if (friendRequest != null)
             {
-                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                    friendRequest.UserWhoSendId, friendRequest.UserWhoReceivedId);
-                if (isBlocked == null)
+                if (friendRequest.UserWhoSendId == user.Id
+                || friendRequest.UserWhoReceivedId == user.Id)
                 {
-                    if (friendRequest.UserWhoSendId == user.Id
-                    || friendRequest.UserWhoReceivedId == user.Id)
-                    {
-                        return StatusCodeReturn<FriendRequest>
-                                ._200_Success("Friend request found successfully");
-                    }
                     return StatusCodeReturn<FriendRequest>
-                        ._403_Forbidden();
+                            ._200_Success("Friend request found successfully");
                 }
                 return StatusCodeReturn<FriendRequest>
-                        ._403_Forbidden();
+                    ._403_Forbidden();
             }
             return StatusCodeReturn<FriendRequest>
                 ._404_NotFound("Friend request not found");
         }
 
+        public async Task<ApiResponse<IEnumerable<FriendRequest>>> GetReceivedFriendRequestsByUserIdAsync(
+            string userId)
+        {
+            var requests = await _friendRequestRepository.GetReceivedFriendRequestsByUserIdAsync(userId);
+            if (requests.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests received");
+            }
+
+            return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("Received friend requests found successfully", requests);
+        }
+
+        public async Task<ApiResponse<IEnumerable<FriendRequest>>> GetSentFriendRequestsByUserIdAsync(
+            string userId)
+        {
+            var requests = await _friendRequestRepository.GetSentFriendRequestsByUserIdAsync(userId);
+            if (requests.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("No friend requests sent");
+            }
+
+            return StatusCodeReturn<IEnumerable<FriendRequest>>
+                    ._200_Success("Sent friend requests found successfully", requests);
+        }
+
         public async Task<ApiResponse<FriendRequest>> UpdateFriendRequestAsync(
-            UpdateFriendRequestDto updateFriendRequestDto)
+            UpdateFriendRequestDto updateFriendRequestDto, SiteUser user)
         {     
             var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(
                 updateFriendRequestDto.FriendRequestId);
             if (friendRequest != null)
             {
-                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
-                    friendRequest.UserWhoReceivedId, friendRequest.UserWhoSendId);
-                if (isBlocked == null)
+                if(user.Id == friendRequest.UserWhoReceivedId)
                 {
                     if (updateFriendRequestDto.IsAccepted)
                     {
@@ -192,10 +170,52 @@ namespace SocialMedia.Service.FriendRequestService
                             ._200_Success("If you want to delete friend request use delete friend request");
                 }
                 return StatusCodeReturn<FriendRequest>
-                        ._403_Forbidden();
+                    ._403_Forbidden();
             }
             return StatusCodeReturn<FriendRequest>
                 ._404_NotFound("Friend request not found");
         }
+
+
+        private async Task<ApiResponse<T>> CheckAbilityToSendRequestAsync<T>(
+                AddFriendRequestDto addFriendRequestDto, SiteUser user)
+        {
+            var askToFriendUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                addFriendRequestDto.PersonIdOrUserNameOrEmail);
+            if (askToFriendUser != null)
+            {
+                var isBlocked = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                    user.Id, askToFriendUser.Id);
+                if (isBlocked == null)
+                {
+                    var isYouFriends = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
+                    user.Id, askToFriendUser.Id);
+                    if (isYouFriends == null)
+                    {
+                        var isFriendRequestSentBefore = await _friendRequestRepository
+                            .GetFriendRequestByUserAndPersonIdAsync(user.Id, askToFriendUser.Id);
+                        if (isFriendRequestSentBefore == null)
+                        {
+                            if (user.Id != askToFriendUser.Id)
+                            {
+                                return StatusCodeReturn<T>
+                                ._200_Success("Success");
+                            }
+                            return StatusCodeReturn<T>
+                            ._403_Forbidden();
+                        }
+                        return StatusCodeReturn<T>
+                            ._403_Forbidden("Friend request already sent before");
+                    }
+                    return StatusCodeReturn<T>
+                    ._403_Forbidden("You are friends");
+                }
+                return StatusCodeReturn<T>
+                    ._403_Forbidden();
+            }
+            return StatusCodeReturn<T>
+                        ._404_NotFound("User you want to send friend request not found");
+        }
+
     }
 }

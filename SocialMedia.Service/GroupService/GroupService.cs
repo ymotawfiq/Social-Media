@@ -7,7 +7,6 @@ using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.GroupMemberRepository;
 using SocialMedia.Repository.GroupMemberRoleRepository;
-using SocialMedia.Repository.GroupPolicyRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
 using SocialMedia.Service.GenericReturn;
@@ -19,18 +18,16 @@ namespace SocialMedia.Service.GroupService
     {
         private readonly IGroupRepository _groupRepository;
         private readonly IPolicyService _policyService;
-        private readonly IGroupPolicyRepository _groupPolicyRepository;
         private readonly IGroupRoleRepository _groupRoleRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         public GroupService(IGroupRepository _groupRepository, IPolicyService _policyService,
-            IGroupPolicyRepository _groupPolicyRepository, IGroupRoleRepository _groupRoleRepository,
+            IGroupRoleRepository _groupRoleRepository,
             IGroupMemberRepository _groupMemberRepository, 
             IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupRepository = _groupRepository;
             this._policyService = _policyService;
-            this._groupPolicyRepository = _groupPolicyRepository;
             this._groupRoleRepository = _groupRoleRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
@@ -40,21 +37,14 @@ namespace SocialMedia.Service.GroupService
             var policy = await _policyService.GetPolicyByIdOrNameAsync(addGroupDto.GroupPolicyIdOrName);
             if(policy!=null && policy.ResponseObject != null)
             {
-                var groupPolicy = await _groupPolicyRepository.GetGroupPolicyByPolicyIdAsync(
-                    policy.ResponseObject.Id);
-                if (groupPolicy != null)
+                var adminRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("admin");
+                if (adminRole != null)
                 {
-                    var adminRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("admin");
-                    if (adminRole != null)
-                    {
-                        addGroupDto.GroupPolicyIdOrName = groupPolicy.Id;
-                        return await CreateGroupWithMemberAdmin(addGroupDto, user, adminRole);
-                    }
-                    return StatusCodeReturn<Group>
-                    ._404_NotFound("Admin role not found");
+                    addGroupDto.GroupPolicyIdOrName = policy.ResponseObject.Id;
+                    return await CreateGroupWithMemberAdmin(addGroupDto, user, adminRole);
                 }
                 return StatusCodeReturn<Group>
-                    ._404_NotFound("Group policy not found");
+                ._404_NotFound("Admin role not found");
             }
             return StatusCodeReturn<Group>
                     ._404_NotFound("Policy not found");
@@ -160,24 +150,17 @@ namespace SocialMedia.Service.GroupService
                     updateExistGroupPolicyDto.GroupPolicyIdOrName);
                 if (policy != null && policy.ResponseObject != null)
                 {
-                    var groupPolicy = await _groupPolicyRepository.GetGroupPolicyByPolicyIdAsync(
-                        policy.ResponseObject.Id);
-                    if (groupPolicy != null)
+                    if(user.Id == group.CreatedUserId)
                     {
-                        if(user.Id == group.CreatedUserId)
-                        {
-                            updateExistGroupPolicyDto.GroupPolicyIdOrName = groupPolicy.Id;
-                            var updatedGroup = await _groupRepository.UpdateGroupAsync(ConvertFromDto
-                                .ConvertFromGroupDto_Update(updateExistGroupPolicyDto, group));
-                            SetNull(updatedGroup);
-                            return StatusCodeReturn<Group>
-                                ._200_Success("Group policy updated successfully", updatedGroup);
-                        }
+                        updateExistGroupPolicyDto.GroupPolicyIdOrName = policy.ResponseObject.Id;
+                        var updatedGroup = await _groupRepository.UpdateGroupAsync(ConvertFromDto
+                            .ConvertFromGroupDto_Update(updateExistGroupPolicyDto, group));
+                        SetNull(updatedGroup);
                         return StatusCodeReturn<Group>
-                            ._403_Forbidden();
+                            ._200_Success("Group policy updated successfully", updatedGroup);
                     }
                     return StatusCodeReturn<Group>
-                            ._404_NotFound("Group policy not found");
+                        ._403_Forbidden();
                 }
                 return StatusCodeReturn<Group>
                             ._404_NotFound("Policy not found");

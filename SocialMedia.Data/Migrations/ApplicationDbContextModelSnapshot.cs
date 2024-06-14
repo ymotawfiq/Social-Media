@@ -316,7 +316,7 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<string>("FollowerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("Follower Id");
 
                     b.Property<string>("UserId")
@@ -327,9 +327,6 @@ namespace SocialMedia.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("FollowerId", "UserId")
-                        .IsUnique();
 
                     b.ToTable("Followers");
                 });
@@ -497,24 +494,6 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("GroupMemberRoles");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PolicyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Policy Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PolicyId")
-                        .IsUnique();
-
-                    b.ToTable("GroupPolicies");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPost", b =>
                 {
                     b.Property<string>("Id")
@@ -611,7 +590,7 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("PageFollowers");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PagePosts", b =>
+            modelBuilder.Entity("SocialMedia.Data.Models.PagePost", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -812,7 +791,7 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("Post Id");
 
-                    b.Property<string>("SpecialPostReactId")
+                    b.Property<string>("PostReactId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("Post React Id");
@@ -824,7 +803,7 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialPostReactId");
+                    b.HasIndex("PostReactId");
 
                     b.HasIndex("UserId");
 
@@ -865,10 +844,13 @@ namespace SocialMedia.Data.Migrations
 
                     b.Property<string>("ReactValue")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("React Value");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ReactValue")
+                        .IsUnique();
 
                     b.ToTable("Reacts");
                 });
@@ -903,7 +885,7 @@ namespace SocialMedia.Data.Migrations
                     b.Property<DateTime>("SentAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 13, 22, 19, 42, 331, DateTimeKind.Local).AddTicks(3750));
+                        .HasDefaultValue(new DateTime(2024, 6, 14, 21, 57, 44, 921, DateTimeKind.Local).AddTicks(700));
 
                     b.HasKey("Id");
 
@@ -946,42 +928,6 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("SavedPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.SpecialCommentReacts", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ReactId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("React Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReactId")
-                        .IsUnique();
-
-                    b.ToTable("SpecialCommentReacts");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.SpecialPostReacts", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ReactId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("React Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReactId")
-                        .IsUnique();
-
-                    b.ToTable("SpecialPostReacts");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.UserPage", b =>
                 {
                     b.Property<string>("Id")
@@ -1005,32 +951,6 @@ namespace SocialMedia.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("UserPages");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.UserPosts", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PostId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Post Id");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("User Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId", "PostId")
-                        .IsUnique();
-
-                    b.ToTable("UserPosts");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
@@ -1205,8 +1125,8 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.GroupPolicy", "GroupPolicy")
-                        .WithMany("Groups")
+                    b.HasOne("SocialMedia.Data.Models.Policy", "GroupPolicy")
+                        .WithMany("GroupPolicies")
                         .HasForeignKey("GroupPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1273,17 +1193,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("GroupRole");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.Policy", "Policy")
-                        .WithMany("GroupPolicies")
-                        .HasForeignKey("PolicyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Policy");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.GroupPost", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Group", "Group")
@@ -1330,7 +1239,7 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PagePosts", b =>
+            modelBuilder.Entity("SocialMedia.Data.Models.PagePost", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Page", "Page")
                         .WithMany("PagePosts")
@@ -1447,9 +1356,9 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.SpecialPostReacts", "React")
+                    b.HasOne("SocialMedia.Data.Models.React", "React")
                         .WithMany("PostReacts")
-                        .HasForeignKey("SpecialPostReactId")
+                        .HasForeignKey("PostReactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1523,28 +1432,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("UserSavedPostsFolder");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.SpecialCommentReacts", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.React", "React")
-                        .WithMany("SpecialCommentReacts")
-                        .HasForeignKey("ReactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("React");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.SpecialPostReacts", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.React", "React")
-                        .WithMany("SpecialPostReacts")
-                        .HasForeignKey("ReactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("React");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.UserPage", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Page", "Page")
@@ -1560,25 +1447,6 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Page");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.UserPosts", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
-                        .WithMany("UserPosts")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("UserPosts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
 
                     b.Navigation("User");
                 });
@@ -1628,8 +1496,6 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("UserPages");
 
-                    b.Navigation("UserPosts");
-
                     b.Navigation("UserSavedPostsFolders");
                 });
 
@@ -1645,11 +1511,6 @@ namespace SocialMedia.Data.Migrations
             modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
                 {
                     b.Navigation("GroupMemberRoles");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupPolicy", b =>
-                {
-                    b.Navigation("Groups");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.GroupRole", b =>
@@ -1704,8 +1565,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("PostViews");
 
                     b.Navigation("SavedPosts");
-
-                    b.Navigation("UserPosts");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
@@ -1719,13 +1578,6 @@ namespace SocialMedia.Data.Migrations
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
-                {
-                    b.Navigation("SpecialCommentReacts");
-
-                    b.Navigation("SpecialPostReacts");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.SpecialPostReacts", b =>
                 {
                     b.Navigation("PostReacts");
                 });
