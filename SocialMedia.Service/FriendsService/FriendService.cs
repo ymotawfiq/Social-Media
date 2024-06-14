@@ -65,51 +65,13 @@ namespace SocialMedia.Service.FriendsService
         }
 
 
-        private async Task<ApiResponse<T>> CheckGetFriendPolicyAsync<T>(SiteUser user, SiteUser user1)
-        {
-            var policy = await _policyRepository.GetPolicyByIdAsync(user.FriendListPolicyId);
-            if (policy != null)
-            {
-                if(user.Id != user1.Id)
-                {
-                    if (policy.PolicyType == "FRIENDS ONLY")
-                    {
-                        var isFriend = await IsUserFriendAsync(user.Id, user1.Id);
-                        if (!isFriend.ResponseObject)
-                        {
-                            return StatusCodeReturn<T>
-                                ._403_Forbidden();
-                        }
-                    }
-                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
-                    {
-                        var isFriendOfFriend = await IsUserFriendOfFriendAsync(user.Id, user1.Id);
-                        if (!isFriendOfFriend.ResponseObject)
-                        {
-                            return StatusCodeReturn<T>
-                                ._403_Forbidden();
-                        }
-                    }
-
-                    else if (policy.PolicyType == "PRIVATE")
-                    {
-                        return StatusCodeReturn<T>
-                            ._403_Forbidden();
-                    }
-                }
-                return StatusCodeReturn<T>
-                    ._200_Success("Success");
-            }
-            return StatusCodeReturn<T>
-                            ._404_NotFound("Policy not found");
-        }
-
+        
 
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user, 
-            SiteUser user1)
+            SiteUser routeUser)
         {
-            var friends = await _friendsRepository.GetAllUserFriendsAsync(user.Id);
-            if((await CheckGetFriendPolicyAsync<IEnumerable<Friend>>(user, user1)).IsSuccess)
+            var friends = await _friendsRepository.GetAllUserFriendsAsync(routeUser.Id);
+            if((await CheckGetFriendPolicyAsync<IEnumerable<Friend>>(user, routeUser)).IsSuccess)
             {
                 if (friends.ToList().Count == 0)
                 {
@@ -119,7 +81,7 @@ namespace SocialMedia.Service.FriendsService
                 return StatusCodeReturn<IEnumerable<Friend>>
                         ._200_Success("Friends found successfully", friends);
             }
-            return await CheckGetFriendPolicyAsync<IEnumerable<Friend>>(user, user1);
+            return await CheckGetFriendPolicyAsync<IEnumerable<Friend>>(user, routeUser);
         }
 
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user)
@@ -146,14 +108,15 @@ namespace SocialMedia.Service.FriendsService
                     ._200_Success("Friend", true);
         }
 
-        public async Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId)
+        public async Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string routeUserId, string userId)
         {
-            var friendsOfFriends = (await _friendsRepository.GetUserFriendsOfFriendsAsync(userId)).ToList();
+            var friendsOfFriends = (await _friendsRepository.GetUserFriendsOfFriendsAsync(routeUserId))
+                .ToList();
             foreach(var userFriends in friendsOfFriends)
             {
                 foreach(var friend in userFriends)
                 {
-                    if(friend.FriendId == friendId || friend.UserId == friendId)
+                    if(friend.FriendId == userId || friend.UserId == userId)
                     {
                         return StatusCodeReturn<bool>
                             ._200_Success("Friend of friend", true);
@@ -164,6 +127,45 @@ namespace SocialMedia.Service.FriendsService
                     ._404_NotFound("Not friend of friend", false);
         }
 
+
+        private async Task<ApiResponse<T>> CheckGetFriendPolicyAsync<T>(SiteUser user, SiteUser routeUser)
+        {
+            var policy = await _policyRepository.GetPolicyByIdAsync(routeUser.FriendListPolicyId);
+            if (policy != null)
+            {
+                if (user.Id != routeUser.Id)
+                {
+                    var isFriend = await IsUserFriendAsync(user.Id, routeUser.Id);
+                    if (policy.PolicyType == "FRIENDS ONLY")
+                    {
+                        if (!isFriend.IsSuccess)
+                        {
+                            return StatusCodeReturn<T>
+                                ._403_Forbidden();
+                        }
+                    }
+                    else if (policy.PolicyType == "FRIENDS OF FRIENDS")
+                    {
+                        var isFriendOfFriend = await IsUserFriendOfFriendAsync(routeUser.Id, user.Id);
+                        if (!isFriendOfFriend.IsSuccess && !isFriend.IsSuccess)
+                        {
+                            return StatusCodeReturn<T>
+                                ._403_Forbidden();
+                        }
+                    }
+
+                    else if (policy.PolicyType == "PRIVATE")
+                    {
+                        return StatusCodeReturn<T>
+                            ._403_Forbidden();
+                    }
+                }
+                return StatusCodeReturn<T>
+                    ._200_Success("Success");
+            }
+            return StatusCodeReturn<T>
+                            ._404_NotFound("Policy not found");
+        }
 
 
     }

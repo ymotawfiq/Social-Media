@@ -37,8 +37,7 @@ namespace SocialMedia.Api.Controllers
                         var userByUserName = await _userManager.FindByNameAsync(userName);
                         if (userByUserName != null)
                         {
-                            var response = await _friendService.GetAllUserFriendsAsync(user,
-                            userByUserName);
+                            var response = await _friendService.GetAllUserFriendsAsync(user, userByUserName);
                             return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>

@@ -639,6 +639,34 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpPut("updateUserAccountFriendListPolicy")]
+        public async Task<IActionResult> UpdateAccountFriendListPolicyAsync([FromBody] string policyIdOrName)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _userManagementService.UpdateAccountFriendListPolicyAsync(
+                            user, policyIdOrName);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                        ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    StatusCodeReturn<string>._500_ServerError(ex.Message));
+            }
+        }
+
         [HttpPut("updateUserAccountPostsPolicy")]
         public async Task<IActionResult> UpdateAccountPostsPolicyAsync([FromBody] string policyIdOrName)
         {

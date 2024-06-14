@@ -58,15 +58,13 @@ namespace SocialMedia.Repository.FriendsRepository
                 UserId = e.UserId,
                 FriendId = e.FriendId,
                 Id = e.Id
-            }).Where(e => e.UserId == userId)
-              .Where(e => e.FriendId == friendId).FirstOrDefaultAsync())!;
+            }).Where(e => e.UserId == userId).Where(e => e.FriendId == friendId).FirstOrDefaultAsync())!;
             var friend2 = (await _dbContext.Friends.Select(e => new Friend
             {
                 UserId = e.UserId,
                 FriendId = e.FriendId,
                 Id = e.Id
-            }).Where(e => e.UserId == friendId)
-              .Where(e => e.FriendId == userId).FirstOrDefaultAsync())!;
+            }).Where(e => e.UserId == friendId).Where(e => e.FriendId == userId).FirstOrDefaultAsync())!;
             return friend1 == null ? friend2! : friend1;
         }
 

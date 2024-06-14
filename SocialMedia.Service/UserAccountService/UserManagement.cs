@@ -459,6 +459,26 @@ namespace SocialMedia.Service.UserAccountService
                     ._404_NotFound("Policy not found");
         }
 
+        public async Task<ApiResponse<bool>> UpdateAccountFriendListPolicyAsync(SiteUser user,
+            string policyIdOrName)
+        {
+            var accountFriendListPolicy = await _policyService.GetPolicyByIdOrNameAsync(policyIdOrName);
+            if (accountFriendListPolicy != null && accountFriendListPolicy.ResponseObject != null)
+            {
+                if (policies.FriendListPolicies.Contains(accountFriendListPolicy.ResponseObject.PolicyType))
+                {
+                    user.FriendListPolicyId = accountFriendListPolicy.ResponseObject.Id;
+                    await _userManager.UpdateAsync(user);
+                    return StatusCodeReturn<bool>
+                        ._200_Success("Accont friend list policy updated successfully", true);
+                }
+                return StatusCodeReturn<bool>
+                     ._403_Forbidden("Invalid policy");
+            }
+            return StatusCodeReturn<bool>
+                    ._404_NotFound("Policy not found");
+        }
+
         public async Task<ApiResponse<bool>> LockProfileAsync(SiteUser user)
         {
             var privatePolicy = await _policyRepository.GetPolicyByNameAsync("private");
@@ -594,6 +614,8 @@ namespace SocialMedia.Service.UserAccountService
             return StatusCodeReturn<SiteUser>
                             ._404_NotFound("Policy not found");
         }
+
+
 
 
         #endregion
