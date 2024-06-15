@@ -3,6 +3,7 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Data.Models;
+using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.FriendRequestRepository;
 
 namespace SocialMedia.Repository.FriendsRepository
@@ -10,12 +11,9 @@ namespace SocialMedia.Repository.FriendsRepository
     public class FriendsRepository : IFriendsRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IFriendRequestRepository _friendRequestRepository;
-        public FriendsRepository(ApplicationDbContext _dbContext, 
-            IFriendRequestRepository _friendRequestRepository)
+        public FriendsRepository(ApplicationDbContext _dbContext)
         {
             this._dbContext = _dbContext;
-            this._friendRequestRepository = _friendRequestRepository;
         }
         public async Task<Friend> AddFriendAsync(Friend friend)
         {
@@ -66,6 +64,31 @@ namespace SocialMedia.Repository.FriendsRepository
                 Id = e.Id
             }).Where(e => e.UserId == friendId).Where(e => e.FriendId == userId).FirstOrDefaultAsync())!;
             return friend1 == null ? friend2! : friend1;
+        }
+
+        public async Task<IEnumerable<Friend>> GetSharedFriendsAsync(string userId, string routeUserId)
+        {
+            var currentUserFriends = await GetAllUserFriendsAsync(userId);
+            var currentRouteUserFriends = await GetAllUserFriendsAsync(routeUserId);
+            var case1 = from f1 in currentUserFriends
+                       from f2 in currentRouteUserFriends
+                       where GetDifferntIdAsync(f1, userId) == GetDifferntIdAsync(f2, routeUserId)
+                       select (new Friend
+                       {
+                           Id = f1.Id,
+                           UserId = userId,
+                           FriendId = GetDifferntIdAsync(f1, userId)
+                       });
+            return case1;
+        }
+
+        private string GetDifferntIdAsync(Friend friend, string userId)
+        {
+            if (friend.FriendId == userId)
+            {
+                return friend.UserId;
+            }
+            return friend.FriendId;
         }
 
         public async Task<IEnumerable<IEnumerable<Friend>>> GetUserFriendsOfFriendsAsync(string userId)

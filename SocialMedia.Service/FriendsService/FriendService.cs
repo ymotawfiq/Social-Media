@@ -64,9 +64,6 @@ namespace SocialMedia.Service.FriendsService
                 ._403_Forbidden();
         }
 
-
-        
-
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user, 
             SiteUser routeUser)
         {
@@ -94,6 +91,19 @@ namespace SocialMedia.Service.FriendsService
             }
             return StatusCodeReturn<IEnumerable<Friend>>
                     ._200_Success("Friends found successfully", friends);
+        }
+
+        public async Task<ApiResponse<IEnumerable<Friend>>> GetSharedFriendsAsync(SiteUser user,
+            SiteUser routeUser)
+        {
+            var sharedFriends = await _friendsRepository.GetSharedFriendsAsync(user.Id, routeUser.Id);
+            if (sharedFriends.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<Friend>>
+                    ._200_Success("No shared friends found", sharedFriends);
+            }
+            return StatusCodeReturn<IEnumerable<Friend>>
+                    ._200_Success("Shared friends found successfully", sharedFriends);
         }
 
         public async Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId)

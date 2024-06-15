@@ -12,32 +12,31 @@ namespace SocialMedia.Api.Controllers
     {
 
         private readonly IFriendService _friendService;
-        private readonly UserManager<SiteUser> _userManager;
         private readonly UserManagerReturn _userManagerReturn;
-        public FriendController(IFriendService _friendService, UserManager<SiteUser> _userManager
-            , UserManagerReturn _userManagerReturn)
+        public FriendController(IFriendService _friendService, UserManagerReturn _userManagerReturn)
         {
             this._friendService = _friendService;
-            this._userManager = _userManager;
             this._userManagerReturn = _userManagerReturn;
         }
 
 
-        [HttpGet("friends/{userName}")]
-        public async Task<IActionResult> GetFriensdByUserNameAsync([FromRoute] string userName)
+        [HttpGet("friends/{userIdOrUserName}")]
+        public async Task<IActionResult> GetFriensdByUserNameAsync([FromRoute] string userIdOrUserName)
         {
             try
             {
                 if(HttpContext.User!=null && HttpContext.User.Identity!=null 
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var userByUserName = await _userManager.FindByNameAsync(userName);
-                        if (userByUserName != null)
+                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                            userIdOrUserName);
+                        if (routeUser != null)
                         {
-                            var response = await _friendService.GetAllUserFriendsAsync(user, userByUserName);
+                            var response = await _friendService.GetAllUserFriendsAsync(user, routeUser);
                             return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
@@ -56,6 +55,41 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpGet("sharedFriends/{userIdOrUserName}")]
+        public async Task<IActionResult> GetSharedFriensdAsync([FromRoute] string userIdOrUserName)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                    && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                            userIdOrUserName);
+                        if (routeUser != null)
+                        {
+                            var response = await _friendService.GetSharedFriendsAsync(user, routeUser);
+                            return Ok(response);
+                        }
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("Route user not found"));
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
         [HttpGet("friends")]
         public async Task<IActionResult> GetFriensAsync()
         {
@@ -64,7 +98,8 @@ namespace SocialMedia.Api.Controllers
                 if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
                     if (user != null)
                     {
                         var response = await _friendService.GetAllUserFriendsAsync(user);
@@ -90,7 +125,8 @@ namespace SocialMedia.Api.Controllers
                     if (HttpContext.User != null && HttpContext.User.Identity != null
                         && HttpContext.User.Identity.Name != null)
                     {
-                        var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
                         if (user != null)
                         {
                             var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(

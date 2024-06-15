@@ -15,5 +15,6 @@ namespace SocialMedia.Service.FriendsService
         Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId);
         Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user, SiteUser user1);
         Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user);
+        Task<ApiResponse<IEnumerable<Friend>>> GetSharedFriendsAsync(SiteUser user, SiteUser routeUser);
     }
 }

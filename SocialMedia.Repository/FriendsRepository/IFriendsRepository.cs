@@ -11,6 +11,7 @@ namespace SocialMedia.Repository.FriendsRepository
         Task<Friend> GetFriendByUserAndFriendIdAsync(string userId, string friendId);
         Task<IEnumerable<Friend>> GetAllUserFriendsAsync(string userId);
         Task<IEnumerable<IEnumerable<Friend>>> GetUserFriendsOfFriendsAsync(string userId);
+        Task <IEnumerable<Friend>> GetSharedFriendsAsync(string userId, string routeUserId);
         Task SaveChangesAsync();
 
     }
