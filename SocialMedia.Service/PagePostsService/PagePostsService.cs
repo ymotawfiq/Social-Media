@@ -29,26 +29,27 @@ namespace SocialMedia.Service.PagePostsService
             var page = await _pageRepository.GetPageByIdAsync(addPagePostDto.PageId);
             if (page != null)
             {
-                var postDto = await _postService.AddPostAsync(user, new AddPostDto
+                if(page.CreatorId == user.Id)
                 {
-                    Images = addPagePostDto.Images,
-                    PostContent = addPagePostDto.PostContent
-                });
-                if (postDto.IsSuccess && postDto.ResponseObject != null && postDto != null)
-                {
-                    var newPagePost = await _pagePostsRepository.AddPagePostAsync(new Data.Models.PagePost
+                    var postDto = await _postService.AddPostAsync(user, new AddPostDto
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        PageId = addPagePostDto.PageId,
-                        PostId = postDto.ResponseObject.Post.Id
+                        Images = addPagePostDto.Images,
+                        PostContent = addPagePostDto.PostContent
                     });
-                    newPagePost.Page = null;
-                    newPagePost.Post = null;
-                    return StatusCodeReturn<object>
-                        ._201_Created("Page post created successfully", newPagePost);
+                    if (postDto.IsSuccess && postDto.ResponseObject != null && postDto != null)
+                    {
+                        var newPagePost = await _pagePostsRepository.AddPagePostAsync(new Data.Models.PagePost
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            PageId = addPagePostDto.PageId,
+                            PostId = postDto.ResponseObject.Post.Id
+                        });
+                        return StatusCodeReturn<object>
+                            ._201_Created("Page post created successfully", newPagePost);
+                    }
                 }
                 return StatusCodeReturn<object>
-                    ._406_NotAcceptable();
+                    ._403_Forbidden("Unauthorized to post in this page");
             }
             return StatusCodeReturn<object>
                 ._404_NotFound("Page not found");

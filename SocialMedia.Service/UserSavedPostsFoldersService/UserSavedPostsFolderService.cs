@@ -34,7 +34,6 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
                     UserId = user.Id
                 }
                 );
-            newFolder.User = null;
             return StatusCodeReturn<UserSavedPostsFolders>
                 ._201_Created("Folder created successfully", newFolder); 
         }
@@ -49,7 +48,6 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
                 if (folder.UserId == user.Id)
                 {
                     await _userSavedPostsFoldersRepository.DeleteUserSavedPostsFoldersByFolderIdAsync(folderId);
-                    folder.User = null;
                     return StatusCodeReturn<UserSavedPostsFolders>
                         ._200_Success("Folder deleted successfully", folder);
                 }
@@ -64,10 +62,6 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
             SiteUser user)
         {
             var folders = await _userSavedPostsFoldersRepository.GetUserFoldersByUserId(user.Id);
-            foreach(var f in folders)
-            {
-                f.User = null;
-            }
             if (folders.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<UserSavedPostsFolders>>
@@ -119,7 +113,6 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
                         FolderName = updateUserSavedPostsFolderDto.FolderName
                     }
                     );
-                updatedFolder.User = null;
                 return StatusCodeReturn<UserSavedPostsFolders>
                     ._200_Success("Folder updated successfully", updatedFolder);
             }

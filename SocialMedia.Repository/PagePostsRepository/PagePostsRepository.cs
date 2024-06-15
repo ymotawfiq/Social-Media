@@ -45,6 +45,16 @@ namespace SocialMedia.Repository.PagePostsRepository
             }).Where(e => e.Id == pagePostId).FirstOrDefaultAsync())!;
         }
 
+        public async Task<PagePost> GetPagePostByPostIdAsync(string postId)
+        {
+            return (await _dbContext.PagePosts.Select(e => new PagePost
+            {
+                PostId = e.PostId,
+                PageId = e.PageId,
+                Id = e.Id
+            }).Where(e => e.PostId == postId).FirstOrDefaultAsync())!;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();

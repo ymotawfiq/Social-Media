@@ -43,21 +43,21 @@ namespace SocialMedia.Service.GroupAccessRequestService
             {
                 var isMember = await _groupMemberRepository.GetGroupMemberAsync(user.Id,
                             addGroupAccessRequestDto.GroupId);
-                if (isMember != null)
+                if (isMember == null)
                 {
+                    var groupPolicy = await _policyRepository.GetPolicyByIdAsync(group.GroupPolicyId);
+                    if (groupPolicy != null)
+                    {
+                        return await CheckGroupPolicyAndApplyRequestAsync(groupPolicy, group, user);
+                    }
                     return StatusCodeReturn<object>
-                        ._403_Forbidden();
-                }
-                var groupPolicy = await _policyRepository.GetPolicyByIdAsync(group.GroupPolicyId);
-                if (groupPolicy != null)
-                {
-                    return await CheckGroupPolicyAndApplyRequestAsync(groupPolicy, group, user);
+                        ._404_NotFound("Group policy not found");
                 }
                 return StatusCodeReturn<object>
-                    ._404_NotFound("Group policy not found");
+                    ._403_Forbidden("You are member in group");
             }
             return StatusCodeReturn<object>
-                    ._404_NotFound("Group not found");
+                        ._404_NotFound("Group not found");
         }
 
         public async Task<ApiResponse<GroupAccessRequest>> DeleteGroupAccessRequestAsync(
@@ -71,7 +71,6 @@ namespace SocialMedia.Service.GroupAccessRequestService
                 {
                     await _groupAccessRequestRepository.DeleteGroupAccessRequestByIdAsync(
                         groupAccessRequestId);
-                    SetNull(request);
                     return StatusCodeReturn<GroupAccessRequest>
                         ._200_Success("Request deleted successfully", request);
                 }
@@ -80,13 +79,6 @@ namespace SocialMedia.Service.GroupAccessRequestService
             }
             return StatusCodeReturn<GroupAccessRequest>
                     ._404_NotFound("Request not found");
-        }
-
-        private GroupAccessRequest SetNull(GroupAccessRequest group)
-        {
-            group.User = null;
-            group.Group = null;
-            return group;
         }
 
         private async Task<ApiResponse<object>> CheckGroupPolicyAndApplyRequestAsync(
@@ -125,7 +117,6 @@ namespace SocialMedia.Service.GroupAccessRequestService
                         GroupId = group.Id,
                         UserId = user.Id
                     });
-                SetNull(request);
                 return StatusCodeReturn<object>
                     ._201_Created("Request sent successfully", request);
             }

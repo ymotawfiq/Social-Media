@@ -30,24 +30,23 @@ namespace SocialMedia.Api.Controllers
         {
             try
             {
-                if(HttpContext.User!=null && HttpContext.User.Identity!=null
+                if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var blockedUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync
-                        (addBlockDto.UserIdOrUserNameOrEmail);
-                    if (user != null && blockedUser != null)
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
                     {
-                            var response = await _blockService.BlockUserAsync(addBlockDto, user);
-                            return Ok(response);
+                        var response = await _blockService.BlockUserAsync(addBlockDto, user);
+                        return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
-                        ._404_NotFound("User you want to block not found"));
+                        ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                             ._401_UnAuthorized());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
                             ._500_ServerError(ex.Message));
@@ -55,23 +54,22 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpPut("unblock")]
-        public async Task<IActionResult> UnBlockAsync([FromBody] UpdateBlockDto updateBlockDto)
+        public async Task<IActionResult> UnBlockAsync([FromBody] UnBlockDto updateBlockDto)
         {
             try
             {
                 if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name != null)
                 {
-                    var user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    var blockedUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync
-                        (updateBlockDto.UserIdOrUserNameOrEmail);
-                    if (user != null && blockedUser != null)
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
                     {
                         var response = await _blockService.UnBlockUserAsync(updateBlockDto, user);
                         return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
-                        ._404_NotFound("User you want to block not found"));
+                        ._404_NotFound("User not found"));
                 }
                 return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
                             ._401_UnAuthorized());

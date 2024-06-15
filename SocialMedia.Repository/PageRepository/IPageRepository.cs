@@ -7,12 +7,11 @@ namespace SocialMedia.Repository.PageRepository
 {
     public interface IPageRepository
     {
-        Task<Page> AddPageAsync(Page page, SiteUser user);
+        Task<Page> AddPageAsync(Page page);
         Task<Page> UpdatePageAsync(Page page);
         Task<Page> GetPageByIdAsync(string pageId);
-        Task<UserPage> GetUserPageByPageIdAsync(string pageId);
         Task<Page> DeletePageByIdAsync(string pageId);
-        Task<IEnumerable<UserPage>> GetPagesByUserIdAsync(string userId);
+        Task<IEnumerable<Page>> GetPagesByUserIdAsync(string userId);
         Task SaveChangesAsync();
     }
 }

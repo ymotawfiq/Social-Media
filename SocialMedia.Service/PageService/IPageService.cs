@@ -12,6 +12,6 @@ namespace SocialMedia.Service.PageService
         Task<ApiResponse<Page>> UpdatePageAsync(UpdatePageDto updatePageDto, SiteUser user);
         Task<ApiResponse<Page>> GetPageByIdAsync(string pageId);
         Task<ApiResponse<Page>> DeletePageByIdAsync(string pageId, SiteUser user);
-        Task<ApiResponse<IEnumerable<UserPage>>> GetPagesByUserIdAsync(string userId);
+        Task<ApiResponse<IEnumerable<Page>>> GetPagesByUserIdAsync(string userId);
     }
 }

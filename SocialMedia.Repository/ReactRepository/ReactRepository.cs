@@ -79,6 +79,23 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
+        public async Task<React> GetReactByNameAsync(string reactName)
+        {
+            try
+            {
+                reactName = reactName.ToUpper();
+                return (await _dbContext.Reacts.Select(e => new React
+                {
+                    ReactValue = e.ReactValue,
+                    Id = e.Id
+                }).Where(e => e.ReactValue == reactName).FirstOrDefaultAsync())!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task SaveChangesAsync()
         {
             try

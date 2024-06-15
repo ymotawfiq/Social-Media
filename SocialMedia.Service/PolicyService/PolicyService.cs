@@ -11,6 +11,7 @@ namespace SocialMedia.Service.PolicyService
 {
     public class PolicyService : IPolicyService
     {
+        private readonly Policies policies = new();
         private readonly IPolicyRepository _policyRepository;
         public PolicyService(IPolicyRepository _policyRepository)
         {
@@ -22,10 +23,15 @@ namespace SocialMedia.Service.PolicyService
             var existPolicy = await _policyRepository.GetPolicyByNameAsync(addPolicyDto.PolicyType);
             if (existPolicy == null)
             {
-                var newPolicy = await _policyRepository.AddPolicyAsync(
+                if (policies.BasicPolicies.Contains(addPolicyDto.PolicyType.ToUpper()))
+                {
+                    var newPolicy = await _policyRepository.AddPolicyAsync(
                     ConvertFromDto.ConvertFromPolicyDto_Add(addPolicyDto));
+                    return StatusCodeReturn<Policy>
+                            ._201_Created("Policy added successfully", newPolicy);
+                }
                 return StatusCodeReturn<Policy>
-                        ._201_Created("Policy added successfully", newPolicy);
+                    ._403_Forbidden("Invalid policy");
             }
             return StatusCodeReturn<Policy>
                     ._403_Forbidden("Policy already exists");
@@ -131,10 +137,15 @@ namespace SocialMedia.Service.PolicyService
                 var policyByName = await _policyRepository.GetPolicyByNameAsync(updatePolicyDto.PolicyType);
                 if (policyByName == null)
                 {
-                    var updatedPolicy = await _policyRepository.UpdatePolicyAsync(
+                    if (policies.BasicPolicies.Contains(updatePolicyDto.PolicyType.ToUpper()))
+                    {
+                        var updatedPolicy = await _policyRepository.UpdatePolicyAsync(
                             ConvertFromDto.ConvertFromPolicyDto_Update(updatePolicyDto));
+                        return StatusCodeReturn<Policy>
+                                ._200_Success("Policy updated successfully", updatedPolicy);
+                    }
                     return StatusCodeReturn<Policy>
-                            ._200_Success("Policy updated successfully", updatedPolicy);
+                   ._403_Forbidden("Invalid policy");
                 }
                 return StatusCodeReturn<Policy>
                        ._403_Forbidden("Policy already exists");

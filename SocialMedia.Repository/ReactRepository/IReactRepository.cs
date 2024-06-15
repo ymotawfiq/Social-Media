@@ -10,6 +10,7 @@ namespace SocialMedia.Repository.ReactRepository
         Task<React> UpdateReactAsync(React react);
         Task<React> DeleteReactByIdAsync(string reactId);
         Task<React> GetReactByIdAsync(string reactId);
+        Task<React> GetReactByNameAsync(string reactName);
         Task<IEnumerable<React>> GetAllReactsAsync();
         Task SaveChangesAsync();
     }

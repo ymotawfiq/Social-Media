@@ -12,6 +12,7 @@ namespace SocialMedia.Service.GroupPostsService
         Task<ApiResponse<GroupPost>> DeleteGroupPostByIdAsync(string groupPostId, SiteUser user);
         Task<ApiResponse<GroupPost>> GetGroupPostByIdAsync(string groupPostId);
         Task<ApiResponse<GroupPost>> GetGroupPostByIdAsync(string groupPostId, SiteUser user);
+        Task<ApiResponse<GroupPost>> GetGroupPostByPostIdAsync(string postId, SiteUser user);
         Task<ApiResponse<IEnumerable<GroupPost>>> GetGroupPostsAsync(string groupId, SiteUser user);
         Task<ApiResponse<IEnumerable<GroupPost>>> GetGroupPostsAsync(string groupId);
     }

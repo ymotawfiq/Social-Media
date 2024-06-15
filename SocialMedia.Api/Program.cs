@@ -20,7 +20,6 @@ using SocialMedia.Repository.PagePostsRepository;
 using SocialMedia.Repository.PageRepository;
 using SocialMedia.Repository.PagesFollowersRepository;
 using SocialMedia.Repository.PolicyRepository;
-using SocialMedia.Repository.PostCommentReplayRepository;
 using SocialMedia.Repository.PostCommentsRepository;
 using SocialMedia.Repository.PostReactsRepository;
 using SocialMedia.Repository.PostRepository;
@@ -43,7 +42,6 @@ using SocialMedia.Service.PagePostsService;
 using SocialMedia.Service.PageService;
 using SocialMedia.Service.PagesFollowersService;
 using SocialMedia.Service.PolicyService;
-using SocialMedia.Service.PostCommentReplayService;
 using SocialMedia.Service.PostCommentService;
 using SocialMedia.Service.PostReactsService;
 using SocialMedia.Service.PostService;
@@ -54,12 +52,13 @@ using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
 using SocialMedia.Service.UserSavedPostsFoldersService;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // database configurations
-var connection = builder.Configuration.GetConnectionString("DefaultConnection");
+var connection = builder.Configuration.GetConnectionString("Connection");
 builder.Services.AddDbContext<ApplicationDbContext>(op =>
 {
     op.UseSqlServer(connection);
@@ -125,6 +124,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// to kill circular in json
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
+
 // services injection
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserManagement, UserManagement>();
@@ -134,21 +139,20 @@ builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<IFollowerService, FollowerService>();
 builder.Services.AddScoped<IBlockService, BlockService>();
 builder.Services.AddScoped<IPolicyService, PolicyService>();
-builder.Services.AddScoped<IPostService, PostService>();
+//builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<UserManagerReturn>();
 builder.Services.AddScoped<IUserSavedPostsFolderService, UserSavedPostsFolderService>();
 builder.Services.AddScoped<ISavedPostsService, SavedPostsService>();
 builder.Services.AddScoped<IPostReactsService, PostReactsService>();
 builder.Services.AddScoped<IPostCommentService, PostCommentService>();
-builder.Services.AddScoped<IPostCommentReplayService, PostCommentReplayService>();
 builder.Services.AddScoped<IPageService, PageService>();
-builder.Services.AddScoped<IPagePostsService, PagePostsService>();
+//builder.Services.AddScoped<IPagePostsService, PagePostsService>();
 builder.Services.AddScoped<IPagesFollowersService, PagesFollowersService>();
 builder.Services.AddScoped<IGroupRolesService, GroupRolesService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService>();
-builder.Services.AddScoped<IGroupPostsService, GroupPostsService>();
+//builder.Services.AddScoped<IGroupPostsService, GroupPostsService>();
 builder.Services.AddScoped<ISarehneService, SarehneService>();
 
 // repositories injection
@@ -164,7 +168,6 @@ builder.Services.AddScoped<IUserSavedPostsFoldersRepository, UserSavedPostsFolde
 builder.Services.AddScoped<ISavePostsRepository, SavePostsRepository>();
 builder.Services.AddScoped<IPostReactsRepository, PostReactsRepository>();
 builder.Services.AddScoped<IPostCommentsRepository, PostCommentsRepository>();
-builder.Services.AddScoped<IPostCommentReplayRepository, PostCommentReplayRepository>();
 builder.Services.AddScoped<IPageRepository, PageRepository>();
 builder.Services.AddScoped<IPagePostsRepository, PagePostsRepository>();
 builder.Services.AddScoped<IPagesFollowersRepository, PagesFollowersRepository>();

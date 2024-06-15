@@ -10,6 +10,7 @@ namespace SocialMedia.Service.GroupRolesService
     public class GroupRolesService : IGroupRolesService
     {
         private readonly IGroupRoleRepository _groupRoleRepository;
+        private readonly Policies policies = new();
         public GroupRolesService(IGroupRoleRepository _groupRoleRepository)
         {
             this._groupRoleRepository = _groupRoleRepository;
@@ -20,10 +21,15 @@ namespace SocialMedia.Service.GroupRolesService
             var groupRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(addGroupRoleDto.RoleName);
             if (groupRole == null)
             {
-                var newGroupRole = await _groupRoleRepository.AddGroupRoleAsync(ConvertFromDto
+                if (policies.GroupRoles.Contains(addGroupRoleDto.RoleName.ToUpper()))
+                {
+                    var newGroupRole = await _groupRoleRepository.AddGroupRoleAsync(ConvertFromDto
                     .ConvertFromGroupRoleDto_Add(addGroupRoleDto));
+                    return StatusCodeReturn<object>
+                        ._201_Created("Group role added successfully", newGroupRole);
+                }
                 return StatusCodeReturn<object>
-                    ._201_Created("Group role added successfully", newGroupRole);
+                ._403_Forbidden("Invalid role");
             }
             return StatusCodeReturn<object>
                 ._403_Forbidden("Group role already exists");
@@ -100,10 +106,15 @@ namespace SocialMedia.Service.GroupRolesService
                     updateGroupRoleDto.RoleName);
                 if (groupRoleByName == null)
                 {
-                    var updatedGroupRole = await _groupRoleRepository.UpdateGroupRoleAsync(
+                    if (policies.GroupRoles.Contains(updateGroupRoleDto.RoleName.ToUpper()))
+                    {
+                        var updatedGroupRole = await _groupRoleRepository.UpdateGroupRoleAsync(
                         ConvertFromDto.ConvertFromGroupRoleDto_Update(updateGroupRoleDto));
+                        return StatusCodeReturn<object>
+                            ._200_Success("Group role updated successfully", updatedGroupRole);
+                    }
                     return StatusCodeReturn<object>
-                        ._200_Success("Group role updated successfully", updatedGroupRole);
+                    ._403_Forbidden("Invalid group role");
                 }
                 return StatusCodeReturn<object>
                     ._403_Forbidden("Group role already exists");

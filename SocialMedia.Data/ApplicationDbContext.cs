@@ -49,9 +49,7 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new UserSavedPostsFoldersConfigurations())
                    .ApplyConfiguration(new PostReactsConfigurations())
                    .ApplyConfiguration(new PostCommentsConfigurations())
-                   .ApplyConfiguration(new PostCommentReplayConfigurations())
                    .ApplyConfiguration(new PageConfigurations())
-                   .ApplyConfiguration(new UserPageConfiguration())
                    .ApplyConfiguration(new PagePostsConfigurations())
                    .ApplyConfiguration(new PageFollowersConfigurations())
                    .ApplyConfiguration(new GroupRoleConfigurations())
@@ -77,9 +75,7 @@ namespace SocialMedia.Data
         public DbSet<UserSavedPostsFolders> UserSavedPostsFolders { get; set; }
         public DbSet<PostReacts> PostReacts { get; set; }
         public DbSet<PostComment> PostComments { get; set; }
-        public DbSet<PostCommentReplay> PostCommentReplay { get; set; }
         public DbSet<Page> Pages { get; set; }
-        public DbSet<UserPage> UserPages { get; set; }
         public DbSet<PagePost> PagePosts { get; set; }
         public DbSet<PageFollower> PageFollowers { get; set; }
         public DbSet<GroupRole> GroupRoles { get; set; }

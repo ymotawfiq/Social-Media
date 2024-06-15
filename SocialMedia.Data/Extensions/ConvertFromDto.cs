@@ -80,13 +80,13 @@ namespace SocialMedia.Data.Extensions
             };
         }
 
-        public static Block ConvertFromBlockDto_Update(UpdateBlockDto updateBlockDto, SiteUser user)
+        public static Block ConvertFromBlockDto_Update(UnBlockDto updateBlockDto, SiteUser user)
         {
             return new Block
             {
                 BlockedUserId = updateBlockDto.UserIdOrUserNameOrEmail,
                 UserId = user.Id,
-                Id = updateBlockDto.Id
+                Id = updateBlockDto.UserIdOrUserNameOrEmail
             };
         }
 
@@ -154,43 +154,16 @@ namespace SocialMedia.Data.Extensions
         }
 
 
-        public static PostCommentReplay ConvertFromPostCommentReplayDto_Add(
-            AddPostCommentReplayDto addPostCommentReplay, SiteUser user, string imageUniqueName)
-        {
-            return new PostCommentReplay
-            {
-                Id = Guid.NewGuid().ToString(),
-                PostCommentId = addPostCommentReplay.PostCommentId,
-                Replay = addPostCommentReplay.Replay,
-                UserId = user.Id,
-                ReplayImage = imageUniqueName
-            };
-        }
 
-        public static PostCommentReplay ConvertFromCommentReplayToReplayDto_Add(
-            AddReplayToReplayCommentDto replayToReplayCommentDto, SiteUser user,
-            string imageUniqueName, string commentId)
-        {
-            return new PostCommentReplay
-            {
-                Id = Guid.NewGuid().ToString(),
-                PostCommentId = commentId,
-                Replay = replayToReplayCommentDto.Replay,
-                UserId = user.Id,
-                ReplayImage = imageUniqueName,
-                PostCommentReplayId = replayToReplayCommentDto.CommentReplayId
-            };
-        }
-
-
-        public static Page ConvertFromPageDto_Add(AddPageDto addPageDto)
+        public static Page ConvertFromPageDto_Add(AddPageDto addPageDto, SiteUser user)
         {
             return new Page
             {
                 Description = addPageDto.Description,
                 Name = addPageDto.Name,
                 Id = Guid.NewGuid().ToString(),
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                CreatorId = user.Id
             };
         }
 

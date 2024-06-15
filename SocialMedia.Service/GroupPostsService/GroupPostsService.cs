@@ -32,8 +32,7 @@ namespace SocialMedia.Service.GroupPostsService
             this._policyService = _policyService;
             this._groupMemberRepository = _groupMemberRepository;
         }
-        public async Task<object> AddGroupPostAsync(
-            AddGroupPostDto addGroupPostDto, SiteUser user)
+        public async Task<object> AddGroupPostAsync(AddGroupPostDto addGroupPostDto, SiteUser user)
         {
             var group = await _groupRepository.GetGroupByIdAsync(addGroupPostDto.GroupId);
             if (group != null)
@@ -52,7 +51,6 @@ namespace SocialMedia.Service.GroupPostsService
                         PostId = newPost.ResponseObject!.Post.Id,
                         UserId = user.Id
                     });
-                    SetNull(groupPost);
                     return StatusCodeReturn<object>
                         ._201_Created("Post saved successfully", groupPost);
                 }
@@ -70,7 +68,6 @@ namespace SocialMedia.Service.GroupPostsService
                 if(groupPost.UserId == user.Id)
                 {
                     await _postService.DeletePostAsync(user, groupPost.PostId);
-                    SetNull(groupPost);
                     return StatusCodeReturn<GroupPost>
                         ._200_Success("Post deleted successfully", groupPost);
                 }
@@ -92,7 +89,6 @@ namespace SocialMedia.Service.GroupPostsService
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
                     {
-                        SetNull(groupPost);
                         return StatusCodeReturn<GroupPost>
                             ._200_Success("Post found successfully", groupPost);
                     }
@@ -118,7 +114,6 @@ namespace SocialMedia.Service.GroupPostsService
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
                     {
-                        SetNull(groupPost);
                         return StatusCodeReturn<GroupPost>
                             ._200_Success("Post found successfully", groupPost);
                     }
@@ -128,12 +123,11 @@ namespace SocialMedia.Service.GroupPostsService
                         user.Id, groupPost.GroupId);
                         if (isMember != null)
                         {
-                            SetNull(groupPost);
                             return StatusCodeReturn<GroupPost>
                             ._200_Success("Post found successfully", groupPost);
                         }
                         return StatusCodeReturn<GroupPost>
-                            ._403_Forbidden();
+                            ._403_Forbidden("You must join group to view post");
                     }
                 }
                 return StatusCodeReturn<GroupPost>
@@ -176,7 +170,7 @@ namespace SocialMedia.Service.GroupPostsService
                             await _groupPostsRepository.GetGroupPostsAsync(groupId));
                     }
                     return StatusCodeReturn<IEnumerable<GroupPost>>
-                        ._403_Forbidden();
+                        ._403_Forbidden("You must join group to get posts");
                 }
                 return StatusCodeReturn<IEnumerable<GroupPost>>
                             ._404_NotFound("Policy not found");
@@ -187,10 +181,6 @@ namespace SocialMedia.Service.GroupPostsService
         private async Task<ApiResponse<IEnumerable<GroupPost>>> GetPostsAsync(string groupId)
         {
             var posts = await _groupPostsRepository.GetGroupPostsAsync(groupId);
-            foreach(var p in posts)
-            {
-                SetNull(p);
-            }
             if (posts.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<GroupPost>>
@@ -215,19 +205,21 @@ namespace SocialMedia.Service.GroupPostsService
                     return await GetPostsAsync(groupId);
                 }
                 return StatusCodeReturn<IEnumerable<GroupPost>>
-                    ._403_Forbidden();
+                    ._403_Forbidden("You must join group to get posts");
             }
             return StatusCodeReturn<IEnumerable<GroupPost>>
                     ._403_Forbidden();
         }
 
-        private void SetNull(GroupPost groupPost)
+        public async Task<ApiResponse<GroupPost>> GetGroupPostByPostIdAsync(string postId, SiteUser user)
         {
-            groupPost.Group = null;
-            groupPost.Post = null;
-            groupPost.User = null;
+            var groupPost = await _groupPostsRepository.GetGroupPostByPostIdAsync(postId);
+            if (groupPost != null)
+            {
+                return await GetGroupPostByIdAsync(groupPost.Id, user);
+            }
+            return StatusCodeReturn<GroupPost>
+                    ._404_NotFound("Post not found");
         }
-
-        
     }
 }

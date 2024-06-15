@@ -393,41 +393,6 @@ namespace SocialMedia.Api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("getJoinedGroups/{userIdOrName}")]
-        public async Task<IActionResult> GetJoinedGroupsAsync([FromRoute] string userIdOrName)
-        {
-            try
-            {
-                if (HttpContext.User != null && HttpContext.User.Identity != null
-                    && HttpContext.User.Identity.Name != null)
-                {
-                    var currentUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                        HttpContext.User.Identity.Name);
-                    var routeUser = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(userIdOrName);
-                    if (currentUser != null)
-                    {
-                        if (routeUser != null)
-                        {
-                            var response = await _groupManager.GetUserJoinedGroupsAsync(
-                                routeUser, currentUser);
-                            return Ok(response);
-                        }
-                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
-                            ._404_NotFound("User you want to get joined groups not found"));
-                    }
-                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
-                        ._404_NotFound("User not found"));
-                }
-                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
-                        ._401_UnAuthorized());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
-                        ._500_ServerError(ex.Message));
-            }
-        }
-
         [HttpGet("getJoinedGroups")]
         public async Task<IActionResult> GetJoinedGroupsAsync()
         {
@@ -440,8 +405,7 @@ namespace SocialMedia.Api.Controllers
                         HttpContext.User.Identity.Name);
                     if (currentUser != null)
                     {
-                        var response = await _groupManager.GetUserJoinedGroupsAsync(
-                            currentUser, currentUser);
+                        var response = await _groupManager.GetUserJoinedGroupsAsync(currentUser);
                         return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>

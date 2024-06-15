@@ -141,10 +141,6 @@ namespace SocialMedia.Service.GroupManager
                 {
                     var requests = await _groupAccessRequestRepository.GetGroupAccessRequestsByGroupIdAsync(
                         groupId);
-                    foreach(var r in requests)
-                    {
-                        SetNull(r);
-                    }
                     if (requests.ToList().Count == 0)
                     {
                         return StatusCodeReturn<IEnumerable<GroupAccessRequest>>
@@ -243,7 +239,7 @@ namespace SocialMedia.Service.GroupManager
                         ._200_Success("Member deleted successfully from group", true);
                 }
                 return StatusCodeReturn<bool>
-                    ._403_Forbidden();
+                    ._403_Forbidden("You are not authorized to delete members");
             }
             return StatusCodeReturn<bool>
                 ._404_NotFound("Group member not found", false);
@@ -284,40 +280,18 @@ namespace SocialMedia.Service.GroupManager
         }
 
 
-        public async Task<ApiResponse<IEnumerable<GroupMember>>> GetUserJoinedGroupsAsync(
-            SiteUser routeUser, SiteUser currentUser)
+        public async Task<ApiResponse<IEnumerable<GroupMember>>> GetUserJoinedGroupsAsync(SiteUser currentUser)
         {
-            if (routeUser.Id == currentUser.Id)
+            var joinedGroups = await _groupMemberRepository.GetUserJoinedGroupsAsync(currentUser.Id);
+            if (joinedGroups.ToList().Count == 0)
             {
-                var joinedGroups = await _groupMemberRepository.GetUserJoinedGroupsAsync(routeUser.Id);
-                foreach(var g in joinedGroups)
-                {
-                    SetNull(g);
-                }
-                if (joinedGroups.ToList().Count == 0)
-                {
-                    return StatusCodeReturn<IEnumerable<GroupMember>>
-                        ._200_Success("No groups found", joinedGroups);
-                }
                 return StatusCodeReturn<IEnumerable<GroupMember>>
-                        ._200_Success("Groups found successfully", joinedGroups);
+                    ._200_Success("No groups found", joinedGroups);
             }
             return StatusCodeReturn<IEnumerable<GroupMember>>
-                ._403_Forbidden();
+                    ._200_Success("Groups found successfully", joinedGroups);
         }
 
-        private void SetNull(GroupAccessRequest groupAccessRequest)
-        {
-            groupAccessRequest.Group = null;
-            groupAccessRequest.User = null;
-        }
-
-        private void SetNull(GroupMember groupMember)
-        {
-            groupMember.Group = null;
-            groupMember.GroupMemberRoles = null;
-            groupMember.User = null;
-        }
 
 
         private async Task<ApiResponse<bool>> CheckUserRoleAndRemoveFromAsync(SiteUser user, Group group,

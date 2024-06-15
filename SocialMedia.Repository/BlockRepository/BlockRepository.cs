@@ -38,13 +38,12 @@ namespace SocialMedia.Repository.BlockRepository
         {
             try
             {
-                var block = (await _dbContext.Blocks.Where(e => e.Id == blockId)
-                    .Select(e=>new Block
-                    {
-                        UserId = e.UserId,
-                        Id = e.Id,
-                        BlockedUserId = e.BlockedUserId
-                    }).Where(e => e.UserId == userId).FirstOrDefaultAsync())!;
+                var block = (await _dbContext.Blocks.Select(e => new Block
+                {
+                    UserId = e.UserId,
+                    Id = e.Id,
+                    BlockedUserId = e.BlockedUserId
+                }).Where(e => e.Id == blockId).Where(e => e.UserId == userId).FirstOrDefaultAsync())!;
                 return block;
             }
             catch (Exception)
@@ -73,20 +72,20 @@ namespace SocialMedia.Repository.BlockRepository
 
         public async Task<Block> GetBlockByUserIdAndBlockedUserIdAsync(string userId, string blockedUserId)
         {
-            var block1 = await _dbContext.Blocks.Where(e => e.UserId == userId)
-                .Select(e => new Block
-                {
-                    UserId = e.UserId,
-                    Id = e.Id,
-                    BlockedUserId = e.BlockedUserId
-                }).Where(e => e.BlockedUserId == blockedUserId).FirstOrDefaultAsync();
-            var block2 = await _dbContext.Blocks.Where(e => e.UserId == blockedUserId)
-                .Select(e => new Block
-                {
-                    UserId = e.UserId,
-                    Id = e.Id,
-                    BlockedUserId = e.BlockedUserId
-                }).Where(e => e.BlockedUserId == userId).FirstOrDefaultAsync();
+            var block1 = await _dbContext.Blocks.Select(e => new Block
+            {
+                UserId = e.UserId,
+                Id = e.Id,
+                BlockedUserId = e.BlockedUserId
+            }).Where(e => e.UserId == userId)
+            .Where(e => e.BlockedUserId == blockedUserId).FirstOrDefaultAsync();
+            var block2 = await _dbContext.Blocks.Select(e => new Block
+            {
+                UserId = e.UserId,
+                Id = e.Id,
+                BlockedUserId = e.BlockedUserId
+            }).Where(e => e.UserId == blockedUserId)
+            .Where(e => e.BlockedUserId == userId).FirstOrDefaultAsync();
             return block1 == null ? block2! : block1;
         }
 
@@ -107,7 +106,12 @@ namespace SocialMedia.Repository.BlockRepository
                 return
                     from b in await _dbContext.Blocks.ToListAsync()
                     where b.UserId == userId
-                    select b;
+                    select (new Block
+                    {
+                        BlockedUserId = b.BlockedUserId,
+                        Id = b.Id,
+                        UserId = b.UserId
+                    });
             }
             catch (Exception)
             {
@@ -127,7 +131,12 @@ namespace SocialMedia.Repository.BlockRepository
                 var block1 = await GetBlockByUserIdAndBlockedUserIdAsync(block.UserId, block.BlockedUserId);
                 _dbContext.Remove(block1);
                 await SaveChangesAsync();
-                return block1;
+                return new Block
+                {
+                    BlockedUserId = block1.BlockedUserId,
+                    Id = block1.Id,
+                    UserId = block1.UserId
+                };
             }
             catch (Exception)
             {

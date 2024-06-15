@@ -14,6 +14,7 @@ using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Service.BlockService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.GroupPostsService;
 using SocialMedia.Service.PolicyService;
 
 namespace SocialMedia.Service.PostService
@@ -24,6 +25,7 @@ namespace SocialMedia.Service.PostService
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendService _friendService;
         private readonly IPolicyService _policyService;
+        private readonly IGroupPostsService _groupPostsService;
         private readonly IPostViewRepository _postViewRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IGroupRepository _groupRepository;
@@ -33,7 +35,7 @@ namespace SocialMedia.Service.PostService
         public PostService(
             IPostRepository _postRepository,
             IPolicyRepository _policyRepository, IFriendService _friendService, IPolicyService _policyService
-            , IGroupRepository _groupRepository,
+            , IGroupRepository _groupRepository, IGroupPostsService _groupPostsService,
             IPostViewRepository _postViewRepository, IWebHostEnvironment _webHostEnvironment,
             IBlockService _blockService)
         {
@@ -45,6 +47,7 @@ namespace SocialMedia.Service.PostService
             this._webHostEnvironment = _webHostEnvironment;
             this._groupRepository = _groupRepository;
             this._blockService = _blockService;
+            this._groupPostsService = _groupPostsService;
         }
         public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
@@ -107,10 +110,17 @@ namespace SocialMedia.Service.PostService
                 {
                     if ((await CheckPostPolicyAsync(user, existPost)).IsSuccess)
                     {
-                        var post = await _postRepository.GetPostWithImagesByPostIdAsync(postId);
-                        //SetNull(post);
+                        if((await _groupPostsService.GetGroupPostByPostIdAsync(postId, user)).IsSuccess)
+                        {
+                            var postView = await _postViewRepository.GetPostViewByPostIdAsync(postId);
+                            postView.ViewNumber = ++postView.ViewNumber;
+                            await _postViewRepository.UpdatePostViewAsync(postView);
+                            var post = await _postRepository.GetPostWithImagesByPostIdAsync(postId);
+                            return StatusCodeReturn<PostDto>
+                                    ._200_Success("Post found successfully", post);
+                        }
                         return StatusCodeReturn<PostDto>
-                                ._200_Success("Post found successfully", post);
+                            ._403_Forbidden("You must join group to get post");
                     }
                     return StatusCodeReturn<PostDto>
                     ._403_Forbidden();
@@ -278,10 +288,16 @@ namespace SocialMedia.Service.PostService
                         updatePostPolicyDto.PolicyIdOrName);
                     if (policy != null && policy.ResponseObject != null)
                     {
-                        post.PostPolicyId = policy.ResponseObject.Id;
-                        await _postRepository.UpdatePostAsync(post);
+                        if(!(await _groupPostsService.GetGroupPostByPostIdAsync(
+                            updatePostPolicyDto.PostId, user)).IsSuccess)
+                        {
+                            post.PostPolicyId = policy.ResponseObject.Id;
+                            await _postRepository.UpdatePostAsync(post);
+                            return StatusCodeReturn<bool>
+                                ._200_Success("Post policy updated successfully", true);
+                        }
                         return StatusCodeReturn<bool>
-                            ._200_Success("Post policy updated successfully", true);
+                            ._403_Forbidden("Group post policy can't be updated and it should be public");
                     }
                     return StatusCodeReturn<bool>
                             ._404_NotFound("Policy not found", false);

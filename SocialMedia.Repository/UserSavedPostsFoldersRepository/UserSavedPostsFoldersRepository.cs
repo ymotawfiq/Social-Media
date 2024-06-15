@@ -18,6 +18,7 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         {
             try
             {
+                userSavedPostsFolders.FolderName = userSavedPostsFolders.FolderName.ToUpper();
                 await _dbContext.UserSavedPostsFolders.AddAsync(userSavedPostsFolders);
                 await SaveChangesAsync();
                 return new UserSavedPostsFolders
@@ -71,6 +72,7 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         public async Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderNameAndUserIdAsync(
             string userId, string folderName)
         {
+            folderName = folderName.ToUpper();
             return (await _dbContext.UserSavedPostsFolders.Select(e => new UserSavedPostsFolders
             {
                 FolderName = e.FolderName,
@@ -99,10 +101,16 @@ namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
         {
             try
             {
+                userSavedPostsFolders.FolderName = userSavedPostsFolders.FolderName.ToUpper();
                 var folder = await GetUserSavedPostsFoldersByFolderIdAsync(userSavedPostsFolders.Id);
                 folder.FolderName = userSavedPostsFolders.FolderName;
                 await SaveChangesAsync();
-                return folder;
+                return new UserSavedPostsFolders
+                {
+                    FolderName = folder.FolderName,
+                    Id = folder.Id,
+                    UserId = folder.UserId
+                };
             }
             catch (Exception)
             {

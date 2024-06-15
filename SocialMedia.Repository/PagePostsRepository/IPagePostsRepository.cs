@@ -9,6 +9,7 @@ namespace SocialMedia.Repository.PagePostsRepository
     {
         Task<PagePost> AddPagePostAsync(PagePost pagePosts);
         Task<PagePost> GetPagePostByIdAsync(string pagePostId);
+        Task<PagePost> GetPagePostByPostIdAsync(string postId);
         Task<PagePost> DeletePagePostByIdAsync(string pagePostId);
         Task SaveChangesAsync();
     }

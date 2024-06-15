@@ -32,7 +32,6 @@ namespace SocialMedia.Service.SarehneService
                 if (message.ReceiverId == user.Id)
                 {
                     await _sarehneRepository.DeleteMessageAsync(messageId);
-                    SetNull(message);
                     return StatusCodeReturn<SarehneMessage>
                         ._200_Success("Message deleted successfully", message);
                 }
@@ -54,7 +53,6 @@ namespace SocialMedia.Service.SarehneService
                     if (message.ReceiverId == user.Id 
                     || message.MessagePolicyId == policy.ResponseObject.Id)
                     {
-                        SetNull(message);
                         return StatusCodeReturn<SarehneMessage>
                             ._200_Success("Message found successfully", message);
                     }
@@ -71,10 +69,6 @@ namespace SocialMedia.Service.SarehneService
         public async Task<ApiResponse<IEnumerable<SarehneMessage>>> GetMessagesAsync(SiteUser user)
         {
             var messages = await _sarehneRepository.GetMessagesAsync(user.Id);
-            foreach(var m in messages)
-            {
-                SetNull(m);
-            }
             if (messages.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<SarehneMessage>>
@@ -90,10 +84,6 @@ namespace SocialMedia.Service.SarehneService
             if(policy!=null && policy.ResponseObject != null)
             {
                 var messages = await _sarehneRepository.GetMessagesAsync(user.Id, policy.ResponseObject.Id);
-                foreach(var m in messages)
-                {
-                    SetNull(m);
-                }
                 if (messages.ToList().Count == 0)
                 {
                     return StatusCodeReturn<IEnumerable<SarehneMessage>>
@@ -118,12 +108,11 @@ namespace SocialMedia.Service.SarehneService
                     sendSarahaMessageDto.ShareYourName = false;
                 }
                 var policy = await _policyService.GetPolicyByNameAsync("private");
-                if(policy!=null && policy.ResponseObject != null)
+                if(policy != null && policy.ResponseObject != null)
                 {
                     var newMessage = await _sarehneRepository.SendMessageAsync(ConvertFromDto
                     .ConvertFromSendSarehneMessageDto(sendSarahaMessageDto, user!, receiver, 
                     policy.ResponseObject));
-                    SetNull(newMessage);
                     return StatusCodeReturn<SarehneMessage>
                         ._201_Created("Message sent successfully", newMessage);
                 }
@@ -142,7 +131,7 @@ namespace SocialMedia.Service.SarehneService
             {
                 var policy = await _policyService.GetPolicyByIdOrNameAsync(
                     updateSarehneMessagePolicyDto.PolicyIdOrName);
-                if(policy!=null && policy.ResponseObject != null)
+                if(policy != null && policy.ResponseObject != null)
                 {
                     if (policies.SarehneMessagePolicies.Contains(policy.ResponseObject.PolicyType))
                     {
@@ -152,7 +141,6 @@ namespace SocialMedia.Service.SarehneService
                             var updatedMessage = await _sarehneRepository.UpdateMessagePolicyAsync(
                                 ConvertFromDto.ConvertFromUpdateSarehneMessagePolicyDto(
                                     updateSarehneMessagePolicyDto, message));
-                            SetNull(updatedMessage);
                             return StatusCodeReturn<SarehneMessage>
                                 ._200_Success("Policy updated successfully", updatedMessage);
                         }
@@ -169,11 +157,6 @@ namespace SocialMedia.Service.SarehneService
                             ._404_NotFound("Message not found");
         }
 
-        private void SetNull(SarehneMessage sarehneMessage)
-        {
-            sarehneMessage.User = null;
-            sarehneMessage.SarehneMessagePolicy = null;
-        }
 
 
     }

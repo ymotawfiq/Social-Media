@@ -70,6 +70,48 @@ namespace SocialMedia.Service.PostCommentService
                         ._404_NotFound("Post not found");
         }
 
+        public async Task<ApiResponse<PostComment>> AddCommentReplayAsync(
+            AddCommentReplayDto replay, SiteUser user)
+        {
+            var post = await _postRepository.GetPostByIdAsync(replay.PostId);
+            if (post != null)
+            {
+                var comment = await _postCommentsRepository.GetPostCommentByIdAsync(replay.CommentId);
+                if (comment != null)
+                {
+                    var isBlockedByPostCreator = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                        post.UserId, user.Id);
+                    var isBlockedByCommentWriter = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
+                        comment.UserId, user.Id);
+                    if (isBlockedByCommentWriter == null && isBlockedByPostCreator == null)
+                    {
+                        var checkPolicy = await CheckPolicyAsync(post.UserId, user.Id, post.Id);
+                        if (checkPolicy.IsSuccess)
+                        {
+                            var commentReplay = await _postCommentsRepository.AddPostCommentAsync(
+                                new PostComment
+                                {
+                                    Comment = replay.Comment,
+                                    CommentId = replay.CommentId,
+                                    Id = Guid.NewGuid().ToString(),
+                                    PostId = replay.PostId,
+                                    UserId = user.Id
+                                });
+                            return StatusCodeReturn<PostComment>
+                                ._201_Created("Replayed successfully", commentReplay);
+                        }
+                        return checkPolicy;
+                    }
+                    return StatusCodeReturn<PostComment>
+                        ._403_Forbidden();
+                }
+                return StatusCodeReturn<PostComment>
+                    ._404_NotFound("Comment not found");
+            }
+            return StatusCodeReturn<PostComment>
+                    ._404_NotFound("Post not found");
+        }
+
         public async Task<ApiResponse<PostComment>> DeletePostCommentByIdAsync(string postCommentId,
             SiteUser user)
         {
@@ -465,6 +507,6 @@ namespace SocialMedia.Service.PostCommentService
             return false;
         }
 
-        
+
     }
 }

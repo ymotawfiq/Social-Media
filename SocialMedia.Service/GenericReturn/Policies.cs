@@ -9,6 +9,11 @@ namespace SocialMedia.Service.GenericReturn
             "PUBLIC", "PRIVATE", "FRIENDS ONLY", "FRIENDS OF FRIENDS"
         };
 
+        public List<string> BasicPolicies { get; private set; } = new List<string>
+        {
+            "PUBLIC", "PRIVATE", "FRIENDS ONLY", "FRIENDS OF FRIENDS"
+        };
+
         public List<string> ReactPolicies { get; private set; } = new List<string>
         {
             "PUBLIC", "PRIVATE", "FRIENDS ONLY", "FRIENDS OF FRIENDS"
@@ -38,6 +43,18 @@ namespace SocialMedia.Service.GenericReturn
         {
             "PUBLIC", "PRIVATE", "FRIENDS ONLY", "FRIENDS OF FRIENDS"
         };
+
+        public List<string> GroupPostsPolicies { get; private set; } = new List<string>
+        {
+            "PUBLIC", "PRIVATE"
+        };
+
+
+        public List<string> GroupRoles { get; private set; } = new List<string>
+        {
+            "USER", "ADMIN", "PUBLISHER"
+        };
+
 
     }
 }

@@ -1,11 +1,13 @@
 ﻿
+
 using System.ComponentModel.DataAnnotations;
 
 namespace SocialMedia.Data.DTOs
 {
-    public class AddSpecialPostsReactsDto
+    public class UnBlockDto
     {
+
         [Required]
-        public string ReactId { get; set; } = null!;
+        public string UserIdOrUserNameOrEmail { get; set; } = null!;
     }
 }

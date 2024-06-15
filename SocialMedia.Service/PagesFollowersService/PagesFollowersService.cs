@@ -33,7 +33,6 @@ namespace SocialMedia.Service.PagesFollowersService
                 {
                     var followPage = await _pagesFollowersRepository.FollowPageAsync(
                         ConvertFromDto.ConvertFromFollowPageDto_Add(followPageDto, user));
-                    SetNull(followPage);
                     return StatusCodeReturn<object>
                         ._201_Created("Followed successfully", followPage);
                 }
@@ -60,7 +59,6 @@ namespace SocialMedia.Service.PagesFollowersService
                     {
                         var followPage = await _pagesFollowersRepository.FollowPageAsync(
                             ConvertFromDto.ConvertFromFollowPageUserDto_Add(followPageUserDto));
-                        SetNull(followPage);
                         return StatusCodeReturn<object>
                             ._201_Created("Followed successfully", followPage);
                     }
@@ -83,7 +81,6 @@ namespace SocialMedia.Service.PagesFollowersService
                 pageId, user.Id);
                 if (pageFollower != null)
                 {
-                    SetNull(pageFollower);
                     return StatusCodeReturn<object>
                         ._200_Success("Page follower found successfully", pageFollower);
                 }
@@ -99,7 +96,6 @@ namespace SocialMedia.Service.PagesFollowersService
             var pageFollower = await _pagesFollowersRepository.GetPageFollowerByIdAsync(pageFollowersId);
             if (pageFollower != null)
             {
-                SetNull(pageFollower);
                 return StatusCodeReturn<object>
                     ._200_Success("Page follower found successfully", pageFollower);
             }
@@ -130,7 +126,6 @@ namespace SocialMedia.Service.PagesFollowersService
                 if (pageFollower != null)
                 {
                     await _pagesFollowersRepository.UnfollowPageByPageIdAsync(unFollowPageDto.PageId, user.Id);
-                    SetNull(pageFollower);
                     return StatusCodeReturn<object>
                         ._200_Success("Unfollowed successfully", pageFollower);
                 }
@@ -149,7 +144,6 @@ namespace SocialMedia.Service.PagesFollowersService
                 if(pageFollower.FollowerId == user.Id)
                 {
                     await _pagesFollowersRepository.UnfollowPageByPageFollowerIdAsync(pageFollowersId);
-                    SetNull(pageFollower);
                     return StatusCodeReturn<object>
                         ._200_Success("Unfollowed successfully", pageFollower);
                 }
@@ -161,11 +155,5 @@ namespace SocialMedia.Service.PagesFollowersService
         }
 
 
-        private object SetNull(PageFollower pageFollower)
-        {
-            pageFollower.User = null;
-            pageFollower.Page = null;
-            return pageFollower;
-        }
     }
 }

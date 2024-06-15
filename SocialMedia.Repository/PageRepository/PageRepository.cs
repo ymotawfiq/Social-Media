@@ -3,7 +3,6 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Data.Models;
-using SocialMedia.Data.Models.Authentication;
 
 namespace SocialMedia.Repository.PageRepository
 {
@@ -14,22 +13,17 @@ namespace SocialMedia.Repository.PageRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<Page> AddPageAsync(Page page, SiteUser user)
+        public async Task<Page> AddPageAsync(Page page)
         {
             await _dbContext.Pages.AddAsync(page);
-            await _dbContext.UserPages.AddAsync(new UserPage
-            {
-                UserId = user.Id,
-                PageId = page.Id,
-                Id = Guid.NewGuid().ToString()
-            });
             await SaveChangesAsync();
             return new Page
             {
                 Id = page.Id,
                 Name = page.Name,
                 Description = page.Description,
-                CreatedAt = page.CreatedAt
+                CreatedAt = page.CreatedAt,
+                CreatorId = page.CreatorId
             };
         }
 
@@ -52,24 +46,16 @@ namespace SocialMedia.Repository.PageRepository
             }).Where(e => e.Id == pageId).FirstOrDefaultAsync())!;
         }
 
-        public async Task<IEnumerable<UserPage>> GetPagesByUserIdAsync(string userId)
+        public async Task<IEnumerable<Page>> GetPagesByUserIdAsync(string userId)
         {
-            return await _dbContext.UserPages.Select(e => new UserPage
+            return await _dbContext.Pages.Select(e => new Page
             {
-                PageId = e.PageId,
-                UserId = e.UserId,
+                CreatorId = e.CreatorId,
+                CreatedAt = e.CreatedAt,
+                Description = e.Description,
+                Name = e.Name,
                 Id = e.Id
-            }).Where(e => e.UserId == userId).ToListAsync();
-        }
-
-        public async Task<UserPage> GetUserPageByPageIdAsync(string pageId)
-        {
-            return (await _dbContext.UserPages.Select(e => new UserPage
-            {
-                PageId = e.PageId,
-                UserId = e.UserId,
-                Id = e.Id
-            }).Where(e => e.PageId == pageId).FirstOrDefaultAsync())!;
+            }).Where(e => e.CreatorId == userId).ToListAsync();
         }
 
         public async Task SaveChangesAsync()
@@ -83,7 +69,14 @@ namespace SocialMedia.Repository.PageRepository
             existPage.Description = page.Description;
             existPage.Name = page.Name;
             await SaveChangesAsync();
-            return existPage;
+            return new Page
+            {
+                CreatorId = existPage.CreatorId,
+                CreatedAt = existPage.CreatedAt,
+                Description = existPage.Description,
+                Id = existPage.Id,
+                Name = existPage.Name
+            };
         }
     }
 }

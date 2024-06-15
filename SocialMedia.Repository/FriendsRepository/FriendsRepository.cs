@@ -69,9 +69,10 @@ namespace SocialMedia.Repository.FriendsRepository
         public async Task<IEnumerable<Friend>> GetSharedFriendsAsync(string userId, string routeUserId)
         {
             var currentUserFriends = await GetAllUserFriendsAsync(userId);
-            var currentRouteUserFriends = await GetAllUserFriendsAsync(routeUserId);
-            var case1 = from f1 in currentUserFriends
-                       from f2 in currentRouteUserFriends
+            var routeUserFriends = await GetAllUserFriendsAsync(routeUserId);
+
+            var sharedFrieds = from f1 in currentUserFriends
+                       from f2 in routeUserFriends
                        where GetDifferntIdAsync(f1, userId) == GetDifferntIdAsync(f2, routeUserId)
                        select (new Friend
                        {
@@ -79,7 +80,7 @@ namespace SocialMedia.Repository.FriendsRepository
                            UserId = userId,
                            FriendId = GetDifferntIdAsync(f1, userId)
                        });
-            return case1;
+            return sharedFrieds;
         }
 
         private string GetDifferntIdAsync(Friend friend, string userId)

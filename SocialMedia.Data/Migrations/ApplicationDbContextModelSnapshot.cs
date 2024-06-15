@@ -548,8 +548,11 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -561,6 +564,8 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
 
                     b.ToTable("Pages");
                 });
@@ -689,6 +694,10 @@ namespace SocialMedia.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("CommentId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Base Comment Id");
+
                     b.Property<string>("CommentImage")
                         .HasColumnType("nvarchar(450)");
 
@@ -704,6 +713,8 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CommentId");
+
                     b.HasIndex("CommentImage")
                         .IsUnique()
                         .HasFilter("[CommentImage] IS NOT NULL");
@@ -713,47 +724,6 @@ namespace SocialMedia.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PostComments");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.PostCommentReplay", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PostCommentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Post comment Id");
-
-                    b.Property<string>("PostCommentReplayId")
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Post Comment Replay Id");
-
-                    b.Property<string>("Replay")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Replay");
-
-                    b.Property<string>("ReplayImage")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Replay_Image");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("User Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostCommentId");
-
-                    b.HasIndex("PostCommentReplayId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PostCommentReplay", t =>
-                        {
-                            t.HasCheckConstraint("EncureReplayAndReplayImageNotNull", "(Replay is NOT null AND Replay_Image is NOT null) OR (Replay_Image is null AND Replay is NOT null) OR (Replay is null AND Replay_Image is NOT null)");
-                        });
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostImages", b =>
@@ -885,7 +855,7 @@ namespace SocialMedia.Data.Migrations
                     b.Property<DateTime>("SentAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 14, 21, 57, 44, 921, DateTimeKind.Local).AddTicks(700));
+                        .HasDefaultValue(new DateTime(2024, 6, 16, 0, 35, 6, 629, DateTimeKind.Local).AddTicks(4064));
 
                     b.HasKey("Id");
 
@@ -926,31 +896,6 @@ namespace SocialMedia.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("SavedPosts");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.UserPage", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PageId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Page Id");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("User Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("PageId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("UserPages");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
@@ -1220,6 +1165,17 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "Creator")
+                        .WithMany("Pages")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.PageFollower", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -1295,6 +1251,10 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
                 {
+                    b.HasOne("SocialMedia.Data.Models.PostComment", "BaseComment")
+                        .WithMany("Replays")
+                        .HasForeignKey("CommentId");
+
                     b.HasOne("SocialMedia.Data.Models.Post", "Post")
                         .WithMany("PostComments")
                         .HasForeignKey("PostId")
@@ -1307,32 +1267,9 @@ namespace SocialMedia.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("BaseComment");
+
                     b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.PostCommentReplay", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.PostComment", "PostComment")
-                        .WithMany("PostCommentReplays")
-                        .HasForeignKey("PostCommentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Data.Models.PostCommentReplay", "PostCommentReplayChildReplay")
-                        .WithMany("PostCommentReplays")
-                        .HasForeignKey("PostCommentReplayId");
-
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("PostCommentReplays")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PostComment");
-
-                    b.Navigation("PostCommentReplayChildReplay");
 
                     b.Navigation("User");
                 });
@@ -1432,25 +1369,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("UserSavedPostsFolder");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserPage", b =>
-                {
-                    b.HasOne("SocialMedia.Data.Models.Page", "Page")
-                        .WithMany("UserPages")
-                        .HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("UserPages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Page");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -1482,7 +1400,7 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("PageFollowers");
 
-                    b.Navigation("PostCommentReplays");
+                    b.Navigation("Pages");
 
                     b.Navigation("PostComments");
 
@@ -1493,8 +1411,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("SarehneMessages");
 
                     b.Navigation("SavedPosts");
-
-                    b.Navigation("UserPages");
 
                     b.Navigation("UserSavedPostsFolders");
                 });
@@ -1523,8 +1439,6 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("PageFollowers");
 
                     b.Navigation("PagePosts");
-
-                    b.Navigation("UserPages");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
@@ -1569,12 +1483,7 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
                 {
-                    b.Navigation("PostCommentReplays");
-                });
-
-            modelBuilder.Entity("SocialMedia.Data.Models.PostCommentReplay", b =>
-                {
-                    b.Navigation("PostCommentReplays");
+                    b.Navigation("Replays");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.React", b =>

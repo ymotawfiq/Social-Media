@@ -10,6 +10,7 @@ using SocialMedia.Repository.GroupMemberRoleRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.GroupManager;
 using SocialMedia.Service.PolicyService;
 
 namespace SocialMedia.Service.GroupService
@@ -21,8 +22,9 @@ namespace SocialMedia.Service.GroupService
         private readonly IGroupRoleRepository _groupRoleRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
+        private readonly IGroupManager _groupManager;
         public GroupService(IGroupRepository _groupRepository, IPolicyService _policyService,
-            IGroupRoleRepository _groupRoleRepository,
+            IGroupRoleRepository _groupRoleRepository, IGroupManager _groupManager,
             IGroupMemberRepository _groupMemberRepository, 
             IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
@@ -31,11 +33,12 @@ namespace SocialMedia.Service.GroupService
             this._groupRoleRepository = _groupRoleRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
+            this._groupManager = _groupManager;
         }
         public async Task<ApiResponse<Group>> AddGroupAsync(AddGroupDto addGroupDto, SiteUser user)
         {
             var policy = await _policyService.GetPolicyByIdOrNameAsync(addGroupDto.GroupPolicyIdOrName);
-            if(policy!=null && policy.ResponseObject != null)
+            if(policy != null && policy.ResponseObject != null)
             {
                 var adminRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("admin");
                 if (adminRole != null)
@@ -61,7 +64,6 @@ namespace SocialMedia.Service.GroupService
                     if (groupMembers.ToList().Count == 0)
                     {
                         await _groupRepository.DeleteGroupByIdAsync(groupId);
-                        SetNull(group);
                         return StatusCodeReturn<Group>
                             ._200_Success("Group deleted successfully", group);
                     }
@@ -69,7 +71,7 @@ namespace SocialMedia.Service.GroupService
                     ._403_Forbidden("Group is not empty");
                 }
                 return StatusCodeReturn<Group>
-                    ._403_Forbidden();
+                    ._403_Forbidden("Only allowd for group creator to delete it");
             }
             return StatusCodeReturn<Group>
                 ._404_NotFound("Group not found");
@@ -78,10 +80,6 @@ namespace SocialMedia.Service.GroupService
         public async Task<ApiResponse<IEnumerable<Group>>> GetAllGroupsAsync()
         {
             var groups = await _groupRepository.GetAllGroupsAsync();
-            foreach (var g in groups)
-            {
-                SetNull(g);
-            }
             if (groups.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<Group>>
@@ -94,10 +92,6 @@ namespace SocialMedia.Service.GroupService
         public async Task<ApiResponse<IEnumerable<Group>>> GetAllGroupsByUserIdAsync(string userId)
         {
             var groups = await _groupRepository.GetAllGroupsByUserIdAsync(userId);
-            foreach(var g in groups)
-            {
-                SetNull(g);
-            }
             if (groups.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<Group>>
@@ -112,7 +106,6 @@ namespace SocialMedia.Service.GroupService
             var group = await _groupRepository.GetGroupByIdAsync(groupId);
             if (group != null)
             {
-                SetNull(group);
                 return StatusCodeReturn<Group>
                     ._200_Success("Group found successfully", group);
             }
@@ -129,7 +122,6 @@ namespace SocialMedia.Service.GroupService
                 {
                     var updatedGroup = await _groupRepository.UpdateGroupAsync(
                     ConvertFromDto.ConvertFromGroupDto_Update(updateGroupDto, user, group));
-                    SetNull(updatedGroup);
                     return StatusCodeReturn<Group>
                         ._200_Success("Group updated successfully", updatedGroup);
                 }
@@ -150,12 +142,12 @@ namespace SocialMedia.Service.GroupService
                     updateExistGroupPolicyDto.GroupPolicyIdOrName);
                 if (policy != null && policy.ResponseObject != null)
                 {
-                    if(user.Id == group.CreatedUserId)
+                    if(user.Id == group.CreatedUserId 
+                        || (await _groupManager.IsInRoleAsync(user, group, "admin")).IsSuccess)
                     {
                         updateExistGroupPolicyDto.GroupPolicyIdOrName = policy.ResponseObject.Id;
                         var updatedGroup = await _groupRepository.UpdateGroupAsync(ConvertFromDto
                             .ConvertFromGroupDto_Update(updateExistGroupPolicyDto, group));
-                        SetNull(updatedGroup);
                         return StatusCodeReturn<Group>
                             ._200_Success("Group policy updated successfully", updatedGroup);
                     }
@@ -188,19 +180,11 @@ namespace SocialMedia.Service.GroupService
                 RoleId = adminRole.Id,
                 GroupMemberId = groupMember.Id
             });
-            SetNull(newGroup);
             return StatusCodeReturn<Group>
                 ._201_Created("Group created successfully", newGroup);
         }
 
-        private Group SetNull(Group group)
-        {
-            group.User = null;
-            group.GroupPolicy = null;
-            group.GroupMembers = null;
-            group.GroupAccessRequests = null;
-            return group;
-        }
+
 
     }
 }

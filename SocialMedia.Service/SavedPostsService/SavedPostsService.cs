@@ -49,7 +49,6 @@ namespace SocialMedia.Service.SavedPostsService
                             UserId = user.Id
                         }
                         );
-                    newSavedPost.User = null;
                     return StatusCodeReturn<SavedPosts>
                         ._201_Created("Post saved successfully", newSavedPost);
                 }

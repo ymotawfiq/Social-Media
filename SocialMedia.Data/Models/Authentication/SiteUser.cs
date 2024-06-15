@@ -30,14 +30,13 @@ namespace SocialMedia.Data.Models.Authentication
         public List<UserSavedPostsFolders>? UserSavedPostsFolders { get; set; }
         public List<PostReacts>? PostReacts { get; set; }
         public List<PostComment>? PostComments { get; set; }
-        public List<PostCommentReplay>? PostCommentReplays { get; set; }
-        public List<UserPage>? UserPages { get; set; }
         public List<PageFollower>? PageFollowers { get; set; }
         public LinkedList<Group>? Groups { get; set; }
         public List<GroupMember>? GroupMembers { get; set; }
         public List<GroupAccessRequest>? GroupAccessRequests { get; set; }
         public List<GroupPost>? GroupPosts { get; set; }
         public List<SarehneMessage>? SarehneMessages { get; set; }
+        public List<Page>? Pages { get; set; }
 
     }
 }

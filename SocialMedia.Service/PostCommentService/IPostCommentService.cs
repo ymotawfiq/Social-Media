@@ -11,8 +11,12 @@ namespace SocialMedia.Service.PostCommentService
     {
         Task<ApiResponse<PostComment>> AddPostCommentAsync(AddPostCommentDto addPostCommentDto,
             SiteUser user);
+
+        Task<ApiResponse<PostComment>> AddCommentReplayAsync(AddCommentReplayDto replay, SiteUser user);
+
         Task<ApiResponse<PostComment>> UpdatePostCommentAsync(UpdatePostCommentDto updatePostCommentDto,
             SiteUser user);
+        
         Task<ApiResponse<PostComment>> DeletePostCommentByIdAsync(string postCommentId, SiteUser user);
         Task<ApiResponse<PostComment>> GetPostCommentByIdAsync(string postCommentId, SiteUser user);
         Task<ApiResponse<PostComment>> GetPostCommentByIdAsync(string postCommentId);
