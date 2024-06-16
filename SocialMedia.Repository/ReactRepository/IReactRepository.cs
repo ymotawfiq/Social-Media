@@ -1,17 +1,12 @@
 ﻿
 
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.ReactRepository
 {
-    public interface IReactRepository
+    public interface IReactRepository : ICrud<React>
     {
-        Task<React> AddReactAsync(React react);
-        Task<React> UpdateReactAsync(React react);
-        Task<React> DeleteReactByIdAsync(string reactId);
-        Task<React> GetReactByIdAsync(string reactId);
         Task<React> GetReactByNameAsync(string reactName);
-        Task<IEnumerable<React>> GetAllReactsAsync();
-        Task SaveChangesAsync();
     }
 }

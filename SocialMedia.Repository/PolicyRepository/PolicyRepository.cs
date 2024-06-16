@@ -13,17 +13,18 @@ namespace SocialMedia.Repository.PolicyRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<Policy> AddPolicyAsync(Policy policy)
+
+        public async Task<Policy> AddAsync(Policy t)
         {
             try
             {
-                policy.PolicyType = policy.PolicyType.ToUpper();
-                await _dbContext.Policies.AddAsync(policy);
+                t.PolicyType = t.PolicyType.ToUpper();
+                await _dbContext.Policies.AddAsync(t);
                 await SaveChangesAsync();
                 return new Policy
                 {
-                    Id = policy.Id,
-                    PolicyType = policy.PolicyType
+                    Id = t.Id,
+                    PolicyType = t.PolicyType
                 };
             }
             catch (Exception)
@@ -32,25 +33,11 @@ namespace SocialMedia.Repository.PolicyRepository
             }
         }
 
-        public async Task<Policy> DeletePolicyAsync(string policyIdOrName)
+        public async Task<Policy> DeleteByIdAsync(string id)
         {
             try
             {
-                var policyById = await GetPolicyByIdAsync(policyIdOrName);
-                var policyByName = await GetPolicyByNameAsync(policyIdOrName);
-                return policyById == null ? policyByName! : policyById;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<Policy> DeletePolicyByIdAsync(string policyId)
-        {
-            try
-            {
-                var policy = await GetPolicyByIdAsync(policyId);
+                var policy = await GetByIdAsync(id);
                 _dbContext.Remove(policy);
                 await SaveChangesAsync();
                 return policy;
@@ -61,11 +48,11 @@ namespace SocialMedia.Repository.PolicyRepository
             }
         }
 
-        public async Task<IEnumerable<Policy>> GetPoliciesAsync()
+        public async Task<IEnumerable<Policy>> GetAllAsync()
         {
             try
             {
-                return await _dbContext.Policies.Select(e=>new Policy
+                return await _dbContext.Policies.Select(e => new Policy
                 {
                     PolicyType = e.PolicyType,
                     Id = e.Id
@@ -77,7 +64,7 @@ namespace SocialMedia.Repository.PolicyRepository
             }
         }
 
-        public async Task<Policy> GetPolicyByIdAsync(string policyId)
+        public async Task<Policy> GetByIdAsync(string id)
         {
             try
             {
@@ -85,7 +72,7 @@ namespace SocialMedia.Repository.PolicyRepository
                 {
                     PolicyType = e.PolicyType,
                     Id = e.Id
-                }).Where(e => e.Id == policyId)
+                }).Where(e => e.Id == id)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -116,19 +103,24 @@ namespace SocialMedia.Repository.PolicyRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Policy> UpdatePolicyAsync(Policy policy)
+        public async Task<Policy> UpdateAsync(Policy t)
         {
             try
             {
-                var policy1 = await GetPolicyByIdAsync(policy.Id);
-                policy1.PolicyType = policy.PolicyType.ToUpper();
+                var policy1 = await GetByIdAsync(t.Id);
+                policy1.PolicyType = t.PolicyType.ToUpper();
                 await SaveChangesAsync();
-                return policy1;
+                return new Policy
+                {
+                    Id = t.Id,
+                    PolicyType = t.PolicyType
+                };
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
     }
 }

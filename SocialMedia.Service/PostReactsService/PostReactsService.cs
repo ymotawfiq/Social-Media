@@ -44,7 +44,7 @@ namespace SocialMedia.Service.PostReactsService
             var post = await _postRepository.GetPostByIdAsync(addPostReactDto.PostId);
             if ((await CheckToReactAsync<PostReacts>(user.Id, post)).IsSuccess)
             {
-                var postReact = await _reactRepository.GetReactByIdAsync(addPostReactDto.ReactId);
+                var postReact = await _reactRepository.GetByIdAsync(addPostReactDto.ReactId);
                 if (postReact != null)
                 {
                     var checkPolicy = await CheckPolicyAsync(post.UserId, user.Id, post);
@@ -208,7 +208,7 @@ namespace SocialMedia.Service.PostReactsService
                 {
                     if (postReact.UserId == user.Id)
                     {
-                        var react = await _reactRepository.GetReactByIdAsync(updatePostReactDto.ReactId);
+                        var react = await _reactRepository.GetByIdAsync(updatePostReactDto.ReactId);
                         if (react != null)
                         {
                             postReact.PostReactId = updatePostReactDto.ReactId;
@@ -231,7 +231,7 @@ namespace SocialMedia.Service.PostReactsService
         private async Task<ApiResponse<PostReacts>> CheckPolicyAsync(string userId,
             string userWhoWantsToReactId, Post post)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(post.ReactPolicyId);
+            var policy = await _policyRepository.GetByIdAsync(post.ReactPolicyId);
             if (policy != null)
             {
                 if(userId != userWhoWantsToReactId)

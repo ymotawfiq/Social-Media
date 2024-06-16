@@ -16,7 +16,6 @@ using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Service.BlockService;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.GroupPostsService;
 using SocialMedia.Service.PolicyService;
 
 namespace SocialMedia.Service.PostService
@@ -55,9 +54,9 @@ namespace SocialMedia.Service.PostService
         }
         public async Task<ApiResponse<PostDto>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
-            var postsPolicy = await _policyRepository.GetPolicyByIdAsync(user.AccountPostPolicyId!);
-            var reactPolicy = await _policyRepository.GetPolicyByIdAsync(user.ReactPolicyId!);
-            var commentPolicy = await _policyRepository.GetPolicyByIdAsync(user.CommentPolicyId!);
+            var postsPolicy = await _policyRepository.GetByIdAsync(user.AccountPostPolicyId!);
+            var reactPolicy = await _policyRepository.GetByIdAsync(user.ReactPolicyId!);
+            var commentPolicy = await _policyRepository.GetByIdAsync(user.CommentPolicyId!);
 
             var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, postsPolicy, reactPolicy,
                 commentPolicy, user);
@@ -151,7 +150,7 @@ namespace SocialMedia.Service.PostService
         public async Task<ApiResponse<IEnumerable<PostDto>>> GetUserPostsByPolicyAsync(
             SiteUser user, Policy policy)
         {
-            var checkPolicy = await _policyRepository.GetPolicyByIdAsync(policy.Id);
+            var checkPolicy = await _policyRepository.GetByIdAsync(policy.Id);
             if (checkPolicy == null)
             {
                 return StatusCodeReturn<IEnumerable<PostDto>>
@@ -393,9 +392,10 @@ namespace SocialMedia.Service.PostService
             }
             return false;
         }
+
         private async Task<ApiResponse<bool>> CheckPostPolicyAsync(SiteUser user, Post post)
         {
-            var postPolicy = await _policyRepository.GetPolicyByIdAsync(post.PostPolicyId);
+            var postPolicy = await _policyRepository.GetByIdAsync(post.PostPolicyId);
             if (post.UserId != user.Id)
             {
                 if (postPolicy.PolicyType == "PRIVATE")
@@ -455,6 +455,7 @@ namespace SocialMedia.Service.PostService
 
         private async Task<ApiResponse<PostDto>> CheckGroupPostAndGetPostAsync(string postId, SiteUser user)
         {
+            var post = await _postRepository.GetPostWithImagesByPostIdAsync(postId);
             var groupPost = await IsGroupPostAsync(postId);
             if (groupPost != null && groupPost.ResponseObject != null)
             {
@@ -479,7 +480,12 @@ namespace SocialMedia.Service.PostService
                 return StatusCodeReturn<PostDto>
                             ._404_NotFound("Policy not found");
             }
-            return await IncreasePostViewsAndGetPostAsync(postId);
+            if((await CheckPostPolicyAsync(user, post.Post)).IsSuccess)
+            {
+                return await IncreasePostViewsAndGetPostAsync(postId);
+            }
+            return StatusCodeReturn<PostDto>
+                ._403_Forbidden((await CheckPostPolicyAsync(user, post.Post)).Message);
         }
 
         private async Task<ApiResponse<PostDto>> IncreasePostViewsAndGetPostAsync(string postId)

@@ -45,7 +45,7 @@ namespace SocialMedia.Service.GroupAccessRequestService
                             addGroupAccessRequestDto.GroupId);
                 if (isMember == null)
                 {
-                    var groupPolicy = await _policyRepository.GetPolicyByIdAsync(group.GroupPolicyId);
+                    var groupPolicy = await _policyRepository.GetByIdAsync(group.GroupPolicyId);
                     if (groupPolicy != null)
                     {
                         return await CheckGroupPolicyAndApplyRequestAsync(groupPolicy, group, user);

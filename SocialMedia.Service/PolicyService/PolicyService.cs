@@ -25,7 +25,7 @@ namespace SocialMedia.Service.PolicyService
             {
                 if (policies.BasicPolicies.Contains(addPolicyDto.PolicyType.ToUpper()))
                 {
-                    var newPolicy = await _policyRepository.AddPolicyAsync(
+                    var newPolicy = await _policyRepository.AddAsync(
                     ConvertFromDto.ConvertFromPolicyDto_Add(addPolicyDto));
                     return StatusCodeReturn<Policy>
                             ._201_Created("Policy added successfully", newPolicy);
@@ -40,10 +40,10 @@ namespace SocialMedia.Service.PolicyService
 
         public async Task<ApiResponse<Policy>> DeletePolicyByIdAsync(string policyId)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(policyId);
+            var policy = await _policyRepository.GetByIdAsync(policyId);
             if (policy != null)
             {
-                await _policyRepository.DeletePolicyByIdAsync(policyId);
+                await _policyRepository.DeleteByIdAsync(policyId);
                 return StatusCodeReturn<Policy>
                         ._200_Success("Policy deleted successfully", policy);
             }
@@ -56,7 +56,7 @@ namespace SocialMedia.Service.PolicyService
             var policy = await GetPolicyAsync(policyIdOrName);
             if (policy != null)
             {
-                await _policyRepository.DeletePolicyByIdAsync(policy.Id);
+                await _policyRepository.DeleteByIdAsync(policy.Id);
                 return StatusCodeReturn<Policy>
                         ._200_Success("Policy deleted successfully", policy);
                     
@@ -70,7 +70,7 @@ namespace SocialMedia.Service.PolicyService
             var policy = await _policyRepository.GetPolicyByNameAsync(policyName);
             if (policy != null)
             {
-                await _policyRepository.DeletePolicyByIdAsync(policy.Id);
+                await _policyRepository.DeleteByIdAsync(policy.Id);
                 return StatusCodeReturn<Policy>
                         ._200_Success("Policy deleted successfully", policy);
                     
@@ -81,7 +81,7 @@ namespace SocialMedia.Service.PolicyService
 
         public async Task<ApiResponse<IEnumerable<Policy>>> GetPoliciesAsync()
         {
-            var policies = await _policyRepository.GetPoliciesAsync();
+            var policies = await _policyRepository.GetAllAsync();
             if (policies.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<Policy>>
@@ -93,7 +93,7 @@ namespace SocialMedia.Service.PolicyService
 
         public async Task<ApiResponse<Policy>> GetPolicyByIdAsync(string policyId)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(policyId);
+            var policy = await _policyRepository.GetByIdAsync(policyId);
             if (policy != null)
             {
                 return StatusCodeReturn<Policy>
@@ -131,7 +131,7 @@ namespace SocialMedia.Service.PolicyService
 
         public async Task<ApiResponse<Policy>> UpdatePolicyAsync(UpdatePolicyDto updatePolicyDto)
         {
-            var policyById = await _policyRepository.GetPolicyByIdAsync(updatePolicyDto.Id);
+            var policyById = await _policyRepository.GetByIdAsync(updatePolicyDto.Id);
             if (policyById != null)
             {
                 var policyByName = await _policyRepository.GetPolicyByNameAsync(updatePolicyDto.PolicyType);
@@ -139,7 +139,7 @@ namespace SocialMedia.Service.PolicyService
                 {
                     if (policies.BasicPolicies.Contains(updatePolicyDto.PolicyType.ToUpper()))
                     {
-                        var updatedPolicy = await _policyRepository.UpdatePolicyAsync(
+                        var updatedPolicy = await _policyRepository.UpdateAsync(
                             ConvertFromDto.ConvertFromPolicyDto_Update(updatePolicyDto));
                         return StatusCodeReturn<Policy>
                                 ._200_Success("Policy updated successfully", updatedPolicy);
@@ -157,7 +157,7 @@ namespace SocialMedia.Service.PolicyService
 
         private async Task<Policy> GetPolicyAsync(string policyIdOrName)
         {
-            var policyById = await _policyRepository.GetPolicyByIdAsync(policyIdOrName);
+            var policyById = await _policyRepository.GetByIdAsync(policyIdOrName);
             var policyByName = await _policyRepository.GetPolicyByNameAsync(policyIdOrName);
             return policyById == null ? policyByName! : policyById;
         }

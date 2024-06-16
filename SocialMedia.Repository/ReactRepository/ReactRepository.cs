@@ -13,17 +13,18 @@ namespace SocialMedia.Repository.ReactRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<React> AddReactAsync(React react)
+
+        public async Task<React> AddAsync(React t)
         {
             try
             {
-                react.ReactValue = react.ReactValue.ToUpper();
-                await _dbContext.Reacts.AddAsync(react);
+                t.ReactValue = t.ReactValue.ToUpper();
+                await _dbContext.Reacts.AddAsync(t);
                 await SaveChangesAsync();
                 return new React
                 {
-                    Id = react.Id,
-                    ReactValue = react.ReactValue
+                    Id = t.Id,
+                    ReactValue = t.ReactValue
                 };
             }
             catch (Exception)
@@ -32,11 +33,12 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
-        public async Task<React> DeleteReactByIdAsync(string reactId)
+
+        public async Task<React> DeleteByIdAsync(string id)
         {
             try
             {
-                var react = await GetReactByIdAsync(reactId);
+                var react = await GetByIdAsync(id);
                 _dbContext.Reacts.Remove(react);
                 await SaveChangesAsync();
                 return react;
@@ -47,11 +49,12 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
-        public async Task<IEnumerable<React>> GetAllReactsAsync()
+
+        public async Task<IEnumerable<React>> GetAllAsync()
         {
             try
             {
-                return await _dbContext.Reacts.Select(e=>new React
+                return await _dbContext.Reacts.Select(e => new React
                 {
                     ReactValue = e.ReactValue,
                     Id = e.Id
@@ -63,7 +66,8 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
-        public async Task<React> GetReactByIdAsync(string reactId)
+
+        public async Task<React> GetByIdAsync(string id)
         {
             try
             {
@@ -71,7 +75,7 @@ namespace SocialMedia.Repository.ReactRepository
                 {
                     ReactValue = e.ReactValue,
                     Id = e.Id
-                }).Where(e => e.Id == reactId).FirstOrDefaultAsync())!;
+                }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -108,12 +112,32 @@ namespace SocialMedia.Repository.ReactRepository
             }
         }
 
+        public async Task<React> UpdateAsync(React t)
+        {
+            try
+            {
+                t.ReactValue = t.ReactValue.ToUpper();
+                var react1 = await GetByIdAsync(t.Id);
+                react1.ReactValue = t.ReactValue;
+                await SaveChangesAsync();
+                return new React
+                {
+                    Id = react1.Id,
+                    ReactValue = react1.ReactValue
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<React> UpdateReactAsync(React react)
         {
             try
             {
                 react.ReactValue = react.ReactValue.ToUpper();
-                var react1 = await GetReactByIdAsync(react.Id);
+                var react1 = await GetByIdAsync(react.Id);
                 react1.ReactValue = react.ReactValue;
                 await SaveChangesAsync();
                 return react1;

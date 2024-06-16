@@ -140,7 +140,7 @@ namespace SocialMedia.Service.FriendsService
 
         private async Task<ApiResponse<T>> CheckGetFriendPolicyAsync<T>(SiteUser user, SiteUser routeUser)
         {
-            var policy = await _policyRepository.GetPolicyByIdAsync(routeUser.FriendListPolicyId);
+            var policy = await _policyRepository.GetByIdAsync(routeUser.FriendListPolicyId);
             if (policy != null)
             {
                 if (user.Id != routeUser.Id)

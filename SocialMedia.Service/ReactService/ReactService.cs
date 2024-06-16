@@ -21,7 +21,7 @@ namespace SocialMedia.Service.ReactService
             var existReact = await _reactRepository.GetReactByNameAsync(addReactDto.ReactValue);
             if (existReact == null)
             {
-                var newReact = await _reactRepository.AddReactAsync(
+                var newReact = await _reactRepository.AddAsync(
                 ConvertFromDto.ConvertFromReactDto_Add(addReactDto));
                 return StatusCodeReturn<React>
                     ._201_Created("React added successfully", newReact);
@@ -32,10 +32,10 @@ namespace SocialMedia.Service.ReactService
 
         public async Task<ApiResponse<React>> DeleteReactByIdAsync(string reactId)
         {
-            var react = await _reactRepository.GetReactByIdAsync(reactId);
+            var react = await _reactRepository.GetByIdAsync(reactId);
             if (react != null)
             {
-                await _reactRepository.DeleteReactByIdAsync(reactId);
+                await _reactRepository.DeleteByIdAsync(reactId);
                 return StatusCodeReturn<React>
                     ._200_Success("React deleted successfully", react);
             }
@@ -48,7 +48,7 @@ namespace SocialMedia.Service.ReactService
             var react = await _reactRepository.GetReactByNameAsync(reactName);
             if (react != null)
             {
-                await _reactRepository.DeleteReactByIdAsync(react.Id);
+                await _reactRepository.DeleteByIdAsync(react.Id);
                 return StatusCodeReturn<React>
                     ._200_Success("React found successfully", react);
             }
@@ -58,7 +58,7 @@ namespace SocialMedia.Service.ReactService
 
         public async Task<ApiResponse<IEnumerable<React>>> GetAllReactsAsync()
         {
-            var reacts = await _reactRepository.GetAllReactsAsync();
+            var reacts = await _reactRepository.GetAllAsync();
             if (reacts.ToList().Count==0)
             {
                 return StatusCodeReturn<IEnumerable<React>>
@@ -71,7 +71,7 @@ namespace SocialMedia.Service.ReactService
 
         public async Task<ApiResponse<React>> GetReactByIdAsync(string reactId)
         {
-            var react = await _reactRepository.GetReactByIdAsync(reactId);
+            var react = await _reactRepository.GetByIdAsync(reactId);
             if (react != null)
             {
                 return StatusCodeReturn<React>
@@ -95,13 +95,13 @@ namespace SocialMedia.Service.ReactService
 
         public async Task<ApiResponse<React>> UpdateReactAsync(UpdateReactDto updateReactDto)
         {
-            var reactById = await _reactRepository.GetReactByIdAsync(updateReactDto.Id);
+            var reactById = await _reactRepository.GetByIdAsync(updateReactDto.Id);
             if (reactById != null)
             {
                 var reactByName = await _reactRepository.GetReactByNameAsync(updateReactDto.ReactValue);
                 if (reactByName == null)
                 {
-                    var updatedReact = await _reactRepository.UpdateReactAsync(
+                    var updatedReact = await _reactRepository.UpdateAsync(
                                     ConvertFromDto.ConvertFromReactDto_Update(updateReactDto));
                     return StatusCodeReturn<React>
                             ._200_Success("React updated successfully", updatedReact);
