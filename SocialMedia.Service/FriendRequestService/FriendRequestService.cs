@@ -42,7 +42,7 @@ namespace SocialMedia.Service.FriendRequestService
             {
                 addFriendRequestDto.PersonIdOrUserNameOrEmail = (await _userManagerReturn
                     .GetUserByUserNameOrEmailOrIdAsync(addFriendRequestDto.PersonIdOrUserNameOrEmail)).Id;
-                var friendRequest = await _friendRequestRepository.AddFriendRequestAsync(
+                var friendRequest = await _friendRequestRepository.AddAsync(
                     ConvertFromDto.ConvertFromFriendRequestDto_Add(addFriendRequestDto, user));
                 return StatusCodeReturn<FriendRequest>
                     ._201_Created("Friend request sent ssuccessfully", friendRequest);
@@ -53,13 +53,13 @@ namespace SocialMedia.Service.FriendRequestService
         public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(
             SiteUser user, string friendRequestId)
         {
-            var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
+            var friendRequest = await _friendRequestRepository.GetByIdAsync(friendRequestId);
             if (friendRequest != null)
             {
                 if (friendRequest.UserWhoSendId == user.Id
                 || friendRequest.UserWhoReceivedId == user.Id)
                 {
-                    await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequestId);
+                    await _friendRequestRepository.DeleteByIdAsync(friendRequestId);
                     return StatusCodeReturn<FriendRequest>
                             ._200_Success("Friend request deleted successfully");
                 }
@@ -73,11 +73,11 @@ namespace SocialMedia.Service.FriendRequestService
 
         public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(SiteUser sender, SiteUser receiver)
         {
-            var friendRequest = await _friendRequestRepository.GetFriendRequestByUserAndPersonIdAsync(
+            var friendRequest = await _friendRequestRepository.GetByUserAndPersonIdAsync(
                 sender.Id, receiver.Id);
             if (friendRequest != null)
             {
-                await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequest.Id);
+                await _friendRequestRepository.DeleteByIdAsync(friendRequest.Id);
                 return StatusCodeReturn<FriendRequest>
                         ._200_Success("Friend request deleted successfully");
             }
@@ -87,7 +87,7 @@ namespace SocialMedia.Service.FriendRequestService
 
         public async Task<ApiResponse<IEnumerable<FriendRequest>>> GetAllFriendRequestsAsync()
         {
-            var friendRequsts = await _friendRequestRepository.GetAllFriendRequestsAsync();
+            var friendRequsts = await _friendRequestRepository.GetAllAsync();
             if (friendRequsts.ToList().Count==0)
             {
                 return StatusCodeReturn<IEnumerable<FriendRequest>>
@@ -101,7 +101,7 @@ namespace SocialMedia.Service.FriendRequestService
         public async Task<ApiResponse<FriendRequest>> GetFriendRequestByIdAsync(
             string friendRequestId, SiteUser user)
         {
-            var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(friendRequestId);
+            var friendRequest = await _friendRequestRepository.GetByIdAsync(friendRequestId);
             if (friendRequest != null)
             {
                 if (friendRequest.UserWhoSendId == user.Id
@@ -148,7 +148,7 @@ namespace SocialMedia.Service.FriendRequestService
         public async Task<ApiResponse<FriendRequest>> UpdateFriendRequestAsync(
             UpdateFriendRequestDto updateFriendRequestDto, SiteUser user)
         {     
-            var friendRequest = await _friendRequestRepository.GetFriendRequestByIdAsync(
+            var friendRequest = await _friendRequestRepository.GetByIdAsync(
                 updateFriendRequestDto.FriendRequestId);
             if (friendRequest != null)
             {
@@ -156,7 +156,7 @@ namespace SocialMedia.Service.FriendRequestService
                 {
                     if (updateFriendRequestDto.IsAccepted)
                     {
-                        await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequest.Id);
+                        await _friendRequestRepository.DeleteByIdAsync(friendRequest.Id);
                         await _friendService.AddFriendAsync(
                             new AddFriendDto
                             {
@@ -188,12 +188,12 @@ namespace SocialMedia.Service.FriendRequestService
                     user.Id, askToFriendUser.Id);
                 if (isBlocked == null)
                 {
-                    var isYouFriends = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
+                    var isYouFriends = await _friendsRepository.GetByUserAndFriendIdAsync(
                     user.Id, askToFriendUser.Id);
                     if (isYouFriends == null)
                     {
                         var isFriendRequestSentBefore = await _friendRequestRepository
-                            .GetFriendRequestByUserAndPersonIdAsync(user.Id, askToFriendUser.Id);
+                            .GetByUserAndPersonIdAsync(user.Id, askToFriendUser.Id);
                         if (isFriendRequestSentBefore == null)
                         {
                             if (user.Id != askToFriendUser.Id)

@@ -13,18 +13,19 @@ namespace SocialMedia.Repository.FriendRequestRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<FriendRequest> AddFriendRequestAsync(FriendRequest friendRequest)
+
+        public async Task<FriendRequest> AddAsync(FriendRequest t)
         {
             try
             {
-                await _dbContext.FriendRequests.AddAsync(friendRequest);
+                await _dbContext.FriendRequests.AddAsync(t);
                 await SaveChangesAsync();
                 return new FriendRequest
                 {
-                    Id = friendRequest.Id,
-                    IsAccepted = friendRequest.IsAccepted,
-                    UserWhoReceivedId = friendRequest.UserWhoReceivedId,
-                    UserWhoSendId = friendRequest.UserWhoSendId
+                    Id = t.Id,
+                    IsAccepted = t.IsAccepted,
+                    UserWhoReceivedId = t.UserWhoReceivedId,
+                    UserWhoSendId = t.UserWhoSendId
                 };
             }
             catch (Exception)
@@ -33,11 +34,12 @@ namespace SocialMedia.Repository.FriendRequestRepository
             }
         }
 
-        public async Task<FriendRequest> DeleteFriendRequestByAsync(string friendRequestId)
+
+        public async Task<FriendRequest> DeleteByIdAsync(string id)
         {
             try
             {
-                var friendRequest = await GetFriendRequestByIdAsync(friendRequestId);
+                var friendRequest = await GetByIdAsync(id);
                 _dbContext.Remove(friendRequest);
                 await SaveChangesAsync();
                 friendRequest.User = null;
@@ -49,11 +51,12 @@ namespace SocialMedia.Repository.FriendRequestRepository
             }
         }
 
-        public async Task<IEnumerable<FriendRequest>> GetAllFriendRequestsAsync()
+
+        public async Task<IEnumerable<FriendRequest>> GetAllAsync()
         {
             try
             {
-                return await _dbContext.FriendRequests.Select(e=>new FriendRequest
+                return await _dbContext.FriendRequests.Select(e => new FriendRequest
                 {
                     UserWhoSendId = e.UserWhoSendId,
                     UserWhoReceivedId = e.UserWhoReceivedId,
@@ -67,7 +70,8 @@ namespace SocialMedia.Repository.FriendRequestRepository
             }
         }
 
-        public async Task<FriendRequest> GetFriendRequestByIdAsync(string friendRequestId)
+
+        public async Task<FriendRequest> GetByIdAsync(string id)
         {
             try
             {
@@ -77,7 +81,7 @@ namespace SocialMedia.Repository.FriendRequestRepository
                     UserWhoReceivedId = e.UserWhoReceivedId,
                     IsAccepted = e.IsAccepted,
                     Id = e.Id
-                }).Where(e => e.Id == friendRequestId).FirstOrDefaultAsync())!;
+                }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -85,7 +89,8 @@ namespace SocialMedia.Repository.FriendRequestRepository
             }
         }
 
-        public async Task<FriendRequest> GetFriendRequestByUserAndPersonIdAsync(string userId, string personId)
+
+        public async Task<FriendRequest> GetByUserAndPersonIdAsync(string userId, string personId)
         {
             var user1 = (await _dbContext.FriendRequests.Select(e => new FriendRequest
             {
@@ -111,9 +116,15 @@ namespace SocialMedia.Repository.FriendRequestRepository
             try
             {
                 return
-                    from u in await GetAllFriendRequestsAsync()
+                    from u in await GetAllAsync()
                     where u.UserWhoReceivedId == userId
-                    select u;
+                    select (new FriendRequest
+                    {
+                        Id = u.Id,
+                        IsAccepted = u.IsAccepted,
+                        UserWhoReceivedId = u.UserWhoReceivedId,
+                        UserWhoSendId = u.UserWhoSendId
+                    });
             }
             catch (Exception)
             {
@@ -126,9 +137,15 @@ namespace SocialMedia.Repository.FriendRequestRepository
             try
             {
                 return
-                    from u in await GetAllFriendRequestsAsync()
+                    from u in await GetAllAsync()
                     where u.UserWhoSendId == userId
-                    select u;
+                    select (new FriendRequest
+                    {
+                        Id = u.Id,
+                        IsAccepted = u.IsAccepted,
+                        UserWhoReceivedId = u.UserWhoReceivedId,
+                        UserWhoSendId = u.UserWhoSendId
+                    });
             }
             catch (Exception)
             {
@@ -141,20 +158,27 @@ namespace SocialMedia.Repository.FriendRequestRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<FriendRequest> UpdateFriendRequestAsync(FriendRequest friendRequest)
+        public async Task<FriendRequest> UpdateAsync(FriendRequest t)
         {
             try
             {
-                var friendRequest1 = await GetFriendRequestByIdAsync(friendRequest.Id);
-                friendRequest1.IsAccepted = friendRequest.IsAccepted;
+                var friendRequest1 = await GetByIdAsync(t.Id);
+                friendRequest1.IsAccepted = t.IsAccepted;
                 await SaveChangesAsync();
-                friendRequest1.User = null;
-                return friendRequest1;
+                return new FriendRequest
+                {
+                    UserWhoSendId = friendRequest1.UserWhoSendId,
+                    UserWhoReceivedId = friendRequest1.UserWhoReceivedId,
+                    IsAccepted = friendRequest1.IsAccepted,
+                    Id = friendRequest1.Id
+                };
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        
     }
 }

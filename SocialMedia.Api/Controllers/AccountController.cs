@@ -52,7 +52,7 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles ="Admin")]
         [HttpGet("accessToken")]
-        public async Task<ActionResult<string>> GetAccessToken()
+        public ActionResult<string> GetAccessToken()
         {
             if (HttpContext.User != null && HttpContext.User.Identity != null
                     && HttpContext.User.Identity.Name != null)
@@ -65,7 +65,7 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("decodeJWTToken")]
-        public async Task<ActionResult<object>> DecodeAccessToken(string token)
+        public ActionResult<object> DecodeAccessToken(string token)
         {
             var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
             var decodedToken = DecodeJwt(jwtToken);
@@ -351,7 +351,7 @@ namespace SocialMedia.Api.Controllers
 
         [AllowAnonymous]
         [HttpGet("generatePasswordResetObject")]
-        public async Task<IActionResult> GenerateResetPasswordObject(string email,string token)
+        public ActionResult<object> GenerateResetPasswordObject(string email,string token)
         {
             var resetPasswordObject = new ResetPasswordDto
             {
@@ -416,7 +416,7 @@ namespace SocialMedia.Api.Controllers
 
         [AllowAnonymous]
         [HttpGet("generateEmailResetObject")]
-        public async Task<IActionResult> GenerateEmailResetObject(string oldEmail, string newEmail
+        public IActionResult GenerateEmailResetObject(string oldEmail, string newEmail
             , string token)
         {
             var resetEmailObject = new ResetEmailDto

@@ -18,7 +18,7 @@ namespace SocialMedia.Service.PageService
         }
         public async Task<ApiResponse<Page>> AddPageAsync(AddPageDto addPageDto, SiteUser user)
         {
-            var newPage = await _pageRepository.AddPageAsync(ConvertFromDto.ConvertFromPageDto_Add(
+            var newPage = await _pageRepository.AddAsync(ConvertFromDto.ConvertFromPageDto_Add(
                 addPageDto, user));
             return StatusCodeReturn<Page>
                 ._201_Created("Page created successfully", newPage);
@@ -26,12 +26,12 @@ namespace SocialMedia.Service.PageService
 
         public async Task<ApiResponse<Page>> DeletePageByIdAsync(string pageId, SiteUser user)
         {
-            var page = await _pageRepository.GetPageByIdAsync(pageId);
+            var page = await _pageRepository.GetByIdAsync(pageId);
             if (page != null)
             {
                 if(page.CreatorId == user.Id)
                 {
-                    await _pageRepository.DeletePageByIdAsync(pageId);
+                    await _pageRepository.DeleteByIdAsync(pageId);
                     return StatusCodeReturn<Page>
                         ._200_Success("Page deleted successfully", page);
                 }
@@ -44,7 +44,7 @@ namespace SocialMedia.Service.PageService
 
         public async Task<ApiResponse<Page>> GetPageByIdAsync(string pageId)
         {
-            var page = await _pageRepository.GetPageByIdAsync(pageId);
+            var page = await _pageRepository.GetByIdAsync(pageId);
             if (page != null)
             {
                 return StatusCodeReturn<Page>
@@ -68,12 +68,12 @@ namespace SocialMedia.Service.PageService
 
         public async Task<ApiResponse<Page>> UpdatePageAsync(UpdatePageDto updatePageDto, SiteUser user)
         {
-            var page = await _pageRepository.GetPageByIdAsync(updatePageDto.Id);
+            var page = await _pageRepository.GetByIdAsync(updatePageDto.Id);
             if (page != null)
             {
                 if(user.Id == page.CreatorId)
                 {
-                    var updatedPage = await _pageRepository.UpdatePageAsync(ConvertFromDto
+                    var updatedPage = await _pageRepository.UpdateAsync(ConvertFromDto
                         .ConvertFromPageDto_Update(updatePageDto));
                     return StatusCodeReturn<Page>
                         ._200_Success("Page updated successfully", updatedPage);

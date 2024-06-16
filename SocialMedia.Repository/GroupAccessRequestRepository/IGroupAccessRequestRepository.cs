@@ -1,18 +1,15 @@
 ﻿
 
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.GroupAccessRequestRepository
 {
-    public interface IGroupAccessRequestRepository
+    public interface IGroupAccessRequestRepository : ICrud<GroupAccessRequest>
     {
-        Task<GroupAccessRequest> AddGroupAccessRequestAsync(GroupAccessRequest request);
-        Task<GroupAccessRequest> DeleteGroupAccessRequestByIdAsync(string groupAccessRequestId);
         Task<GroupAccessRequest> DeleteGroupAccessRequestAsync(string groupId, string userId);
         Task<GroupAccessRequest> GetGroupAccessRequestAsync(string groupId, string userId);
-        Task<GroupAccessRequest> GetGroupAccessRequestByIdAsync(string groupAccessRequestId);
         Task<IEnumerable<GroupAccessRequest>> GetGroupAccessRequestsByUserIdAsync(string userId);
         Task<IEnumerable<GroupAccessRequest>> GetGroupAccessRequestsByGroupIdAsync(string groupId);
-        Task SaveChangesAsync();
     }
 }

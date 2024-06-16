@@ -1,19 +1,15 @@
 ﻿
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.PostReactsRepository
 {
-    public interface IPostReactsRepository
+    public interface IPostReactsRepository : ICrud<PostReacts>
     {
 
-        Task<PostReacts> AddPostReactAsync(PostReacts postReacts);
-        Task<PostReacts> UpdatePostReactAsync(PostReacts postReacts);
-        Task<PostReacts> GetPostReactByIdAsync(string Id);
         Task<PostReacts> GetPostReactByUserIdAndPostIdAsync(string userId, string postId);
         Task<PostReacts> DeletePostReactByUserIdAndPostIdAsync(string userId, string postId);
-        Task<PostReacts> DeletePostReactByIdAsync(string Id);
         Task<IEnumerable<PostReacts>> GetPostReactsByPostIdAsync(string postId);
         Task<IEnumerable<PostReacts>> GetPostReactsByUserIdAsync(string userId);
-        Task SaveChangesAsync();
     }
 }

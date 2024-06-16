@@ -13,18 +13,35 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<GroupMemberRole> AddGroupMemberRoleAsync(GroupMemberRole groupMemberRole)
+
+        public async Task<GroupMemberRole> AddAsync(GroupMemberRole t)
         {
             try
             {
-                await _dbContext.GroupMemberRoles.AddAsync(groupMemberRole);
+                await _dbContext.GroupMemberRoles.AddAsync(t);
                 await SaveChangesAsync();
                 return new GroupMemberRole
                 {
-                    Id = groupMemberRole.Id,
-                    GroupMemberId = groupMemberRole.GroupMemberId,
-                    RoleId = groupMemberRole.RoleId
+                    Id = t.Id,
+                    GroupMemberId = t.GroupMemberId,
+                    RoleId = t.RoleId
                 };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<GroupMemberRole> DeleteByIdAsync(string id)
+        {
+            try
+            {
+                var groupMember = await GetByIdAsync(id);
+                _dbContext.GroupMemberRoles.Remove(groupMember);
+                await SaveChangesAsync();
+                return groupMember;
             }
             catch (Exception)
             {
@@ -47,14 +64,28 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
             }
         }
 
-        public async Task<GroupMemberRole> DeleteGroupMemberRoleAsync(string groupMemberRoleId)
+
+        public async Task<IEnumerable<GroupMemberRole>> GetAllAsync()
+        {
+            return await _dbContext.GroupMemberRoles.Select(e=>new GroupMemberRole
+            {
+                Id = e.Id,
+                GroupMemberId = e.GroupMemberId,
+                RoleId = e.RoleId
+            }).ToListAsync();
+        }
+
+        public async Task<GroupMemberRole> GetByIdAsync(string id)
         {
             try
             {
-                var groupMember = await GetGroupMemberRoleAsync(groupMemberRoleId);
-                _dbContext.GroupMemberRoles.Remove(groupMember);
-                await SaveChangesAsync();
-                return groupMember;
+                return (await _dbContext.GroupMemberRoles.Select(e => new GroupMemberRole
+                {
+                    RoleId = e.RoleId,
+                    Id = e.Id,
+                    GroupMemberId = e.GroupMemberId
+                }).Where(e => e.Id == id)
+                    .FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -73,24 +104,6 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
                     GroupMemberId = e.GroupMemberId
                 }).Where(e => e.RoleId == roleId)
                     .Where(e=>e.GroupMemberId==groupMemberId).FirstOrDefaultAsync())!;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<GroupMemberRole> GetGroupMemberRoleAsync(string groupMemberRoleId)
-        {
-            try
-            {
-                return (await _dbContext.GroupMemberRoles.Select(e => new GroupMemberRole
-                {
-                    RoleId = e.RoleId,
-                    Id = e.Id,
-                    GroupMemberId = e.GroupMemberId
-                }).Where(e => e.Id == groupMemberRoleId)
-                    .FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -122,5 +135,9 @@ namespace SocialMedia.Repository.GroupMemberRoleRepository
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<GroupMemberRole> UpdateAsync(GroupMemberRole t)
+        {
+            return await DeleteByIdAsync(t.Id);
+        }
     }
 }

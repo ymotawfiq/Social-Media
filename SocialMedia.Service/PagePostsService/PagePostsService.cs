@@ -26,7 +26,7 @@ namespace SocialMedia.Service.PagePostsService
         public async Task<ApiResponse<object>> AddPagePostAsync(
             AddPagePostDto addPagePostDto, SiteUser user)
         {
-            var page = await _pageRepository.GetPageByIdAsync(addPagePostDto.PageId);
+            var page = await _pageRepository.GetByIdAsync(addPagePostDto.PageId);
             if (page != null)
             {
                 if(page.CreatorId == user.Id)
@@ -38,7 +38,7 @@ namespace SocialMedia.Service.PagePostsService
                     });
                     if (postDto.IsSuccess && postDto.ResponseObject != null && postDto != null)
                     {
-                        var newPagePost = await _pagePostsRepository.AddPagePostAsync(new Data.Models.PagePost
+                        var newPagePost = await _pagePostsRepository.AddAsync(new PagePost
                         {
                             Id = Guid.NewGuid().ToString(),
                             PageId = addPagePostDto.PageId,
@@ -57,7 +57,7 @@ namespace SocialMedia.Service.PagePostsService
 
         public async Task<ApiResponse<object>> DeletePagePostByIdAsync(string pagePostId, SiteUser user)
         {
-            var pagePost = await _pagePostsRepository.GetPagePostByIdAsync(pagePostId);
+            var pagePost = await _pagePostsRepository.GetByIdAsync(pagePostId);
             if (pagePost != null)
             {
                 var userPost = await _postService.GetPostByIdAsync(user, pagePost.PostId);
@@ -89,7 +89,7 @@ namespace SocialMedia.Service.PagePostsService
 
         public async Task<ApiResponse<object>> GetPagePostByIdAsync(string pagePostId)
         {
-            var pagePost = await _pagePostsRepository.GetPagePostByIdAsync(pagePostId);
+            var pagePost = await _pagePostsRepository.GetByIdAsync(pagePostId);
             if (pagePost != null)
             {
                 return StatusCodeReturn<object>

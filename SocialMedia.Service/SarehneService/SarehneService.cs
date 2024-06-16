@@ -26,12 +26,12 @@ namespace SocialMedia.Service.SarehneService
 
         public async Task<ApiResponse<SarehneMessage>> DeleteMessageAsync(string messageId, SiteUser user)
         {
-            var message = await _sarehneRepository.GetMessageAsync(messageId);
+            var message = await _sarehneRepository.GetByIdAsync(messageId);
             if (message != null)
             {
                 if (message.ReceiverId == user.Id)
                 {
-                    await _sarehneRepository.DeleteMessageAsync(messageId);
+                    await _sarehneRepository.DeleteByIdAsync(messageId);
                     return StatusCodeReturn<SarehneMessage>
                         ._200_Success("Message deleted successfully", message);
                 }
@@ -44,7 +44,7 @@ namespace SocialMedia.Service.SarehneService
 
         public async Task<ApiResponse<SarehneMessage>> GetMessageAsync(string messageId, SiteUser user)
         {
-            var message = await _sarehneRepository.GetMessageAsync(messageId);
+            var message = await _sarehneRepository.GetByIdAsync(messageId);
             if (message != null)
             {
                 var policy = await _policyService.GetPolicyByNameAsync("public");
@@ -110,7 +110,7 @@ namespace SocialMedia.Service.SarehneService
                 var policy = await _policyService.GetPolicyByNameAsync("private");
                 if(policy != null && policy.ResponseObject != null)
                 {
-                    var newMessage = await _sarehneRepository.SendMessageAsync(ConvertFromDto
+                    var newMessage = await _sarehneRepository.AddAsync(ConvertFromDto
                     .ConvertFromSendSarehneMessageDto(sendSarahaMessageDto, user!, receiver, 
                     policy.ResponseObject));
                     return StatusCodeReturn<SarehneMessage>
@@ -126,7 +126,7 @@ namespace SocialMedia.Service.SarehneService
         public async Task<ApiResponse<SarehneMessage>> UpdateMessagePolicyAsync(
             UpdateSarehneMessagePolicyDto updateSarehneMessagePolicyDto, SiteUser user)
         {
-            var message = await _sarehneRepository.GetMessageAsync(updateSarehneMessagePolicyDto.MessageId);
+            var message = await _sarehneRepository.GetByIdAsync(updateSarehneMessagePolicyDto.MessageId);
             if (message != null)
             {
                 var policy = await _policyService.GetPolicyByIdOrNameAsync(
@@ -138,7 +138,7 @@ namespace SocialMedia.Service.SarehneService
                         if (user.Id == message.ReceiverId)
                         {
                             updateSarehneMessagePolicyDto.PolicyIdOrName = policy.ResponseObject.Id;
-                            var updatedMessage = await _sarehneRepository.UpdateMessagePolicyAsync(
+                            var updatedMessage = await _sarehneRepository.UpdateAsync(
                                 ConvertFromDto.ConvertFromUpdateSarehneMessagePolicyDto(
                                     updateSarehneMessagePolicyDto, message));
                             return StatusCodeReturn<SarehneMessage>

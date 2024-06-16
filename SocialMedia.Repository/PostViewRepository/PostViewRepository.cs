@@ -13,23 +13,53 @@ namespace SocialMedia.Repository.PostViewRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<PostView> AddPostViewAsync(PostView postView)
+
+        public async Task<PostView> AddAsync(PostView t)
         {
             try
             {
-                await _dbContext.PostViews.AddAsync(postView);
+                await _dbContext.PostViews.AddAsync(t);
                 await SaveChangesAsync();
                 return new PostView
                 {
-                    Id = postView.Id,
-                    PostId = postView.PostId,
-                    ViewNumber = postView.ViewNumber
+                    Id = t.Id,
+                    PostId = t.PostId,
+                    ViewNumber = t.ViewNumber
                 };
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+
+        public async Task<PostView> DeleteByIdAsync(string id)
+        {
+            var postView = await GetByIdAsync(id);
+            _dbContext.PostViews.Remove(postView);
+            await SaveChangesAsync();
+            return postView;
+        }
+
+        public async Task<IEnumerable<PostView>> GetAllAsync()
+        {
+            return await _dbContext.PostViews.Select(e=>new PostView
+            {
+                Id = e.Id,
+                PostId = e.PostId,
+                ViewNumber = e.ViewNumber
+            }).ToListAsync();
+        }
+
+        public async Task<PostView> GetByIdAsync(string id)
+        {
+            return (await _dbContext.PostViews.Select(e => new PostView
+            {
+                Id = e.Id,
+                PostId = e.PostId,
+                ViewNumber = e.ViewNumber
+            }).FirstOrDefaultAsync())!;
         }
 
         public async Task<PostView> GetPostViewByPostIdAsync(string postId)
@@ -53,7 +83,7 @@ namespace SocialMedia.Repository.PostViewRepository
         {
             try
             {
-                return from v in await _dbContext.PostViews.ToListAsync()
+                return from v in await GetAllAsync()
                        where v.PostId == postId
                        select (new PostView
                        {
@@ -73,13 +103,13 @@ namespace SocialMedia.Repository.PostViewRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<PostView> UpdatePostViewAsync(PostView postView)
+        public async Task<PostView> UpdateAsync(PostView t)
         {
             try
             {
-                var postView1 = await GetPostViewByPostIdAsync(postView.PostId);
-                postView1.ViewNumber = postView.ViewNumber++;
-                _dbContext.PostViews.Update(postView);
+                var postView1 = await GetPostViewByPostIdAsync(t.PostId);
+                postView1.ViewNumber = t.ViewNumber++;
+                _dbContext.PostViews.Update(t);
                 await SaveChangesAsync();
                 return postView1;
             }
@@ -88,5 +118,7 @@ namespace SocialMedia.Repository.PostViewRepository
                 throw;
             }
         }
+
+        
     }
 }

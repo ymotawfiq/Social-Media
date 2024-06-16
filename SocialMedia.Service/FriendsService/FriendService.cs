@@ -26,7 +26,7 @@ namespace SocialMedia.Service.FriendsService
         }
         public async Task<ApiResponse<Friend>> AddFriendAsync(AddFriendDto addFriendDto)
         {
-            var existFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(addFriendDto.UserId,
+            var existFriend = await _friendsRepository.GetByUserAndFriendIdAsync(addFriendDto.UserId,
                 addFriendDto.FriendId);
             if (existFriend == null)
             {
@@ -34,7 +34,7 @@ namespace SocialMedia.Service.FriendsService
                     addFriendDto.FriendId, addFriendDto.UserId);
                 if (isBlocked == null)
                 {
-                    var newFriend = await _friendsRepository.AddFriendAsync(
+                    var newFriend = await _friendsRepository.AddAsync(
                     ConvertFromDto.ConvertFromFriendtDto_Add(addFriendDto));
                     return StatusCodeReturn<Friend>
                         ._201_Created("Friend added successfully to your friend list", newFriend);
@@ -50,7 +50,7 @@ namespace SocialMedia.Service.FriendsService
         {
             if (userId != friendId)
             {
-                var isYourFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
+                var isYourFriend = await _friendsRepository.GetByUserAndFriendIdAsync(userId, friendId);
                 if (isYourFriend != null)
                 {
                     await _friendsRepository.DeleteFriendAsync(userId, friendId);
@@ -62,6 +62,24 @@ namespace SocialMedia.Service.FriendsService
             }
             return StatusCodeReturn<Friend>
                 ._403_Forbidden();
+        }
+
+        public async Task<ApiResponse<Friend>> DeleteFriendAsync(string id, SiteUser user)
+        {
+            var friendship = await _friendsRepository.GetByIdAsync(id);
+            if (friendship != null)
+            {
+                if(friendship.UserId == user.Id || friendship.FriendId == user.Id)
+                {
+                    var deletedFriendShip = await _friendsRepository.DeleteByIdAsync(id);
+                    return StatusCodeReturn<Friend>
+                        ._200_Success("Unfriend successfully", deletedFriendShip);
+                }
+                return StatusCodeReturn<Friend>
+                    ._403_Forbidden();
+            }
+            return StatusCodeReturn<Friend>
+                    ._404_NotFound("Friendship not found");
         }
 
         public async Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user, 
@@ -108,7 +126,7 @@ namespace SocialMedia.Service.FriendsService
 
         public async Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId)
         {
-            var check = await _friendsRepository.GetFriendByUserAndFriendIdAsync(userId, friendId);
+            var check = await _friendsRepository.GetByUserAndFriendIdAsync(userId, friendId);
             if (check == null)
             {
                 return StatusCodeReturn<bool>

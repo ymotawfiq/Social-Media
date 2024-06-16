@@ -2,16 +2,12 @@
 
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.PageRepository
 {
-    public interface IPageRepository
+    public interface IPageRepository : ICrud<Page>
     {
-        Task<Page> AddPageAsync(Page page);
-        Task<Page> UpdatePageAsync(Page page);
-        Task<Page> GetPageByIdAsync(string pageId);
-        Task<Page> DeletePageByIdAsync(string pageId);
         Task<IEnumerable<Page>> GetPagesByUserIdAsync(string userId);
-        Task SaveChangesAsync();
     }
 }

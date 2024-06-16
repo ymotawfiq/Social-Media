@@ -14,17 +14,18 @@ namespace SocialMedia.Repository.GroupRoleRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<GroupRole> AddGroupRoleAsync(GroupRole groupRole)
+
+        public async Task<GroupRole> AddAsync(GroupRole t)
         {
             try
             {
-                groupRole.RoleName = groupRole.RoleName.ToUpper();
-                await _dbContext.GroupRoles.AddAsync(groupRole);
+                t.RoleName = t.RoleName.ToUpper();
+                await _dbContext.GroupRoles.AddAsync(t);
                 await SaveChangesAsync();
                 return new GroupRole
                 {
-                    Id = groupRole.Id,
-                    RoleName = groupRole.RoleName
+                    Id = t.Id,
+                    RoleName = t.RoleName
                 };
             }
             catch (Exception)
@@ -33,11 +34,12 @@ namespace SocialMedia.Repository.GroupRoleRepository
             }
         }
 
-        public async Task<GroupRole> DeleteGroupRoleByIdAsync(string groupRoleId)
+
+        public async Task<GroupRole> DeleteByIdAsync(string id)
         {
             try
             {
-                var groupRole = await GetGroupRoleByIdAsync(groupRoleId);
+                var groupRole = await GetByIdAsync(id);
                 _dbContext.GroupRoles.Remove(groupRole);
                 await SaveChangesAsync();
                 return groupRole;
@@ -64,7 +66,23 @@ namespace SocialMedia.Repository.GroupRoleRepository
             }
         }
 
-        public async Task<GroupRole> GetGroupRoleByIdAsync(string groupRoleId)
+        public async Task<IEnumerable<GroupRole>> GetAllAsync()
+        {
+            try
+            {
+                return await _dbContext.GroupRoles.Select(e => new GroupRole
+                {
+                    RoleName = e.RoleName,
+                    Id = e.Id
+                }).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<GroupRole> GetByIdAsync(string id)
         {
             try
             {
@@ -72,13 +90,14 @@ namespace SocialMedia.Repository.GroupRoleRepository
                 {
                     RoleName = e.RoleName,
                     Id = e.Id
-                }).Where(e => e.Id == groupRoleId).FirstOrDefaultAsync())!;
+                }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         public async Task<GroupRole> GetGroupRoleByRoleNameAsync(string groupRoleName)
         {
@@ -98,34 +117,18 @@ namespace SocialMedia.Repository.GroupRoleRepository
             }
         }
 
-        public async Task<IEnumerable<GroupRole>> GetGroupRolesAsync()
-        {
-            try
-            {
-                return await _dbContext.GroupRoles.Select(e => new GroupRole
-                {
-                    RoleName = e.RoleName,
-                    Id = e.Id
-                }).ToListAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<GroupRole> UpdateGroupRoleAsync(GroupRole groupRole)
+        public async Task<GroupRole> UpdateAsync(GroupRole t)
         {
             try
             {
-                groupRole.RoleName = groupRole.RoleName.ToUpper();
-                var existGroupRole = await GetGroupRoleByIdAsync(groupRole.Id);
-                existGroupRole.RoleName = groupRole.RoleName;
+                t.RoleName = t.RoleName.ToUpper();
+                var existGroupRole = await GetByIdAsync(t.Id);
+                existGroupRole.RoleName = t.RoleName;
                 await SaveChangesAsync();
                 return existGroupRole;
             }
@@ -134,5 +137,7 @@ namespace SocialMedia.Repository.GroupRoleRepository
                 throw;
             }
         }
+
+        
     }
 }

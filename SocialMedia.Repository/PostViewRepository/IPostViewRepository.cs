@@ -1,14 +1,12 @@
 ﻿
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.PostViewRepository
 {
-    public interface IPostViewRepository
+    public interface IPostViewRepository : ICrud<PostView>
     {
-        Task<PostView> AddPostViewAsync(PostView postView);
-        Task<PostView> UpdatePostViewAsync(PostView postView);
         Task<IEnumerable<PostView>> GetPostViews(string postId);
         Task<PostView> GetPostViewByPostIdAsync(string postId);
-        Task SaveChangesAsync();
     }
 }

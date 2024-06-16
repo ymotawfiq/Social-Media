@@ -3,33 +3,22 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Data.Models;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.FriendRequestRepository;
+
 
 namespace SocialMedia.Repository.FriendsRepository
 {
     public class FriendsRepository : IFriendsRepository
     {
+
         private readonly ApplicationDbContext _dbContext;
         public FriendsRepository(ApplicationDbContext _dbContext)
         {
             this._dbContext = _dbContext;
         }
-        public async Task<Friend> AddFriendAsync(Friend friend)
-        {
-            await _dbContext.Friends.AddAsync(friend);
-            await SaveChangesAsync();
-            return new Friend
-            {
-                Id = friend.Id,
-                FriendId = friend.FriendId,
-                UserId = friend.UserId
-            };
-        }
 
         public async Task<Friend> DeleteFriendAsync(string userId, string friendId)
         {
-            var friend = await GetFriendByUserAndFriendIdAsync(userId, friendId);
+            var friend = await GetByUserAndFriendIdAsync(userId, friendId);
             _dbContext.Friends.Remove(friend);
             await SaveChangesAsync();
             friend.User = null;
@@ -39,7 +28,7 @@ namespace SocialMedia.Repository.FriendsRepository
         public async Task<IEnumerable<Friend>> GetAllUserFriendsAsync(string userId)
         {
             return
-                from f in await _dbContext.Friends.ToListAsync()
+                from f in await GetAllAsync()
                 where f.UserId == userId || f.FriendId==userId
                 select (new Friend
                 {
@@ -49,7 +38,7 @@ namespace SocialMedia.Repository.FriendsRepository
                 });
         }
 
-        public async Task<Friend> GetFriendByUserAndFriendIdAsync(string userId, string friendId)
+        public async Task<Friend> GetByUserAndFriendIdAsync(string userId, string friendId)
         {
             var friend1 = (await _dbContext.Friends.Select(e => new Friend
             {
@@ -109,6 +98,56 @@ namespace SocialMedia.Repository.FriendsRepository
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Friend> AddAsync(Friend t)
+        {
+            await _dbContext.Friends.AddAsync(t);
+            await SaveChangesAsync();
+            return new Friend
+            {
+                Id = t.Id,
+                FriendId = t.FriendId,
+                UserId = t.UserId
+            };
+        }
+
+        public async Task<Friend> UpdateAsync(Friend t)
+        {
+            return await DeleteByIdAsync(t.Id);
+        }
+
+        public async Task<Friend> DeleteByIdAsync(string id)
+        {
+            var friend = await GetByIdAsync(id);
+            _dbContext.Friends.Remove(friend);
+            await SaveChangesAsync();
+            return new Friend
+            {
+                Id = friend.Id,
+                FriendId = friend.FriendId,
+                UserId = friend.UserId
+            };
+        }
+
+        public async Task<Friend> GetByIdAsync(string id)
+        {
+            return (await _dbContext.Friends.Select(e => new Friend
+            {
+                FriendId = e.FriendId,
+                Id = e.Id,
+                UserId = e.UserId
+            }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
+        }
+
+        public async Task<IEnumerable<Friend>> GetAllAsync()
+        {
+            return await _dbContext.Friends.Select(e=>new Friend
+            {
+                UserId = e.UserId,
+                Id = e.Id,
+                FriendId = e.FriendId
+            }).ToListAsync();
         }
     }
 }

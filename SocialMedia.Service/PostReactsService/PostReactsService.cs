@@ -55,7 +55,7 @@ namespace SocialMedia.Service.PostReactsService
                         if (existPostReact == null)
                         {
                             addPostReactDto.ReactId = postReact.Id;
-                            var newPostReact = await _postReactsRepository.AddPostReactAsync(
+                            var newPostReact = await _postReactsRepository.AddAsync(
                             ConvertFromDto.ConvertFromPostReactsDto_Add(addPostReactDto, user));
                             return StatusCodeReturn<PostReacts>
                                 ._201_Created("Reacted successfully", newPostReact);
@@ -74,7 +74,7 @@ namespace SocialMedia.Service.PostReactsService
 
         public async Task<ApiResponse<PostReacts>> DeletePostReactByIdAsync(string Id, SiteUser user)
         {
-            var postReact = await _postReactsRepository.GetPostReactByIdAsync(Id);
+            var postReact = await _postReactsRepository.GetByIdAsync(Id);
             if (postReact != null)
             {
                 var post = await _postRepository.GetPostByIdAsync(postReact.PostId);
@@ -82,7 +82,7 @@ namespace SocialMedia.Service.PostReactsService
                 {
                     if (user.Id == postReact.UserId)
                     {
-                        await _postReactsRepository.DeletePostReactByIdAsync(Id);
+                        await _postReactsRepository.DeleteByIdAsync(Id);
                         return StatusCodeReturn<PostReacts>
                             ._200_Success("Post react deleted successfully");
                     }
@@ -106,7 +106,7 @@ namespace SocialMedia.Service.PostReactsService
                 {
                     if (userId == postReact.UserId)
                     {
-                        await _postReactsRepository.DeletePostReactByIdAsync(postReact.Id);
+                        await _postReactsRepository.DeleteByIdAsync(postReact.Id);
                         return StatusCodeReturn<PostReacts>
                             ._200_Success("Post react deleted successfully");
                     }
@@ -121,7 +121,7 @@ namespace SocialMedia.Service.PostReactsService
 
         public async Task<ApiResponse<PostReacts>> GetPostReactByIdAsync(SiteUser user, string Id)
         {
-            var postReact = await _postReactsRepository.GetPostReactByIdAsync(Id);
+            var postReact = await _postReactsRepository.GetByIdAsync(Id);
             if (postReact != null)
             {
                 var post = await _postRepository.GetPostByIdAsync(postReact.PostId);
@@ -200,7 +200,7 @@ namespace SocialMedia.Service.PostReactsService
         public async Task<ApiResponse<PostReacts>> UpdatePostReactAsync(UpdatePostReactDto updatePostReactDto,
             SiteUser user)
         {
-            var postReact = await _postReactsRepository.GetPostReactByIdAsync(updatePostReactDto.Id);
+            var postReact = await _postReactsRepository.GetByIdAsync(updatePostReactDto.Id);
             if (postReact != null)
             {
                 var post = await _postRepository.GetPostByIdAsync(updatePostReactDto.PostId);
@@ -212,7 +212,7 @@ namespace SocialMedia.Service.PostReactsService
                         if (react != null)
                         {
                             postReact.PostReactId = updatePostReactDto.ReactId;
-                            postReact = await _postReactsRepository.UpdatePostReactAsync(postReact);
+                            postReact = await _postReactsRepository.UpdateAsync(postReact);
                             return StatusCodeReturn<PostReacts>
                                 ._200_Success("Post react updated successfully", postReact);
                         }

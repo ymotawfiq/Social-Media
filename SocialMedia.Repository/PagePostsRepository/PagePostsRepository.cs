@@ -15,35 +15,49 @@ namespace SocialMedia.Repository.PagePostsRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<PagePost> AddPagePostAsync(PagePost pagePost)
+
+        public async Task<PagePost> AddAsync(PagePost t)
         {
-            await _dbContext.PagePosts.AddAsync(pagePost);
+            await _dbContext.PagePosts.AddAsync(t);
             await SaveChangesAsync();
             return new PagePost
             {
-                Id = pagePost.Id,
-                PageId = pagePost.PageId,
-                PostId = pagePost.PostId
+                Id = t.Id,
+                PageId = t.PageId,
+                PostId = t.PostId
             };
         }
 
-        public async Task<PagePost> DeletePagePostByIdAsync(string pagePostId)
+
+        public async Task<PagePost> DeleteByIdAsync(string id)
         {
-            var pagePost = await GetPagePostByIdAsync(pagePostId);
+            var pagePost = await GetByIdAsync(id);
             _dbContext.PagePosts.Remove(pagePost);
             await SaveChangesAsync();
             return pagePost;
         }
 
-        public async Task<PagePost> GetPagePostByIdAsync(string pagePostId)
+
+        public async Task<IEnumerable<PagePost>> GetAllAsync()
         {
-            return (await _dbContext.PagePosts.Select(e=>new PagePost
+            return await _dbContext.PagePosts.Select(e=>new PagePost
+            {
+                PostId = e.PostId,
+                Id = e.Id,
+                PageId = e.PageId
+            }).ToListAsync();
+        }
+
+        public async Task<PagePost> GetByIdAsync(string id)
+        {
+            return (await _dbContext.PagePosts.Select(e => new PagePost
             {
                 PostId = e.PostId,
                 PageId = e.PageId,
                 Id = e.Id
-            }).Where(e => e.Id == pagePostId).FirstOrDefaultAsync())!;
+            }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
         }
+
 
         public async Task<PagePost> GetPagePostByPostIdAsync(string postId)
         {
@@ -58,6 +72,11 @@ namespace SocialMedia.Repository.PagePostsRepository
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<PagePost> UpdateAsync(PagePost t)
+        {
+            return await DeleteByIdAsync(t.Id);
         }
     }
 }

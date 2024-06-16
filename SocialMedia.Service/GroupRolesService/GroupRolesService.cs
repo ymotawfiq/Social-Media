@@ -23,7 +23,7 @@ namespace SocialMedia.Service.GroupRolesService
             {
                 if (policies.GroupRoles.Contains(addGroupRoleDto.RoleName.ToUpper()))
                 {
-                    var newGroupRole = await _groupRoleRepository.AddGroupRoleAsync(ConvertFromDto
+                    var newGroupRole = await _groupRoleRepository.AddAsync(ConvertFromDto
                     .ConvertFromGroupRoleDto_Add(addGroupRoleDto));
                     return StatusCodeReturn<object>
                         ._201_Created("Group role added successfully", newGroupRole);
@@ -37,10 +37,10 @@ namespace SocialMedia.Service.GroupRolesService
 
         public async Task<object> DeleteGroupRoleByIdAsync(string groupRoleId)
         {
-            var groupRole = await _groupRoleRepository.GetGroupRoleByIdAsync(groupRoleId);
+            var groupRole = await _groupRoleRepository.GetByIdAsync(groupRoleId);
             if (groupRole != null)
             {
-                await _groupRoleRepository.DeleteGroupRoleByIdAsync(groupRoleId);
+                await _groupRoleRepository.DeleteByIdAsync(groupRoleId);
                 return StatusCodeReturn<object>
                     ._200_Success("Group role deleted successfully", groupRole);
             }
@@ -63,7 +63,7 @@ namespace SocialMedia.Service.GroupRolesService
 
         public async Task<object> GetGroupRoleByIdAsync(string groupRoleId)
         {
-            var groupRole = await _groupRoleRepository.GetGroupRoleByIdAsync(groupRoleId);
+            var groupRole = await _groupRoleRepository.GetByIdAsync(groupRoleId);
             if (groupRole != null)
             {
                 return StatusCodeReturn<object>
@@ -87,7 +87,7 @@ namespace SocialMedia.Service.GroupRolesService
 
         public async Task<object> GetGroupRolesAsync()
         {
-            var groupRoles = await _groupRoleRepository.GetGroupRolesAsync();
+            var groupRoles = await _groupRoleRepository.GetAllAsync();
             if (groupRoles.ToList().Count == 0)
             {
                 return StatusCodeReturn<object>
@@ -99,7 +99,7 @@ namespace SocialMedia.Service.GroupRolesService
 
         public async Task<object> UpdateGroupRoleAsync(UpdateGroupRoleDto updateGroupRoleDto)
         {
-            var groupRoleById = await _groupRoleRepository.GetGroupRoleByIdAsync(updateGroupRoleDto.Id);
+            var groupRoleById = await _groupRoleRepository.GetByIdAsync(updateGroupRoleDto.Id);
             if (groupRoleById != null)
             {
                 var groupRoleByName = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(
@@ -108,7 +108,7 @@ namespace SocialMedia.Service.GroupRolesService
                 {
                     if (policies.GroupRoles.Contains(updateGroupRoleDto.RoleName.ToUpper()))
                     {
-                        var updatedGroupRole = await _groupRoleRepository.UpdateGroupRoleAsync(
+                        var updatedGroupRole = await _groupRoleRepository.UpdateAsync(
                         ConvertFromDto.ConvertFromGroupRoleDto_Update(updateGroupRoleDto));
                         return StatusCodeReturn<object>
                             ._200_Success("Group role updated successfully", updatedGroupRole);

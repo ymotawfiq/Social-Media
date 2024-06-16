@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.Models.Authentication;
+﻿using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 
@@ -116,8 +114,8 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpDelete("unFriend/{friendIdOrUserNameOrEmail}")]
-        public async Task<IActionResult> DeleteFriendAsync([FromRoute] string friendIdOrUserNameOrEmail)
+        [HttpDelete("unFriendByUser/{friendIdOrUserNameOrEmail}")]
+        public async Task<IActionResult> DeleteFriendByUserAsync([FromRoute] string friendIdOrUserNameOrEmail)
         {
             {
                 try
@@ -138,6 +136,36 @@ namespace SocialMedia.Api.Controllers
                             }
                             return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                                 ._404_NotFound("User not found in your friend list"));
+                        }
+                        return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                                ._404_NotFound("User not found"));
+                    }
+                    return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+                }
+            }
+        }
+
+        [HttpDelete("unFriendById/{friendShipId}")]
+        public async Task<IActionResult> DeleteFriendShipByIdAsync([FromRoute] string friendShipId)
+        {
+            {
+                try
+                {
+                    if (HttpContext.User != null && HttpContext.User.Identity != null
+                        && HttpContext.User.Identity.Name != null)
+                    {
+                        var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                        if (user != null)
+                        {
+                            var response = await _friendService.DeleteFriendAsync(friendShipId, user.Id);
+                            return Ok(response);
                         }
                         return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
                                 ._404_NotFound("User not found"));

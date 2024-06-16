@@ -1,18 +1,14 @@
 ﻿
 
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.BlockRepository
 {
-    public interface IBlockRepository
+    public interface IBlockRepository : ICrud<Block>
     {
-        Task<Block> BlockUserAsync(Block block);
-        Task<Block> UnBlockUserAsync(Block block);
-        Task<Block> GetBlockByIdAsync(string blockId);
         Task<Block> GetBlockByIdAndUserIdAsync(string blockId, string userId);
         Task<Block> GetBlockByUserIdAndBlockedUserIdAsync(string userId, string blockedUserId);
         Task<IEnumerable<Block>> GetUserBlockListAsync(string userId);
-        Task<IEnumerable<Block>> GetBlockListAsync();
-        Task SaveChangesAsync();
     }
 }

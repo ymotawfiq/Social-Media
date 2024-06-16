@@ -34,7 +34,7 @@ namespace SocialMedia.Service.GroupPostsService
         }
         public async Task<object> AddGroupPostAsync(AddGroupPostDto addGroupPostDto, SiteUser user)
         {
-            var group = await _groupRepository.GetGroupByIdAsync(addGroupPostDto.GroupId);
+            var group = await _groupRepository.GetByIdAsync(addGroupPostDto.GroupId);
             if (group != null)
             {
                 var newPost = await _postService.AddPostAsync(user, new AddPostDto
@@ -44,7 +44,7 @@ namespace SocialMedia.Service.GroupPostsService
                 });
                 if (newPost.ResponseObject != null)
                 {
-                    var groupPost = await _groupPostsRepository.AddGroupPostAsync(new GroupPost
+                    var groupPost = await _groupPostsRepository.AddAsync(new GroupPost
                     {
                         GroupId = addGroupPostDto.GroupId,
                         Id = Guid.NewGuid().ToString(),
@@ -62,7 +62,7 @@ namespace SocialMedia.Service.GroupPostsService
 
         public async Task<ApiResponse<GroupPost>> DeleteGroupPostByIdAsync(string groupPostId, SiteUser user)
         {
-            var groupPost = await _groupPostsRepository.GetGroupPostByIdAsync(groupPostId);
+            var groupPost = await _groupPostsRepository.GetByIdAsync(groupPostId);
             if (groupPost != null)
             {
                 if(groupPost.UserId == user.Id)
@@ -80,11 +80,11 @@ namespace SocialMedia.Service.GroupPostsService
 
         public async Task<ApiResponse<GroupPost>> GetGroupPostByIdAsync(string groupPostId)
         {
-            var groupPost = await _groupPostsRepository.GetGroupPostByIdAsync(groupPostId);
+            var groupPost = await _groupPostsRepository.GetByIdAsync(groupPostId);
             if (groupPost != null)
             {
                 var policy = await _policyService.GetPolicyByIdAsync((await _groupRepository
-                    .GetGroupByIdAsync(groupPost.GroupId)).GroupPolicyId);
+                    .GetByIdAsync(groupPost.GroupId)).GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
@@ -105,11 +105,11 @@ namespace SocialMedia.Service.GroupPostsService
 
         public async Task<ApiResponse<GroupPost>> GetGroupPostByIdAsync(string groupPostId, SiteUser user)
         {
-            var groupPost = await _groupPostsRepository.GetGroupPostByIdAsync(groupPostId);
+            var groupPost = await _groupPostsRepository.GetByIdAsync(groupPostId);
             if (groupPost != null)
             {
                 var policy = await _policyService.GetPolicyByIdAsync((await _groupRepository
-                    .GetGroupByIdAsync(groupPost.GroupId)).GroupPolicyId);
+                    .GetByIdAsync(groupPost.GroupId)).GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
@@ -140,7 +140,7 @@ namespace SocialMedia.Service.GroupPostsService
         public async Task<ApiResponse<IEnumerable<GroupPost>>> GetGroupPostsAsync(
             string groupId, SiteUser user)
         {
-            var group = await _groupRepository.GetGroupByIdAsync(groupId);
+            var group = await _groupRepository.GetByIdAsync(groupId);
             if (group != null)
             {
                 var policy = await _policyService.GetPolicyByIdAsync(group.GroupPolicyId);
@@ -157,7 +157,7 @@ namespace SocialMedia.Service.GroupPostsService
 
         public async Task<ApiResponse<IEnumerable<GroupPost>>> GetGroupPostsAsync(string groupId)
         {
-            var group = await _groupRepository.GetGroupByIdAsync(groupId);
+            var group = await _groupRepository.GetByIdAsync(groupId);
             if (group != null)
             {
                 var policy = await _policyService.GetPolicyByIdAsync(group.GroupPolicyId);

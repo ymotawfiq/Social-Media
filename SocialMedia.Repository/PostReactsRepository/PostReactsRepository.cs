@@ -13,18 +13,19 @@ namespace SocialMedia.Repository.PostReactsRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<PostReacts> AddPostReactAsync(PostReacts postReacts)
+
+        public async Task<PostReacts> AddAsync(PostReacts t)
         {
             try
             {
-                await _dbContext.PostReacts.AddAsync(postReacts);
+                await _dbContext.PostReacts.AddAsync(t);
                 await SaveChangesAsync();
                 return new PostReacts
                 {
-                    UserId = postReacts.UserId,
-                    Id = postReacts.Id,
-                    PostId = postReacts.PostId,
-                    PostReactId = postReacts.PostReactId
+                    UserId = t.UserId,
+                    Id = t.Id,
+                    PostId = t.PostId,
+                    PostReactId = t.PostReactId
                 };
             }
             catch (Exception)
@@ -33,11 +34,11 @@ namespace SocialMedia.Repository.PostReactsRepository
             }
         }
 
-        public async Task<PostReacts> DeletePostReactByIdAsync(string Id)
+        public async Task<PostReacts> DeleteByIdAsync(string id)
         {
             try
             {
-                var postReact = await GetPostReactByIdAsync(Id);
+                var postReact = await GetByIdAsync(id);
                 _dbContext.PostReacts.Remove(postReact);
                 await SaveChangesAsync();
                 return postReact;
@@ -63,11 +64,22 @@ namespace SocialMedia.Repository.PostReactsRepository
             }
         }
 
-        public async Task<PostReacts> GetPostReactByIdAsync(string Id)
+        public async Task<IEnumerable<PostReacts>> GetAllAsync()
+        {
+            return await _dbContext.PostReacts.Select(e=>new PostReacts
+            {
+                UserId = e.UserId,
+                PostId = e.PostId,
+                Id = e.Id,
+                PostReactId = e.PostReactId
+            }).ToListAsync();
+        }
+
+        public async Task<PostReacts> GetByIdAsync(string id)
         {
             try
             {
-                return (await _dbContext.PostReacts.Where(e => e.Id == Id)
+                return (await _dbContext.PostReacts.Where(e => e.Id == id)
                     .Select(e => new PostReacts
                     {
                         Id = e.Id,
@@ -81,6 +93,7 @@ namespace SocialMedia.Repository.PostReactsRepository
                 throw;
             }
         }
+
 
         public async Task<PostReacts> GetPostReactByUserIdAndPostIdAsync(string userId, string postId)
         {
@@ -146,12 +159,12 @@ namespace SocialMedia.Repository.PostReactsRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<PostReacts> UpdatePostReactAsync(PostReacts postReacts)
+        public async Task<PostReacts> UpdateAsync(PostReacts t)
         {
             try
             {
-                var oldPostReact = await GetPostReactByIdAsync(postReacts.Id);
-                oldPostReact.PostReactId = postReacts.PostReactId;
+                var oldPostReact = await GetByIdAsync(t.Id);
+                oldPostReact.PostReactId = t.PostReactId;
                 await SaveChangesAsync();
                 return oldPostReact;
             }
@@ -160,5 +173,7 @@ namespace SocialMedia.Repository.PostReactsRepository
                 throw;
             }
         }
+
+        
     }
 }

@@ -24,14 +24,14 @@ namespace SocialMedia.Service.PagesFollowersService
         }
         public async Task<ApiResponse<object>> FollowPageAsync(FollowPageDto followPageDto, SiteUser user)
         {
-            var page = await _pageRepository.GetPageByIdAsync(followPageDto.PageId);
+            var page = await _pageRepository.GetByIdAsync(followPageDto.PageId);
             if (page != null)
             {
                 var pageFollower = await _pagesFollowersRepository.GetPageFollowerByPageIdAndFollowerIdAsync(
                     followPageDto.PageId, user.Id);
                 if (pageFollower == null)
                 {
-                    var followPage = await _pagesFollowersRepository.FollowPageAsync(
+                    var followPage = await _pagesFollowersRepository.AddAsync(
                         ConvertFromDto.ConvertFromFollowPageDto_Add(followPageDto, user));
                     return StatusCodeReturn<object>
                         ._201_Created("Followed successfully", followPage);
@@ -45,7 +45,7 @@ namespace SocialMedia.Service.PagesFollowersService
 
         public async Task<ApiResponse<object>> FollowPageAsync(FollowPageUserDto followPageUserDto)
         {
-            var page = await _pageRepository.GetPageByIdAsync(followPageUserDto.PageId);
+            var page = await _pageRepository.GetByIdAsync(followPageUserDto.PageId);
             if (page != null)
             {
                 var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
@@ -57,7 +57,7 @@ namespace SocialMedia.Service.PagesFollowersService
                         followPageUserDto.PageId, followPageUserDto.UserIdOrUserNameOrEmail);
                     if (pageFollower == null)
                     {
-                        var followPage = await _pagesFollowersRepository.FollowPageAsync(
+                        var followPage = await _pagesFollowersRepository.AddAsync(
                             ConvertFromDto.ConvertFromFollowPageUserDto_Add(followPageUserDto));
                         return StatusCodeReturn<object>
                             ._201_Created("Followed successfully", followPage);
@@ -74,7 +74,7 @@ namespace SocialMedia.Service.PagesFollowersService
 
         public async Task<ApiResponse<object>> GetPageFollowerAsync(string pageId, SiteUser user)
         {
-            var page = await _pageRepository.GetPageByIdAsync(pageId);
+            var page = await _pageRepository.GetByIdAsync(pageId);
             if (page != null)
             {
                 var pageFollower = await _pagesFollowersRepository.GetPageFollowerByPageIdAndFollowerIdAsync(
@@ -93,7 +93,7 @@ namespace SocialMedia.Service.PagesFollowersService
 
         public async Task<ApiResponse<object>> GetPageFollowerAsync(string pageFollowersId)
         {
-            var pageFollower = await _pagesFollowersRepository.GetPageFollowerByIdAsync(pageFollowersId);
+            var pageFollower = await _pagesFollowersRepository.GetByIdAsync(pageFollowersId);
             if (pageFollower != null)
             {
                 return StatusCodeReturn<object>
@@ -118,7 +118,7 @@ namespace SocialMedia.Service.PagesFollowersService
         public async Task<ApiResponse<object>> UnFollowPageAsync(
             UnFollowPageDto unFollowPageDto, SiteUser user)
         {
-            var page = await _pageRepository.GetPageByIdAsync(unFollowPageDto.PageId);
+            var page = await _pageRepository.GetByIdAsync(unFollowPageDto.PageId);
             if (page != null)
             {
                 var pageFollower = await _pagesFollowersRepository.GetPageFollowerByPageIdAndFollowerIdAsync(
@@ -138,12 +138,12 @@ namespace SocialMedia.Service.PagesFollowersService
 
         public async Task<ApiResponse<object>> UnFollowPageAsync(string pageFollowersId, SiteUser user)
         {
-            var pageFollower = await _pagesFollowersRepository.GetPageFollowerByIdAsync(pageFollowersId);
+            var pageFollower = await _pagesFollowersRepository.GetByIdAsync(pageFollowersId);
             if (pageFollower != null)
             {
                 if(pageFollower.FollowerId == user.Id)
                 {
-                    await _pagesFollowersRepository.UnfollowPageByPageFollowerIdAsync(pageFollowersId);
+                    await _pagesFollowersRepository.DeleteByIdAsync(pageFollowersId);
                     return StatusCodeReturn<object>
                         ._200_Success("Unfollowed successfully", pageFollower);
                 }

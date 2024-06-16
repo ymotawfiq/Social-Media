@@ -51,7 +51,7 @@ namespace SocialMedia.Service.PostCommentService
                         var checkPolicy = await CheckPolicyAsync(userPost.UserId, user.Id, post.Id);
                         if (checkPolicy.IsSuccess)
                         {
-                            var newPostComment = await _postCommentsRepository.AddPostCommentAsync(
+                            var newPostComment = await _postCommentsRepository.AddAsync(
                             ConvertFromDto.ConvertFromPostCommentDto_Add(addPostCommentDto, user,
                             SaveCommentImages(addPostCommentDto.CommentImage!)));
                             newPostComment.User = null;
@@ -76,7 +76,7 @@ namespace SocialMedia.Service.PostCommentService
             var post = await _postRepository.GetPostByIdAsync(replay.PostId);
             if (post != null)
             {
-                var comment = await _postCommentsRepository.GetPostCommentByIdAsync(replay.CommentId);
+                var comment = await _postCommentsRepository.GetByIdAsync(replay.CommentId);
                 if (comment != null)
                 {
                     var isBlockedByPostCreator = await _blockRepository.GetBlockByUserIdAndBlockedUserIdAsync(
@@ -88,7 +88,7 @@ namespace SocialMedia.Service.PostCommentService
                         var checkPolicy = await CheckPolicyAsync(post.UserId, user.Id, post.Id);
                         if (checkPolicy.IsSuccess)
                         {
-                            var commentReplay = await _postCommentsRepository.AddPostCommentAsync(
+                            var commentReplay = await _postCommentsRepository.AddAsync(
                                 new PostComment
                                 {
                                     Comment = replay.Comment,
@@ -115,7 +115,7 @@ namespace SocialMedia.Service.PostCommentService
         public async Task<ApiResponse<PostComment>> DeletePostCommentByIdAsync(string postCommentId,
             SiteUser user)
         {
-            var postComment = await _postCommentsRepository.GetPostCommentByIdAsync(postCommentId);
+            var postComment = await _postCommentsRepository.GetByIdAsync(postCommentId);
             if (postComment != null)
             {
                 var userPost = await _postRepository.GetPostByIdAsync(postComment.PostId);
@@ -128,7 +128,7 @@ namespace SocialMedia.Service.PostCommentService
                         if (isBlocked == null)
                         {
                             DeleteCommentImage(postComment.CommentImage!);
-                            await _postCommentsRepository.DeletePostCommentByIdAsync(postComment.Id);
+                            await _postCommentsRepository.DeleteByIdAsync(postComment.Id);
                             postComment.User = null;
                             return StatusCodeReturn<PostComment>
                                 ._200_Success("Post comment deleted successfully", postComment);
@@ -163,7 +163,7 @@ namespace SocialMedia.Service.PostCommentService
                         if (isBlocked == null)
                         {
                             DeleteCommentImage(postComment.CommentImage!);
-                            await _postCommentsRepository.DeletePostCommentByIdAsync(postComment.Id);
+                            await _postCommentsRepository.DeleteByIdAsync(postComment.Id);
                             postComment.User = null;
                             return StatusCodeReturn<PostComment>
                                 ._200_Success("Post comment deleted successfully", postComment);
@@ -218,7 +218,7 @@ namespace SocialMedia.Service.PostCommentService
 
         public async Task<ApiResponse<PostComment>> DeletePostCommentImageAsync(string postCommentId)
         {
-            var postComment = await _postCommentsRepository.GetPostCommentByIdAsync(postCommentId);
+            var postComment = await _postCommentsRepository.GetByIdAsync(postCommentId);
             if (postComment != null)
             {
                 DeleteCommentImage(postComment.CommentImage!);
@@ -233,7 +233,7 @@ namespace SocialMedia.Service.PostCommentService
 
         public async Task<ApiResponse<PostComment>> GetPostCommentByIdAsync(string postCommentId)
         {
-            var postComment = await _postCommentsRepository.GetPostCommentByIdAsync(postCommentId);
+            var postComment = await _postCommentsRepository.GetByIdAsync(postCommentId);
             postComment.User = null;
             if (postComment != null)
             {
@@ -247,7 +247,7 @@ namespace SocialMedia.Service.PostCommentService
         public async Task<ApiResponse<PostComment>> GetPostCommentByIdAsync(string postCommentId,
             SiteUser user)
         {
-            var postComment = await _postCommentsRepository.GetPostCommentByIdAsync(postCommentId);
+            var postComment = await _postCommentsRepository.GetByIdAsync(postCommentId);
             if (postComment != null)
             {
                 var userPost = await _postRepository.GetPostByIdAsync(postComment.PostId);
@@ -404,7 +404,7 @@ namespace SocialMedia.Service.PostCommentService
                                             updatePostCommentDto.CommentImage);
                                     }
                                 }
-                                postComment = await _postCommentsRepository.UpdatePostCommentAsync(
+                                postComment = await _postCommentsRepository.UpdateAsync(
                                     postComment);
                                 postComment.User = null;
                                 return StatusCodeReturn<PostComment>

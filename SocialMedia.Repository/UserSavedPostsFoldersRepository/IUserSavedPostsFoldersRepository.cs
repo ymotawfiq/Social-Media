@@ -1,19 +1,14 @@
 ﻿
 
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.UserSavedPostsFoldersRepository
 {
-    public interface IUserSavedPostsFoldersRepository
+    public interface IUserSavedPostsFoldersRepository : ICrud<UserSavedPostsFolders>
     {
-        Task<UserSavedPostsFolders> AddUserSavedPostsFoldersAsync(
-            UserSavedPostsFolders userSavedPostsFolders);
-        Task<UserSavedPostsFolders> UpdateFolderNameAsync(UserSavedPostsFolders userSavedPostsFolders);
-        Task<UserSavedPostsFolders> DeleteUserSavedPostsFoldersByFolderIdAsync(string folderId);
-        Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderIdAsync(string folderId);
         Task<UserSavedPostsFolders> GetUserSavedPostsFoldersByFolderNameAndUserIdAsync(
             string userId, string folderName);
         Task<IEnumerable<UserSavedPostsFolders>> GetUserFoldersByUserId(string userId);
-        Task SaveChangesAsync();
     }
 }

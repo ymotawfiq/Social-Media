@@ -35,10 +35,10 @@ namespace SocialMedia.Service.GroupManager
 
         public async Task<ApiResponse<bool>> AcceptGroupRequestAsync(string requestId, SiteUser user)
         {
-            var request = await _groupAccessRequestRepository.GetGroupAccessRequestByIdAsync(requestId);
+            var request = await _groupAccessRequestRepository.GetByIdAsync(requestId);
             if (request != null)
             {
-                var group = await _groupRepository.GetGroupByIdAsync(request.GroupId);
+                var group = await _groupRepository.GetByIdAsync(request.GroupId);
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
                 if (isAdmin.ResponseObject)
                 {
@@ -51,14 +51,14 @@ namespace SocialMedia.Service.GroupManager
                             GroupId = group.Id,
                             MemberId = request.UserId,
                         };
-                        await _groupMemberRepository.AddGroupMemberAsync(groupMember);
-                        await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+                        await _groupMemberRepository.AddAsync(groupMember);
+                        await _groupMemberRoleRepository.AddAsync(new GroupMemberRole
                         {
                             Id = Guid.NewGuid().ToString(),
                             GroupMemberId = groupMember.Id,
                             RoleId = userRole.Id
                         });
-                        await _groupAccessRequestRepository.DeleteGroupAccessRequestByIdAsync(request.Id);
+                        await _groupAccessRequestRepository.DeleteByIdAsync(request.Id);
                         return StatusCodeReturn<bool>
                             ._200_Success("Request accepted successfully", true);
                     }
@@ -97,10 +97,10 @@ namespace SocialMedia.Service.GroupManager
 
         public async Task<ApiResponse<bool>> AddToRoleAsync(string groupMemberId, SiteUser user, string role)
         {
-            var groupMember = await _groupMemberRepository.GetGroupMemberAsync(groupMemberId);
+            var groupMember = await _groupMemberRepository.GetByIdAsync(groupMemberId);
             if (groupMember != null)
             {
-                var group = await _groupRepository.GetGroupByIdAsync(groupMember.GroupId);
+                var group = await _groupRepository.GetByIdAsync(groupMember.GroupId);
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
                 if (isAdmin.ResponseObject)
                 {
@@ -133,7 +133,7 @@ namespace SocialMedia.Service.GroupManager
         public async Task<ApiResponse<IEnumerable<GroupAccessRequest>>> GetRequestsAsync(
             string groupId, SiteUser user)
         {
-            var group = await _groupRepository.GetGroupByIdAsync(groupId);
+            var group = await _groupRepository.GetByIdAsync(groupId);
             if (group != null)
             {
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
@@ -158,7 +158,7 @@ namespace SocialMedia.Service.GroupManager
 
         public async Task<ApiResponse<IEnumerable<string>>> GetUserRolesAsync(string userId, string groupId)
         {
-            var group = await _groupRepository.GetGroupByIdAsync(groupId);
+            var group = await _groupRepository.GetByIdAsync(groupId);
             if (group != null)
             {
                 var groupMember = await _groupMemberRepository.GetGroupMemberAsync(userId, group.Id);
@@ -169,7 +169,7 @@ namespace SocialMedia.Service.GroupManager
                     List<string> roles = new();
                     foreach (var role in userGroupRolesIds)
                     {
-                        roles.Add((await _groupRoleRepository.GetGroupRoleByIdAsync(role.RoleId)).RoleName);
+                        roles.Add((await _groupRoleRepository.GetByIdAsync(role.RoleId)).RoleName);
                     }
                     return StatusCodeReturn<IEnumerable<string>>
                         ._200_Success("Roles found successfully", roles);
@@ -227,14 +227,14 @@ namespace SocialMedia.Service.GroupManager
 
         public async Task<ApiResponse<bool>> RemoveFromGroupAsync(string groupMemberId, SiteUser user)
         {
-            var groupMember = await _groupMemberRepository.GetGroupMemberAsync(groupMemberId);
+            var groupMember = await _groupMemberRepository.GetByIdAsync(groupMemberId);
             if (groupMember != null)
             {
-                var group = await _groupRepository.GetGroupByIdAsync(groupMember.GroupId);
+                var group = await _groupRepository.GetByIdAsync(groupMember.GroupId);
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
                 if (isAdmin != null)
                 {
-                    await _groupMemberRepository.DeleteGroupMemberAsync(groupMemberId);
+                    await _groupMemberRepository.DeleteByIdAsync(groupMemberId);
                     return StatusCodeReturn<bool>
                         ._200_Success("Member deleted successfully from group", true);
                 }
@@ -258,10 +258,10 @@ namespace SocialMedia.Service.GroupManager
             var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
             if (getRole != null)
             {
-                var groupMember = await _groupMemberRepository.GetGroupMemberAsync(groupMemberId);
+                var groupMember = await _groupMemberRepository.GetByIdAsync(groupMemberId);
                 if (groupMember != null)
                 {
-                    var group = await _groupRepository.GetGroupByIdAsync(groupMember.GroupId);
+                    var group = await _groupRepository.GetByIdAsync(groupMember.GroupId);
                     var userRoles = await GetUserRolesAsync(groupMember.MemberId, group.Id);
                     if (userRoles != null)
                     {
@@ -306,7 +306,7 @@ namespace SocialMedia.Service.GroupManager
                         groupMember.Id, getRole.Id);
                     if (isInRole != null)
                     {
-                        await _groupMemberRoleRepository.DeleteGroupMemberRoleAsync(isInRole.Id);
+                        await _groupMemberRoleRepository.DeleteByIdAsync(isInRole.Id);
                         return StatusCodeReturn<bool>
                             ._200_Success("Role deleted from user successfully", true);
                     }
@@ -327,7 +327,7 @@ namespace SocialMedia.Service.GroupManager
             group, role.RoleName);
             if (!isMemberInRole.ResponseObject)
             {
-                await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+                await _groupMemberRoleRepository.AddAsync(new GroupMemberRole
                 {
                     Id = Guid.NewGuid().ToString(),
                     GroupMemberId = groupMember.Id,

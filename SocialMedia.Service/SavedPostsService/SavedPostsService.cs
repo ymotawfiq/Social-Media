@@ -7,7 +7,6 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.PostRepository;
 using SocialMedia.Repository.SavePostsRepository;
 using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.PostService;
 using SocialMedia.Service.UserSavedPostsFoldersService;
 
 namespace SocialMedia.Service.SavedPostsService
@@ -40,7 +39,7 @@ namespace SocialMedia.Service.SavedPostsService
                         return StatusCodeReturn<SavedPosts>
                             ._403_Forbidden("Post already saved in the same folder");
                     }
-                    var newSavedPost = await _savePostsRepository.SavePostAsync(
+                    var newSavedPost = await _savePostsRepository.AddAsync(
                         new SavedPosts
                         {
                             FolderId = folder.ResponseObject.Id,

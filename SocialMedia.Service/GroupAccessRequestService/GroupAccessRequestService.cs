@@ -38,7 +38,7 @@ namespace SocialMedia.Service.GroupAccessRequestService
         public async Task<ApiResponse<object>> AddGroupAccessRequestAsync(
                     AddGroupAccessRequestDto addGroupAccessRequestDto, SiteUser user)
         {
-            var group = await _groupRepository.GetGroupByIdAsync(addGroupAccessRequestDto.GroupId);
+            var group = await _groupRepository.GetByIdAsync(addGroupAccessRequestDto.GroupId);
             if (group != null)
             {
                 var isMember = await _groupMemberRepository.GetGroupMemberAsync(user.Id,
@@ -63,14 +63,12 @@ namespace SocialMedia.Service.GroupAccessRequestService
         public async Task<ApiResponse<GroupAccessRequest>> DeleteGroupAccessRequestAsync(
             string groupAccessRequestId, SiteUser user)
         {
-            var request = await _groupAccessRequestRepository.GetGroupAccessRequestByIdAsync(
-                groupAccessRequestId);
+            var request = await _groupAccessRequestRepository.GetByIdAsync(groupAccessRequestId);
             if (request != null)
             {
                 if(request.UserId == user.Id)
                 {
-                    await _groupAccessRequestRepository.DeleteGroupAccessRequestByIdAsync(
-                        groupAccessRequestId);
+                    await _groupAccessRequestRepository.DeleteByIdAsync(groupAccessRequestId);
                     return StatusCodeReturn<GroupAccessRequest>
                         ._200_Success("Request deleted successfully", request);
                 }
@@ -95,8 +93,8 @@ namespace SocialMedia.Service.GroupAccessRequestService
                         GroupId = group.Id,
                         MemberId = user.Id,
                     };
-                    await _groupMemberRepository.AddGroupMemberAsync(groupMember);
-                    await _groupMemberRoleRepository.AddGroupMemberRoleAsync(new GroupMemberRole
+                    await _groupMemberRepository.AddAsync(groupMember);
+                    await _groupMemberRoleRepository.AddAsync(new GroupMemberRole
                     {
                         Id = Guid.NewGuid().ToString(),
                         GroupMemberId = groupMember.Id,
@@ -110,7 +108,7 @@ namespace SocialMedia.Service.GroupAccessRequestService
             }
             else
             {
-                var request = await _groupAccessRequestRepository.AddGroupAccessRequestAsync(
+                var request = await _groupAccessRequestRepository.AddAsync(
                     new GroupAccessRequest
                     {
                         Id = Guid.NewGuid().ToString(),

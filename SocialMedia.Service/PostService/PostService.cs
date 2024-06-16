@@ -57,9 +57,14 @@ namespace SocialMedia.Service.PostService
             var postsPolicy = await _policyRepository.GetByIdAsync(user.AccountPostPolicyId!);
             var reactPolicy = await _policyRepository.GetByIdAsync(user.ReactPolicyId!);
             var commentPolicy = await _policyRepository.GetByIdAsync(user.CommentPolicyId!);
-
             var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, postsPolicy, reactPolicy,
                 commentPolicy, user);
+            await _postViewRepository.AddAsync(new PostView
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = post.Id,
+                ViewNumber = 0
+            });
             var postImages = new List<PostImages>();
             if (createPostDto.Images != null)
             {
@@ -74,7 +79,6 @@ namespace SocialMedia.Service.PostService
                 }
             }
             var newPostDto = await _postRepository.AddPostAsync(post, postImages);
-            //SetNull(newPostDto);
             return StatusCodeReturn<PostDto>
                     ._201_Created("Post created successfully", newPostDto);
         }
@@ -460,7 +464,7 @@ namespace SocialMedia.Service.PostService
             if (groupPost != null && groupPost.ResponseObject != null)
             {
                 var policy = await _policyService.GetPolicyByIdAsync((await _groupRepository
-                    .GetGroupByIdAsync(groupPost.ResponseObject.GroupId)).GroupPolicyId);
+                    .GetByIdAsync(groupPost.ResponseObject.GroupId)).GroupPolicyId);
                 if (policy != null && policy.ResponseObject != null)
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
@@ -495,7 +499,7 @@ namespace SocialMedia.Service.PostService
             {
                 var postView = await _postViewRepository.GetPostViewByPostIdAsync(post.Post.Id);
                 postView.ViewNumber = ++postView.ViewNumber;
-                await _postViewRepository.UpdatePostViewAsync(postView);
+                await _postViewRepository.UpdateAsync(postView);
                 return StatusCodeReturn<PostDto>
                     ._200_Success("Post found successfully", post);
             }

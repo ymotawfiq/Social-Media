@@ -1,18 +1,17 @@
 ﻿
 
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.FriendsRepository
 {
-    public interface IFriendsRepository
+    public interface IFriendsRepository : ICrud<Friend>
     {
-        Task<Friend> AddFriendAsync(Friend friend);
         Task<Friend> DeleteFriendAsync(string userId, string friendId);
-        Task<Friend> GetFriendByUserAndFriendIdAsync(string userId, string friendId);
+        Task<Friend> GetByUserAndFriendIdAsync(string userId, string friendId);
         Task<IEnumerable<Friend>> GetAllUserFriendsAsync(string userId);
         Task<IEnumerable<IEnumerable<Friend>>> GetUserFriendsOfFriendsAsync(string userId);
         Task <IEnumerable<Friend>> GetSharedFriendsAsync(string userId, string routeUserId);
-        Task SaveChangesAsync();
 
     }
 }

@@ -11,6 +11,7 @@ namespace SocialMedia.Service.FriendsService
     {
         Task<ApiResponse<Friend>> AddFriendAsync(AddFriendDto addFriendDto);
         Task<ApiResponse<Friend>> DeleteFriendAsync(string userId, string friendId);
+        Task<ApiResponse<Friend>> DeleteFriendAsync(string id, SiteUser user);
         Task<ApiResponse<bool>> IsUserFriendAsync(string userId, string friendId);
         Task<ApiResponse<bool>> IsUserFriendOfFriendAsync(string userId, string friendId);
         Task<ApiResponse<IEnumerable<Friend>>> GetAllUserFriendsAsync(SiteUser user, SiteUser user1);

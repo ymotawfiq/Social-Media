@@ -15,20 +15,21 @@ namespace SocialMedia.Repository.GroupRepository
             this._dbContext = _dbContext;
             this._groupRoleRepository = _groupRoleRepository;
         }
-        public async Task<Group> AddGroupAsync(Group group)
+
+        public async Task<Group> AddAsync(Group t)
         {
             try
             {
-                await _dbContext.Groups.AddAsync(group);
+                await _dbContext.Groups.AddAsync(t);
                 await SaveChangesAsync();
                 return new Group
                 {
-                    Id = group.Id,
-                    CreatedAt = group.CreatedAt,
-                    CreatedUserId = group.CreatedUserId,
-                    Description = group.Description,
-                    GroupPolicyId = group.GroupPolicyId,
-                    Name = group.Name
+                    Id = t.Id,
+                    CreatedAt = t.CreatedAt,
+                    CreatedUserId = t.CreatedUserId,
+                    Description = t.Description,
+                    GroupPolicyId = t.GroupPolicyId,
+                    Name = t.Name
                 };
             }
             catch (Exception)
@@ -37,11 +38,11 @@ namespace SocialMedia.Repository.GroupRepository
             }
         }
 
-        public async Task<Group> DeleteGroupByIdAsync(string groupId)
+        public async Task<Group> DeleteByIdAsync(string id)
         {
             try
             {
-                var group = await GetGroupByIdAsync(groupId);
+                var group = await GetByIdAsync(id);
                 _dbContext.Groups.Remove(group);
                 await SaveChangesAsync();
                 return group;
@@ -52,11 +53,12 @@ namespace SocialMedia.Repository.GroupRepository
             }
         }
 
-        public async Task<IEnumerable<Group>> GetAllGroupsAsync()
+
+        public async Task<IEnumerable<Group>> GetAllAsync()
         {
             try
             {
-                return await _dbContext.Groups.Select(e=>new Group
+                return await _dbContext.Groups.Select(e => new Group
                 {
                     Id = e.Id,
                     CreatedAt = e.CreatedAt,
@@ -76,7 +78,7 @@ namespace SocialMedia.Repository.GroupRepository
         {
             try
             {
-                return from g in await GetAllGroupsAsync()
+                return from g in await GetAllAsync()
                        where g.CreatedUserId == userId
                        select g;
             }
@@ -86,7 +88,7 @@ namespace SocialMedia.Repository.GroupRepository
             }
         }
 
-        public async Task<Group> GetGroupByIdAsync(string groupId)
+        public async Task<Group> GetByIdAsync(string id)
         {
             try
             {
@@ -98,7 +100,7 @@ namespace SocialMedia.Repository.GroupRepository
                     Description = e.Description,
                     GroupPolicyId = e.GroupPolicyId,
                     Name = e.Name
-                }).Where(e => e.Id == groupId).FirstOrDefaultAsync())!;
+                }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -106,19 +108,20 @@ namespace SocialMedia.Repository.GroupRepository
             }
         }
 
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Group> UpdateGroupAsync(Group group)
+        public async Task<Group> UpdateAsync(Group t)
         {
             try
             {
-                var existGroup = await GetGroupByIdAsync(group.Id);
-                existGroup.Name = group.Name;
-                existGroup.Description = group.Description;
-                existGroup.GroupPolicyId = group.GroupPolicyId;
+                var existGroup = await GetByIdAsync(t.Id);
+                existGroup.Name = t.Name;
+                existGroup.Description = t.Description;
+                existGroup.GroupPolicyId = t.GroupPolicyId;
                 await SaveChangesAsync();
                 return existGroup;
             }
@@ -127,5 +130,6 @@ namespace SocialMedia.Repository.GroupRepository
                 throw;
             }
         }
+
     }
 }

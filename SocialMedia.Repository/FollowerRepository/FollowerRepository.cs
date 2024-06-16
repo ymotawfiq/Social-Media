@@ -12,17 +12,18 @@ namespace SocialMedia.Repository.FollowerRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<Follower> FollowAsync(Follower follower)
+
+        public async Task<Follower> AddAsync(Follower t)
         {
             try
             {
-                await _dbContext.Followers.AddAsync(follower);
+                await _dbContext.Followers.AddAsync(t);
                 await SaveChangesAsync();
                 return new Follower
                 {
-                    Id = follower.Id,
-                    UserId = follower.UserId,
-                    FollowerId = follower.FollowerId
+                    Id = t.Id,
+                    UserId = t.UserId,
+                    FollowerId = t.FollowerId
                 };
             }
             catch (Exception)
@@ -31,10 +32,35 @@ namespace SocialMedia.Repository.FollowerRepository
             }
         }
 
-        public async Task<IEnumerable<Follower>> GetAllFollowers(string userId)
+        public async Task<Follower> DeleteByIdAsync(string id)
+        {
+            var follow = await GetByIdAsync(id);
+            _dbContext.Followers.Remove(follow);
+            await SaveChangesAsync();
+            return new Follower
+            {
+                FollowerId = follow.FollowerId,
+                Id = follow.Id,
+                UserId = follow.UserId
+            };
+        }
+
+
+
+        public async Task<IEnumerable<Follower>> GetAllAsync()
+        {
+            return await _dbContext.Followers.Select(e=>new Follower
+            {
+                FollowerId = e.FollowerId,
+                Id = e.Id,
+                UserId = e.UserId
+            }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Follower>> GetAllAsync(string userId)
         {
             return
-                from f in await _dbContext.Followers.ToListAsync()
+                from f in await GetAllAsync()
                 where f.UserId == userId
                 select (new Follower
                 {
@@ -44,7 +70,17 @@ namespace SocialMedia.Repository.FollowerRepository
                 });
         }
 
-        public async Task<Follower> GetFollowingByUserIdAndFollowerIdAsync(string userId, string followerId)
+        public async Task<Follower> GetByIdAsync(string id)
+        {
+            return (await _dbContext.Followers.Select(e => new Follower
+            {
+                UserId = e.UserId,
+                FollowerId = e.FollowerId,
+                Id = e.Id
+            }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
+        }
+
+        public async Task<Follower> GetByUserIdAndFollowerIdAsync(string userId, string followerId)
         {
             return (await _dbContext.Followers.Select(e => new Follower
             {
@@ -59,14 +95,26 @@ namespace SocialMedia.Repository.FollowerRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Follower> UnfollowAsync(string userId, string followerId)
+        public async Task<Follower> UpdateAsync(string userId, string followerId)
         {
-            var followingInfo = await GetFollowingByUserIdAndFollowerIdAsync(userId, followerId);
+            var followingInfo = await GetByUserIdAndFollowerIdAsync(userId, followerId);
             _dbContext.Followers.Remove(followingInfo);
             await SaveChangesAsync();
             followingInfo!.User = null;
             return followingInfo;
         }
 
+        public async Task<Follower> UpdateAsync(Follower t)
+        {
+            var follow = await GetByIdAsync(t.Id);
+            _dbContext.Followers.Remove(follow);
+            await SaveChangesAsync();
+            return new Follower
+            {
+                Id = follow.Id,
+                FollowerId = follow.FollowerId,
+                UserId = follow.UserId
+            };
+        }
     }
 }

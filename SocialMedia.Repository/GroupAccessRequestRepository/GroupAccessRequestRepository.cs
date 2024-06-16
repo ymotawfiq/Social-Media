@@ -13,18 +13,35 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<GroupAccessRequest> AddGroupAccessRequestAsync(GroupAccessRequest request)
+
+        public async Task<GroupAccessRequest> AddAsync(GroupAccessRequest t)
         {
             try
             {
-                await _dbContext.GroupAccessRequests.AddAsync(request);
+                await _dbContext.GroupAccessRequests.AddAsync(t);
                 await SaveChangesAsync();
                 return new GroupAccessRequest
                 {
-                    UserId = request.UserId,
-                    Id = request.Id,
-                    GroupId = request.GroupId
+                    UserId = t.UserId,
+                    Id = t.Id,
+                    GroupId = t.GroupId
                 };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<GroupAccessRequest> DeleteByIdAsync(string id)
+        {
+            try
+            {
+                var request = await GetByIdAsync(id);
+                _dbContext.GroupAccessRequests.Remove(request);
+                await SaveChangesAsync();
+                return request;
             }
             catch (Exception)
             {
@@ -40,14 +57,27 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
             return request;
         }
 
-        public async Task<GroupAccessRequest> DeleteGroupAccessRequestByIdAsync(string groupAccessRequestId)
+
+        public async Task<IEnumerable<GroupAccessRequest>> GetAllAsync()
+        {
+            return await _dbContext.GroupAccessRequests.Select(e=>new GroupAccessRequest
+            {
+                Id = e.Id,
+                UserId = e.UserId,
+                GroupId = e.GroupId
+            }).ToListAsync();
+        }
+
+        public async Task<GroupAccessRequest> GetByIdAsync(string id)
         {
             try
             {
-                var request = await GetGroupAccessRequestByIdAsync(groupAccessRequestId);
-                _dbContext.GroupAccessRequests.Remove(request);
-                await SaveChangesAsync();
-                return request;
+                return (await _dbContext.GroupAccessRequests.Select(e => new GroupAccessRequest
+                {
+                    GroupId = e.GroupId,
+                    UserId = e.UserId,
+                    Id = e.Id
+                }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
@@ -73,28 +103,11 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
             }
         }
 
-        public async Task<GroupAccessRequest> GetGroupAccessRequestByIdAsync(string groupAccessRequestId)
-        {
-            try
-            {
-                return (await _dbContext.GroupAccessRequests.Select(e => new GroupAccessRequest
-                {
-                    GroupId = e.GroupId,
-                    UserId = e.UserId,
-                    Id = e.Id
-                }).Where(e => e.Id == groupAccessRequestId).FirstOrDefaultAsync())!;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<IEnumerable<GroupAccessRequest>> GetGroupAccessRequestsByGroupIdAsync(string groupId)
         {
             try
             {
-                return from g in await _dbContext.GroupAccessRequests.ToListAsync()
+                return from g in await GetAllAsync()
                        where g.GroupId == groupId
                        select (new GroupAccessRequest
                        {
@@ -113,7 +126,7 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
         {
             try
             {
-                return from g in await _dbContext.GroupAccessRequests.ToListAsync()
+                return from g in await GetAllAsync()
                        where g.UserId == userId
                        select (new GroupAccessRequest
                        {
@@ -131,6 +144,11 @@ namespace SocialMedia.Repository.GroupAccessRequestRepository
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<GroupAccessRequest> UpdateAsync(GroupAccessRequest t)
+        {
+            return await DeleteByIdAsync(t.Id);
         }
     }
 }

@@ -2,15 +2,12 @@
 
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.PagePostsRepository
 {
-    public interface IPagePostsRepository
+    public interface IPagePostsRepository : ICrud<PagePost>
     {
-        Task<PagePost> AddPagePostAsync(PagePost pagePosts);
-        Task<PagePost> GetPagePostByIdAsync(string pagePostId);
         Task<PagePost> GetPagePostByPostIdAsync(string postId);
-        Task<PagePost> DeletePagePostByIdAsync(string pagePostId);
-        Task SaveChangesAsync();
     }
 }

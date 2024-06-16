@@ -13,18 +13,19 @@ namespace SocialMedia.Repository.GroupPostsRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<GroupPost> AddGroupPostAsync(GroupPost groupPost)
+
+        public async Task<GroupPost> AddAsync(GroupPost t)
         {
             try
             {
-                await _dbContext.GroupPosts.AddAsync(groupPost);
+                await _dbContext.GroupPosts.AddAsync(t);
                 await SaveChangesAsync();
                 return new GroupPost
                 {
-                    Id = groupPost.Id,
-                    GroupId = groupPost.GroupId,
-                    PostId = groupPost.PostId,
-                    UserId = groupPost.UserId
+                    Id = t.Id,
+                    GroupId = t.GroupId,
+                    PostId = t.PostId,
+                    UserId = t.UserId
                 };
             }
             catch (Exception)
@@ -33,11 +34,11 @@ namespace SocialMedia.Repository.GroupPostsRepository
             }
         }
 
-        public async Task<GroupPost> DeleteGroupPostByIdAsync(string groupPostId)
+        public async Task<GroupPost> DeleteByIdAsync(string id)
         {
             try
             {
-                var groupPost = await GetGroupPostByIdAsync(groupPostId);
+                var groupPost = await GetByIdAsync(id);
                 _dbContext.GroupPosts.Remove(groupPost);
                 await SaveChangesAsync();
                 return groupPost;
@@ -48,23 +49,36 @@ namespace SocialMedia.Repository.GroupPostsRepository
             }
         }
 
-        public async Task<GroupPost> GetGroupPostByIdAsync(string groupPostId)
+
+        public async Task<IEnumerable<GroupPost>> GetAllAsync()
+        {
+            return await _dbContext.GroupPosts.Select(e=>new GroupPost
+            {
+                Id = e.Id,
+                GroupId = e.GroupId,
+                PostId = e.PostId,
+                UserId = e.UserId
+            }).ToListAsync();
+        }
+
+        public async Task<GroupPost> GetByIdAsync(string id)
         {
             try
             {
-                return (await _dbContext.GroupPosts.Select(e=>new GroupPost
+                return (await _dbContext.GroupPosts.Select(e => new GroupPost
                 {
                     UserId = e.UserId,
                     PostId = e.PostId,
                     GroupId = e.GroupId,
                     Id = e.Id
-                }).Where(e => e.Id == groupPostId).FirstOrDefaultAsync())!;
+                }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         public async Task<GroupPost> GetGroupPostByPostIdAsync(string postId)
         {
@@ -81,7 +95,7 @@ namespace SocialMedia.Repository.GroupPostsRepository
         {
             try
             {
-                return from p in await _dbContext.GroupPosts.ToListAsync()
+                return from p in await GetAllAsync()
                        where p.GroupId == groupId
                        select (new GroupPost
                        {
@@ -100,6 +114,11 @@ namespace SocialMedia.Repository.GroupPostsRepository
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<GroupPost> UpdateAsync(GroupPost t)
+        {
+            return await DeleteByIdAsync(t.Id);
         }
     }
 }

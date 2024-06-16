@@ -26,7 +26,7 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
                 return StatusCodeReturn<UserSavedPostsFolders>
                     ._403_Forbidden("Folder with same name already exists");
             }
-            var newFolder = await _userSavedPostsFoldersRepository.AddUserSavedPostsFoldersAsync(
+            var newFolder = await _userSavedPostsFoldersRepository.AddAsync(
                 new UserSavedPostsFolders
                 {
                     FolderName = addUserSavedPostsFolderDto.FolderName,
@@ -41,13 +41,13 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
         public async Task<ApiResponse<UserSavedPostsFolders>> DeleteUserSavedPostsFoldersByFolderIdAsync(
             SiteUser user, string folderId)
         {
-            var folder = await _userSavedPostsFoldersRepository.GetUserSavedPostsFoldersByFolderIdAsync(
+            var folder = await _userSavedPostsFoldersRepository.GetByIdAsync(
                 folderId);
             if (folder != null)
             {
                 if (folder.UserId == user.Id)
                 {
-                    await _userSavedPostsFoldersRepository.DeleteUserSavedPostsFoldersByFolderIdAsync(folderId);
+                    await _userSavedPostsFoldersRepository.DeleteByIdAsync(folderId);
                     return StatusCodeReturn<UserSavedPostsFolders>
                         ._200_Success("Folder deleted successfully", folder);
                 }
@@ -74,7 +74,7 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
         public async Task<ApiResponse<UserSavedPostsFolders>> GetUserSavedPostsFoldersByFolderIdAsync(
             SiteUser user, string folderId)
         {
-            var folder = await _userSavedPostsFoldersRepository.GetUserSavedPostsFoldersByFolderIdAsync(
+            var folder = await _userSavedPostsFoldersRepository.GetByIdAsync(
                 folderId);
             if (folder != null)
             {
@@ -94,7 +94,7 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
         public async Task<ApiResponse<UserSavedPostsFolders>> UpdateFolderNameAsync(
             SiteUser user, UpdateUserSavedPostsFolderDto updateUserSavedPostsFolderDto)
         {
-            var folder = await _userSavedPostsFoldersRepository.GetUserSavedPostsFoldersByFolderIdAsync(
+            var folder = await _userSavedPostsFoldersRepository.GetByIdAsync(
                 updateUserSavedPostsFolderDto.Id);
             if (folder != null)
             {
@@ -106,7 +106,7 @@ namespace SocialMedia.Service.UserSavedPostsFoldersService
                     return StatusCodeReturn<UserSavedPostsFolders>
                         ._403_Forbidden("Folder with same name already exists");
                 }
-                var updatedFolder = await _userSavedPostsFoldersRepository.UpdateFolderNameAsync(
+                var updatedFolder = await _userSavedPostsFoldersRepository.UpdateAsync(
                     new UserSavedPostsFolders
                     {
                         Id = updateUserSavedPostsFolderDto.Id,

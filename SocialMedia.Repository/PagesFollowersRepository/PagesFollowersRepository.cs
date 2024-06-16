@@ -13,17 +13,18 @@ namespace SocialMedia.Repository.PagesFollowersRepository
         {
             this._dbContext = _dbContext;
         }
-        public async Task<PageFollower> FollowPageAsync(PageFollower pageFollower)
+
+        public async Task<PageFollower> AddAsync(PageFollower t)
         {
             try
             {
-                await _dbContext.PageFollowers.AddAsync(pageFollower);
+                await _dbContext.PageFollowers.AddAsync(t);
                 await SaveChangesAsync();
                 return new PageFollower
                 {
-                    PageId = pageFollower.PageId,
-                    Id = pageFollower.Id,
-                    FollowerId = pageFollower.FollowerId
+                    PageId = t.PageId,
+                    Id = t.Id,
+                    FollowerId = t.FollowerId
                 };
             }
             catch (Exception)
@@ -32,16 +33,41 @@ namespace SocialMedia.Repository.PagesFollowersRepository
             }
         }
 
-        public async Task<PageFollower> GetPageFollowerByIdAsync(string pageFollowerId)
+        public async Task<PageFollower> DeleteByIdAsync(string id)
         {
             try
             {
-                return (await _dbContext.PageFollowers.Select(e=>new PageFollower
+                var pageFollower = await GetByIdAsync(id);
+                _dbContext.PageFollowers.Remove(pageFollower);
+                await SaveChangesAsync();
+                return pageFollower;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<PageFollower>> GetAllAsync()
+        {
+            return await _dbContext.PageFollowers.Select(e=>new PageFollower
+            {
+                Id = e.Id,
+                PageId = e.PageId,
+                FollowerId = e.FollowerId
+            }).ToListAsync();
+        }
+
+        public async Task<PageFollower> GetByIdAsync(string id)
+        {
+            try
+            {
+                return (await _dbContext.PageFollowers.Select(e => new PageFollower
                 {
                     FollowerId = e.FollowerId,
                     Id = e.Id,
                     PageId = e.PageId
-                }).Where(e=>e.Id==pageFollowerId)
+                }).Where(e => e.Id == id)
                     .FirstOrDefaultAsync())!;
             }
             catch (Exception)
@@ -49,6 +75,7 @@ namespace SocialMedia.Repository.PagesFollowersRepository
                 throw;
             }
         }
+
 
         public async Task<PageFollower> GetPageFollowerByPageIdAndFollowerIdAsync(
             string pageId, string followerId)
@@ -70,7 +97,7 @@ namespace SocialMedia.Repository.PagesFollowersRepository
 
         public async Task<IEnumerable<PageFollower>> GetPageFollowersAsync(string pageId)
         {
-            return from p in await _dbContext.PageFollowers.ToListAsync()
+            return from p in await GetAllAsync()
                    where p.PageId == pageId
                    select (new PageFollower
                    {
@@ -85,20 +112,6 @@ namespace SocialMedia.Repository.PagesFollowersRepository
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<PageFollower> UnfollowPageByPageFollowerIdAsync(string pageFollowerId)
-        {
-            try
-            {
-                var pageFollower = await GetPageFollowerByIdAsync(pageFollowerId);
-                _dbContext.PageFollowers.Remove(pageFollower);
-                await SaveChangesAsync();
-                return pageFollower;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
         public async Task<PageFollower> UnfollowPageByPageIdAsync(string pageId, string followerId)
         {
@@ -114,6 +127,11 @@ namespace SocialMedia.Repository.PagesFollowersRepository
             {
                 throw;
             }
+        }
+
+        public async Task<PageFollower> UpdateAsync(PageFollower t)
+        {
+            return await DeleteByIdAsync(t.Id);
         }
     }
 }

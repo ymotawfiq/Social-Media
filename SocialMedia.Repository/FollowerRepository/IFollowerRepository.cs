@@ -1,14 +1,13 @@
 ﻿
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.FollowerRepository
 {
-    public interface IFollowerRepository
+    public interface IFollowerRepository : ICrud<Follower>
     {
-        Task<Follower> FollowAsync(Follower follower);
-        Task<Follower> UnfollowAsync(string userId, string followerId);
-        Task<Follower> GetFollowingByUserIdAndFollowerIdAsync(string userId, string followerId);
-        Task<IEnumerable<Follower>> GetAllFollowers(string userId);
-        Task SaveChangesAsync();
+        Task<Follower> UpdateAsync(string userId, string followerId);
+        Task<Follower> GetByUserIdAndFollowerIdAsync(string userId, string followerId);
+        Task<IEnumerable<Follower>> GetAllAsync(string userId);
     }
 }

@@ -2,19 +2,14 @@
 
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.FriendRequestRepository
 {
-    public interface IFriendRequestRepository
+    public interface IFriendRequestRepository : ICrud<FriendRequest>
     {
-        Task<FriendRequest> AddFriendRequestAsync(FriendRequest friendRequest);
-        Task<FriendRequest> UpdateFriendRequestAsync(FriendRequest friendRequest);
-        Task<FriendRequest> GetFriendRequestByIdAsync(string friendRequestId);
-        Task<FriendRequest> GetFriendRequestByUserAndPersonIdAsync(string userId, string personId);
-        Task<FriendRequest> DeleteFriendRequestByAsync(string friendRequestId);
-        Task<IEnumerable<FriendRequest>> GetAllFriendRequestsAsync();
+        Task<FriendRequest> GetByUserAndPersonIdAsync(string userId, string personId);
         Task<IEnumerable<FriendRequest>> GetSentFriendRequestsByUserIdAsync(string userId);
         Task<IEnumerable<FriendRequest>> GetReceivedFriendRequestsByUserIdAsync(string userId);
-        Task SaveChangesAsync();
     }
 }

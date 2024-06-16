@@ -44,7 +44,7 @@ namespace SocialMedia.Service.BlockService
                     await UnfollowAsync(addBlockDto, user);
                     await DeleteFriendRequestAsync(addBlockDto, user);
                     await DeleteFromFriendListAsync(addBlockDto, user);
-                    var newBlockedUser = await _blockRepository.BlockUserAsync(
+                    var newBlockedUser = await _blockRepository.AddAsync(
                             ConvertFromDto.ConvertFromBlockDto_Add(addBlockDto, user));
                     return StatusCodeReturn<Block>
                     ._200_Success("User blocked successfully", newBlockedUser);
@@ -83,7 +83,7 @@ namespace SocialMedia.Service.BlockService
 
         public async Task<ApiResponse<IEnumerable<Block>>> GetBlockListAsync()
         {
-            var blockList = await _blockRepository.GetBlockListAsync();
+            var blockList = await _blockRepository.GetAllAsync();
             if (blockList.ToList().Count == 0)
             {
                 return StatusCodeReturn<IEnumerable<Block>>
@@ -116,7 +116,7 @@ namespace SocialMedia.Service.BlockService
                 user.Id, updateBlockDto.UserIdOrUserNameOrEmail);
                 if (existBlockedUser != null)
                 {
-                    var unblockedUser = await _blockRepository.UnBlockUserAsync(
+                    var unblockedUser = await _blockRepository.UpdateAsync(
                             ConvertFromDto.ConvertFromBlockDto_Update(updateBlockDto, user));
                     return StatusCodeReturn<Block>
                             ._200_Success("Block removed successfully", unblockedUser);
@@ -130,12 +130,12 @@ namespace SocialMedia.Service.BlockService
 
         public async Task<ApiResponse<Block>> UnBlockUserByBlockIdAsync(string blockId, SiteUser user)
         {
-            var block = await _blockRepository.GetBlockByIdAsync(blockId);
+            var block = await _blockRepository.GetByIdAsync(blockId);
             if (block != null)
             {
                 if(block.UserId == user.Id)
                 {
-                    var unblock = await _blockRepository.UnBlockUserAsync(block);
+                    var unblock = await _blockRepository.UpdateAsync(block);
                     return StatusCodeReturn<Block>
                     ._200_Success("Unblocked successfully", unblock);
                 }
@@ -148,7 +148,7 @@ namespace SocialMedia.Service.BlockService
         private async Task<ApiResponse<Block>> DeleteFromFriendListAsync(
             AddBlockDto addBlockDto, SiteUser user)
         {
-            var isUserFriend = await _friendsRepository.GetFriendByUserAndFriendIdAsync(
+            var isUserFriend = await _friendsRepository.GetByUserAndFriendIdAsync(
                             user.Id, addBlockDto.UserIdOrUserNameOrEmail);
             if (isUserFriend != null)
             {
@@ -160,11 +160,11 @@ namespace SocialMedia.Service.BlockService
         private async Task<ApiResponse<Block>> DeleteFriendRequestAsync(
             AddBlockDto addBlockDto, SiteUser user)
         {
-            var friendRequest = await _friendRequestRepository.GetFriendRequestByUserAndPersonIdAsync(
+            var friendRequest = await _friendRequestRepository.GetByUserAndPersonIdAsync(
                     user.Id, addBlockDto.UserIdOrUserNameOrEmail);
             if (friendRequest != null)
             {
-                await _friendRequestRepository.DeleteFriendRequestByAsync(friendRequest.Id);
+                await _friendRequestRepository.DeleteByIdAsync(friendRequest.Id);
                 return StatusCodeReturn<Block>._200_Success("Success");
             }
             return StatusCodeReturn<Block>._404_NotFound("Friend request not found");
@@ -172,17 +172,17 @@ namespace SocialMedia.Service.BlockService
 
         private async Task<ApiResponse<Block>> UnfollowAsync(AddBlockDto addBlockDto, SiteUser user)
         {
-            var isFollowingYou = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
+            var isFollowingYou = await _followerRepository.GetByUserIdAndFollowerIdAsync(
                     user.Id, addBlockDto.UserIdOrUserNameOrEmail);
-            var areYouFollowingHim = await _followerRepository.GetFollowingByUserIdAndFollowerIdAsync(
+            var areYouFollowingHim = await _followerRepository.GetByUserIdAndFollowerIdAsync(
                 addBlockDto.UserIdOrUserNameOrEmail, user.Id);
             if (isFollowingYou != null)
             {
-                await _followerRepository.UnfollowAsync(user.Id, addBlockDto.UserIdOrUserNameOrEmail);
+                await _followerRepository.UpdateAsync(user.Id, addBlockDto.UserIdOrUserNameOrEmail);
             }
             if (areYouFollowingHim != null)
             {
-                await _followerRepository.UnfollowAsync(addBlockDto.UserIdOrUserNameOrEmail, user.Id);
+                await _followerRepository.UpdateAsync(addBlockDto.UserIdOrUserNameOrEmail, user.Id);
             }
             return StatusCodeReturn<Block>._200_Success("Success");
         }

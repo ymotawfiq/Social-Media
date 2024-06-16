@@ -2,17 +2,12 @@
 
 
 using SocialMedia.Data.Models;
+using SocialMedia.Repository.GenericCrudInterface;
 
 namespace SocialMedia.Repository.GroupRepository
 {
-    public interface IGroupRepository
+    public interface IGroupRepository : ICrud<Group>
     {
-        Task<Group> AddGroupAsync(Group group);
-        Task<Group> UpdateGroupAsync(Group group);
-        Task<Group> GetGroupByIdAsync(string groupId);
-        Task<Group> DeleteGroupByIdAsync(string groupId);
-        Task<IEnumerable<Group>> GetAllGroupsAsync();
         Task<IEnumerable<Group>> GetAllGroupsByUserIdAsync(string userId);
-        Task SaveChangesAsync();
     }
 }
