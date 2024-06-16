@@ -309,6 +309,29 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Blocks");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.ChatRequest", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserWhoReceivedRequestId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserWhoSentRequestId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserWhoSentRequestId");
+
+                    b.HasIndex("UserWhoReceivedRequestId", "UserWhoSentRequestId")
+                        .IsUnique();
+
+                    b.ToTable("ChatRequests");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
                 {
                     b.Property<string>("Id")
@@ -855,7 +878,7 @@ namespace SocialMedia.Data.Migrations
                     b.Property<DateTime>("SentAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 16, 0, 35, 6, 629, DateTimeKind.Local).AddTicks(4064));
+                        .HasDefaultValue(new DateTime(2024, 6, 16, 21, 37, 56, 846, DateTimeKind.Local).AddTicks(5722));
 
                     b.HasKey("Id");
 
@@ -896,6 +919,29 @@ namespace SocialMedia.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("SavedPosts");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.UserChat", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("User1Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("User2Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.HasIndex("User1Id", "User2Id")
+                        .IsUnique();
+
+                    b.ToTable("UserChats");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
@@ -1027,6 +1073,25 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Data.Models.ChatRequest", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "UserWhoReceived")
+                        .WithMany("ReceivedUserRequests")
+                        .HasForeignKey("UserWhoReceivedRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "UserWhoSent")
+                        .WithMany("SentUserRequests")
+                        .HasForeignKey("UserWhoSentRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserWhoReceived");
+
+                    b.Navigation("UserWhoSent");
                 });
 
             modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
@@ -1369,6 +1434,25 @@ namespace SocialMedia.Data.Migrations
                     b.Navigation("UserSavedPostsFolder");
                 });
 
+            modelBuilder.Entity("SocialMedia.Data.Models.UserChat", b =>
+                {
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User1")
+                        .WithMany("User1Chats")
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User2")
+                        .WithMany("User2Chats")
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
@@ -1408,9 +1492,17 @@ namespace SocialMedia.Data.Migrations
 
                     b.Navigation("Posts");
 
+                    b.Navigation("ReceivedUserRequests");
+
                     b.Navigation("SarehneMessages");
 
                     b.Navigation("SavedPosts");
+
+                    b.Navigation("SentUserRequests");
+
+                    b.Navigation("User1Chats");
+
+                    b.Navigation("User2Chats");
 
                     b.Navigation("UserSavedPostsFolders");
                 });

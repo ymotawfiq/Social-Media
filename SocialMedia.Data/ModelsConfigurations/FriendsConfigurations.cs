@@ -5,7 +5,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class FriendsConfigurations : IEntityTypeConfiguration<Friend>
+    internal class FriendsConfigurations : IEntityTypeConfiguration<Friend>
     {
         public void Configure(EntityTypeBuilder<Friend> builder)
         {

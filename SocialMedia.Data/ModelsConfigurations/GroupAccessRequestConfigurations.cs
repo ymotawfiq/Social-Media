@@ -5,7 +5,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class GroupAccessRequestConfigurations : IEntityTypeConfiguration<GroupAccessRequest>
+    internal class GroupAccessRequestConfigurations : IEntityTypeConfiguration<GroupAccessRequest>
     {
         public void Configure(EntityTypeBuilder<GroupAccessRequest> builder)
         {

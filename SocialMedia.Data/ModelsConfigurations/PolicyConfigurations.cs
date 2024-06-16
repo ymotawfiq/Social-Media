@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PolicyConfigurations : IEntityTypeConfiguration<Policy>
+    internal class PolicyConfigurations : IEntityTypeConfiguration<Policy>
     {
         public void Configure(EntityTypeBuilder<Policy> builder)
         {

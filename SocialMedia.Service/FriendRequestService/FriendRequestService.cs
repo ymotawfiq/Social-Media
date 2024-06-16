@@ -8,6 +8,7 @@ using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.BlockRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
+using SocialMedia.Repository.UserChatRepository;
 using SocialMedia.Service.FriendsService;
 using SocialMedia.Service.GenericReturn;
 
@@ -20,8 +21,9 @@ namespace SocialMedia.Service.FriendRequestService
         private readonly IFriendsRepository _friendsRepository;
         private readonly UserManagerReturn _userManagerReturn;
         private readonly IBlockRepository _blockRepository;
+        private readonly IUserChatRepository _userChatRepository;
         public FriendRequestService(IFriendRequestRepository _friendRequestRepository
-            , IFriendService _friendService,
+            , IFriendService _friendService, IUserChatRepository _userChatRepository,
             IFriendsRepository friendsRepository, UserManagerReturn _userManagerReturn,
             IBlockRepository _blockRepository)
         {
@@ -30,6 +32,7 @@ namespace SocialMedia.Service.FriendRequestService
             _friendsRepository = friendsRepository;
             this._userManagerReturn = _userManagerReturn;
             this._blockRepository = _blockRepository;
+            this._userChatRepository = _userChatRepository;
         }
 
 
@@ -163,6 +166,12 @@ namespace SocialMedia.Service.FriendRequestService
                                 FriendId = friendRequest.UserWhoReceivedId,
                                 UserId = friendRequest.UserWhoSendId
                             });
+                        await _userChatRepository.AddAsync(new UserChat
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            User1Id = friendRequest.UserWhoReceivedId,
+                            User2Id = friendRequest.UserWhoSendId
+                        });
                         return StatusCodeReturn<FriendRequest>
                             ._200_Success("Friend request accepted successfully");
                     }

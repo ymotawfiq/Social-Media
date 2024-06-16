@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class GroupMemberRoleConfigurations : IEntityTypeConfiguration<GroupMemberRole>
+    internal class GroupMemberRoleConfigurations : IEntityTypeConfiguration<GroupMemberRole>
     {
         public void Configure(EntityTypeBuilder<GroupMemberRole> builder)
         {

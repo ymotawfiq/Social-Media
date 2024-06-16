@@ -5,7 +5,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class ReactConfiguration : IEntityTypeConfiguration<React>
+    internal class ReactConfiguration : IEntityTypeConfiguration<React>
     {
         public void Configure(EntityTypeBuilder<React> builder)
         {

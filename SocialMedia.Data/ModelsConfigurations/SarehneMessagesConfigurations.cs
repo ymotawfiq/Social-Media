@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class SarehneMessagesConfigurations : IEntityTypeConfiguration<SarehneMessage>
+    internal class SarehneMessagesConfigurations : IEntityTypeConfiguration<SarehneMessage>
     {
         public void Configure(EntityTypeBuilder<SarehneMessage> builder)
         {

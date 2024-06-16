@@ -316,6 +316,27 @@ namespace SocialMedia.Data.Extensions
             return sarehneMessage;
         }
 
+        public static UserChat ConvertFromUserChatDto_Add(AddUserChatDto addUserChatDto, SiteUser user)
+        {
+            return new UserChat
+            {
+                Id = Guid.NewGuid().ToString(),
+                User1Id = user.Id,
+                User2Id = addUserChatDto.UserIdOrNameOrEmail
+            };
+        }
+
+        public static ChatRequest ConvertFromChatRequestDto_Add(AddChatRequestDto addChatRequestDto,
+            SiteUser user)
+        {
+            return new ChatRequest
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserWhoReceivedRequestId = addChatRequestDto.UserIdOrNameOrEmail,
+                UserWhoSentRequestId = user.Id
+            };
+        }
+
 
     }
 }

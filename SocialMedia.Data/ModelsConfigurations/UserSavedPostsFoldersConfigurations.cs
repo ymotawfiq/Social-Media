@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class UserSavedPostsFoldersConfigurations : IEntityTypeConfiguration<UserSavedPostsFolders>
+    internal class UserSavedPostsFoldersConfigurations : IEntityTypeConfiguration<UserSavedPostsFolders>
     {
         public void Configure(EntityTypeBuilder<UserSavedPostsFolders> builder)
         {

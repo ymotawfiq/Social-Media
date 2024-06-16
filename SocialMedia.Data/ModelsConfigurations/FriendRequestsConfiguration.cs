@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class FriendRequestsConfiguration : IEntityTypeConfiguration<FriendRequest>
+    internal class FriendRequestsConfiguration : IEntityTypeConfiguration<FriendRequest>
     {
         public void Configure(EntityTypeBuilder<FriendRequest> builder)
         {

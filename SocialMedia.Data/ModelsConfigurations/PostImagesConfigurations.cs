@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PostImagesConfigurations : IEntityTypeConfiguration<PostImages>
+    internal class PostImagesConfigurations : IEntityTypeConfiguration<PostImages>
     {
         public void Configure(EntityTypeBuilder<PostImages> builder)
         {

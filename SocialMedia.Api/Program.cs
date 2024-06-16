@@ -7,6 +7,7 @@ using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
 using SocialMedia.Repository.BlockRepository;
+using SocialMedia.Repository.ChatRequestRepository;
 using SocialMedia.Repository.FollowerRepository;
 using SocialMedia.Repository.FriendRequestRepository;
 using SocialMedia.Repository.FriendsRepository;
@@ -27,8 +28,10 @@ using SocialMedia.Repository.PostViewRepository;
 using SocialMedia.Repository.ReactRepository;
 using SocialMedia.Repository.SarehneRepository;
 using SocialMedia.Repository.SavePostsRepository;
+using SocialMedia.Repository.UserChatRepository;
 using SocialMedia.Repository.UserSavedPostsFoldersRepository;
 using SocialMedia.Service.BlockService;
+using SocialMedia.Service.ChatRequestService;
 using SocialMedia.Service.FollowerService;
 using SocialMedia.Service.FriendRequestService;
 using SocialMedia.Service.FriendsService;
@@ -50,6 +53,7 @@ using SocialMedia.Service.SarehneService;
 using SocialMedia.Service.SavedPostsService;
 using SocialMedia.Service.SendEmailService;
 using SocialMedia.Service.UserAccountService;
+using SocialMedia.Service.UserChatService;
 using SocialMedia.Service.UserSavedPostsFoldersService;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -154,6 +158,8 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService>();
 builder.Services.AddScoped<ISarehneService, SarehneService>();
+builder.Services.AddScoped<IUserChatService, UserChatService>();
+builder.Services.AddScoped<IChatRequestService, ChatRequestService>();
 
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
@@ -178,6 +184,9 @@ builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<IGroupMemberRoleRepository, GroupMemberRoleRepository>();
 builder.Services.AddScoped<IGroupPostsRepository, GroupPostsRepository>();
 builder.Services.AddScoped<ISarehneRepository, SarehneRepository>();
+builder.Services.AddScoped<IUserChatRepository, UserChatRepository>();
+builder.Services.AddScoped<IChatRequestRepository, ChatRequestRepository>();
+
 
 
 builder.Services.AddControllers().AddJsonOptions(op =>

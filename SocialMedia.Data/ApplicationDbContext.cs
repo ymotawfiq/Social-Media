@@ -58,7 +58,9 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new GroupAccessRequestConfigurations())
                    .ApplyConfiguration(new GroupMemberRoleConfigurations())
                    .ApplyConfiguration(new GroupPostsConfigurations())
-                   .ApplyConfiguration(new SarehneMessagesConfigurations());
+                   .ApplyConfiguration(new SarehneMessagesConfigurations())
+                   .ApplyConfiguration(new UserChatConfigurations())
+                   .ApplyConfiguration(new ChatRequestConfigurations());
         }
 
 
@@ -85,6 +87,8 @@ namespace SocialMedia.Data
         public DbSet<GroupMemberRole> GroupMemberRoles { get; set; }
         public DbSet<GroupPost> GroupPosts { get; set; }
         public DbSet<SarehneMessage> SarehneMessages { get; set; }
+        public DbSet<UserChat> UserChats { get; set; }
+        public DbSet<ChatRequest> ChatRequests  { get; set; }
 
     }
 }

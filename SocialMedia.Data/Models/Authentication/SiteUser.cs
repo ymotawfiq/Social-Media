@@ -37,6 +37,11 @@ namespace SocialMedia.Data.Models.Authentication
         public List<GroupPost>? GroupPosts { get; set; }
         public List<SarehneMessage>? SarehneMessages { get; set; }
         public List<Page>? Pages { get; set; }
+        public List<UserChat>? User1Chats { get; set; }
+        public List<UserChat>? User2Chats { get; set; }
+
+        public List<ChatRequest>? ReceivedUserRequests { get; set; }
+        public List<ChatRequest>? SentUserRequests { get; set; }
 
     }
 }

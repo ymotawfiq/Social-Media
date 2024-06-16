@@ -6,7 +6,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class BlockConfigurations : IEntityTypeConfiguration<Block>
+    internal class BlockConfigurations : IEntityTypeConfiguration<Block>
     {
         public void Configure(EntityTypeBuilder<Block> builder)
         {

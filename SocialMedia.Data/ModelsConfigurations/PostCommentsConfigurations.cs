@@ -5,7 +5,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PostCommentsConfigurations : IEntityTypeConfiguration<PostComment>
+    internal class PostCommentsConfigurations : IEntityTypeConfiguration<PostComment>
     {
         public void Configure(EntityTypeBuilder<PostComment> builder)
         {

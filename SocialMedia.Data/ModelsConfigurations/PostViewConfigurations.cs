@@ -5,7 +5,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PostViewConfigurations : IEntityTypeConfiguration<PostView>
+    internal class PostViewConfigurations : IEntityTypeConfiguration<PostView>
     {
         public void Configure(EntityTypeBuilder<PostView> builder)
         {

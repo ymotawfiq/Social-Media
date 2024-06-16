@@ -5,7 +5,7 @@ using SocialMedia.Data.Models;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class PageFollowersConfigurations : IEntityTypeConfiguration<PageFollower>
+    internal class PageFollowersConfigurations : IEntityTypeConfiguration<PageFollower>
     {
         public void Configure(EntityTypeBuilder<PageFollower> builder)
         {

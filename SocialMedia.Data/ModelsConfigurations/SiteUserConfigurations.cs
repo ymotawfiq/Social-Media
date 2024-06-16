@@ -6,7 +6,7 @@ using SocialMedia.Data.Models.Authentication;
 
 namespace SocialMedia.Data.ModelsConfigurations
 {
-    public class SiteUserConfigurations : IEntityTypeConfiguration<SiteUser>
+    internal class SiteUserConfigurations : IEntityTypeConfiguration<SiteUser>
     {
         public void Configure(EntityTypeBuilder<SiteUser> builder)
         {
