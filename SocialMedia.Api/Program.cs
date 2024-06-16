@@ -139,20 +139,20 @@ builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<IFollowerService, FollowerService>();
 builder.Services.AddScoped<IBlockService, BlockService>();
 builder.Services.AddScoped<IPolicyService, PolicyService>();
-//builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IPagePostsService, PagePostsService>();
+builder.Services.AddScoped<IGroupPostsService, GroupPostsService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<UserManagerReturn>();
 builder.Services.AddScoped<IUserSavedPostsFolderService, UserSavedPostsFolderService>();
 builder.Services.AddScoped<ISavedPostsService, SavedPostsService>();
 builder.Services.AddScoped<IPostReactsService, PostReactsService>();
 builder.Services.AddScoped<IPostCommentService, PostCommentService>();
 builder.Services.AddScoped<IPageService, PageService>();
-//builder.Services.AddScoped<IPagePostsService, PagePostsService>();
 builder.Services.AddScoped<IPagesFollowersService, PagesFollowersService>();
 builder.Services.AddScoped<IGroupRolesService, GroupRolesService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService>();
-//builder.Services.AddScoped<IGroupPostsService, GroupPostsService>();
 builder.Services.AddScoped<ISarehneService, SarehneService>();
 
 // repositories injection
