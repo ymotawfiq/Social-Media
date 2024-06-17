@@ -304,7 +304,7 @@ namespace SocialMedia.Data.Extensions
                 ReceiverId = receiver.Id,
                 SenderName = "Anonymous",
                 MessagePolicyId = policy.Id,
-                SentAt = DateTime.Now
+                SentAt = DateTime.Now.Date
             };
         }
 
@@ -333,10 +333,60 @@ namespace SocialMedia.Data.Extensions
             {
                 Id = Guid.NewGuid().ToString(),
                 UserWhoReceivedRequestId = addChatRequestDto.UserIdOrNameOrEmail,
-                UserWhoSentRequestId = user.Id
+                UserWhoSentRequestId = user.Id,
             };
         }
 
+        public static ChatMessage ConvertFromChatMessageDto_Add(AddChatMessageDto addChatMessageDto,
+            SiteUser user, string photoUniqueName)
+        {
+            return new ChatMessage
+            {
+                ChatId =addChatMessageDto.ChatId,
+                Id = Guid.NewGuid().ToString(),
+                Message = addChatMessageDto.Message,
+                Photo = photoUniqueName,
+                SenderId = user.Id,
+            };
+        }
+
+        public static ArchievedChat ConvertFromArchievedChatDto_Add(ArchieveChatDto archieveChatDto,
+            SiteUser user)
+        {
+            return new ArchievedChat
+            {
+                Id = Guid.NewGuid().ToString(),
+                ChatId = archieveChatDto.ChatId,
+                UserId = user.Id
+            };
+        }
+
+        public static ChatMessage ConvertFromChatMessageReplayDto_Add(
+            AddChatMessageReplayDto addChatMessageReplayDto, SiteUser user, UserChat chat,
+            string photoUniqueName)
+        {
+            return new ChatMessage
+            {
+                ChatId = chat.Id,
+                Id = Guid.NewGuid().ToString(),
+                Message = addChatMessageReplayDto.Message,
+                Photo = photoUniqueName,
+                SenderId = user.Id,
+                MessageId = addChatMessageReplayDto.MessageId
+            };
+        }
+
+        public static MessageReact ConvertFromMessageReactDto_Add(AddMessageReactDto addMessageReactDto,
+            SiteUser user)
+        {
+            return new MessageReact
+            {
+                Id = Guid.NewGuid().ToString(),
+                MessageId = addMessageReactDto.MessageId,
+                ReactId = addMessageReactDto.ReactId,
+                ReactedUserId = user.Id
+            };
+        }
 
     }
 }

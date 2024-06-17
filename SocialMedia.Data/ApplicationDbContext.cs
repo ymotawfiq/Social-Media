@@ -60,7 +60,10 @@ namespace SocialMedia.Data
                    .ApplyConfiguration(new GroupPostsConfigurations())
                    .ApplyConfiguration(new SarehneMessagesConfigurations())
                    .ApplyConfiguration(new UserChatConfigurations())
-                   .ApplyConfiguration(new ChatRequestConfigurations());
+                   .ApplyConfiguration(new ChatRequestConfigurations())
+                   .ApplyConfiguration(new ChatMessageConfigurations())
+                   .ApplyConfiguration(new ArchievedChatConfigurations())
+                   .ApplyConfiguration(new MessageReactsConfigurations());
         }
 
 
@@ -89,6 +92,9 @@ namespace SocialMedia.Data
         public DbSet<SarehneMessage> SarehneMessages { get; set; }
         public DbSet<UserChat> UserChats { get; set; }
         public DbSet<ChatRequest> ChatRequests  { get; set; }
+        public DbSet<ChatMessage> ChatMessages  { get; set; }
+        public DbSet<ArchievedChat> ArchievedChats { get; set; }
+        public DbSet<MessageReact> MessageReacts { get; set; }
 
     }
 }

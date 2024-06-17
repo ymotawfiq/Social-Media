@@ -1,3 +1,5 @@
+
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,9 @@ using Microsoft.OpenApi.Models;
 using SocialMedia.Data;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Data.Models.EmailModel;
+using SocialMedia.Repository.ArchievedChatRepository;
 using SocialMedia.Repository.BlockRepository;
+using SocialMedia.Repository.ChatMessageRepository;
 using SocialMedia.Repository.ChatRequestRepository;
 using SocialMedia.Repository.FollowerRepository;
 using SocialMedia.Repository.FriendRequestRepository;
@@ -17,6 +21,7 @@ using SocialMedia.Repository.GroupMemberRoleRepository;
 using SocialMedia.Repository.GroupPostsRepository;
 using SocialMedia.Repository.GroupRepository;
 using SocialMedia.Repository.GroupRoleRepository;
+using SocialMedia.Repository.MessageReactRepository;
 using SocialMedia.Repository.PagePostsRepository;
 using SocialMedia.Repository.PageRepository;
 using SocialMedia.Repository.PagesFollowersRepository;
@@ -30,7 +35,9 @@ using SocialMedia.Repository.SarehneRepository;
 using SocialMedia.Repository.SavePostsRepository;
 using SocialMedia.Repository.UserChatRepository;
 using SocialMedia.Repository.UserSavedPostsFoldersRepository;
+using SocialMedia.Service.ArchievedChatService;
 using SocialMedia.Service.BlockService;
+using SocialMedia.Service.ChatMessageService;
 using SocialMedia.Service.ChatRequestService;
 using SocialMedia.Service.FollowerService;
 using SocialMedia.Service.FriendRequestService;
@@ -41,6 +48,7 @@ using SocialMedia.Service.GroupManager;
 using SocialMedia.Service.GroupPostsService;
 using SocialMedia.Service.GroupRolesService;
 using SocialMedia.Service.GroupService;
+using SocialMedia.Service.MessageReactService;
 using SocialMedia.Service.PagePostsService;
 using SocialMedia.Service.PageService;
 using SocialMedia.Service.PagesFollowersService;
@@ -160,6 +168,9 @@ builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService
 builder.Services.AddScoped<ISarehneService, SarehneService>();
 builder.Services.AddScoped<IUserChatService, UserChatService>();
 builder.Services.AddScoped<IChatRequestService, ChatRequestService>();
+builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+builder.Services.AddScoped<IArchievedChatService, ArchievedChatService>();
+builder.Services.AddScoped<IMessageReactService, MessageReactService>();
 
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
@@ -186,6 +197,9 @@ builder.Services.AddScoped<IGroupPostsRepository, GroupPostsRepository>();
 builder.Services.AddScoped<ISarehneRepository, SarehneRepository>();
 builder.Services.AddScoped<IUserChatRepository, UserChatRepository>();
 builder.Services.AddScoped<IChatRequestRepository, ChatRequestRepository>();
+builder.Services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+builder.Services.AddScoped<IArchievedChatRepository, ArchievedChatRepository>();
+builder.Services.AddScoped<IMessageReactRepository, MessageReactRepository>();
 
 
 

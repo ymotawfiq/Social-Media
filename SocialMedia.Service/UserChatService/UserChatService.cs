@@ -5,6 +5,7 @@ using SocialMedia.Data.Extensions;
 using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
+using SocialMedia.Repository.ChatMessageRepository;
 using SocialMedia.Repository.UserChatRepository;
 using SocialMedia.Service.GenericReturn;
 
@@ -14,10 +15,13 @@ namespace SocialMedia.Service.UserChatService
     {
         private readonly IUserChatRepository _userChatRepository;
         private readonly UserManagerReturn _userManagerReturn;
-        public UserChatService(IUserChatRepository _userChatRepository, UserManagerReturn _userManagerReturn)
+        private readonly IChatMessageRepository _chatMessageRepository;
+        public UserChatService(IUserChatRepository _userChatRepository, UserManagerReturn _userManagerReturn,
+            IChatMessageRepository _chatMessageRepository)
         {
             this._userChatRepository = _userChatRepository;
             this._userManagerReturn = _userManagerReturn;
+            this._chatMessageRepository = _chatMessageRepository;
         }
         public async Task<ApiResponse<UserChat>> AddUserChatAsync(
             AddUserChatDto addUserChatDto, SiteUser user)
@@ -47,9 +51,14 @@ namespace SocialMedia.Service.UserChatService
             var chat = await GetUserChatByIdAsync(chatId, user);
             if (chat.IsSuccess && chat.ResponseObject != null)
             {
-                await _userChatRepository.DeleteByIdAsync(chatId);
+                if(await _chatMessageRepository.IsChatEmptyAsync(user, chatId))
+                {
+                    await _userChatRepository.DeleteByIdAsync(chatId);
+                    return StatusCodeReturn<UserChat>
+                        ._200_Success("Chat deleted successfully", chat.ResponseObject);
+                }
                 return StatusCodeReturn<UserChat>
-                    ._200_Success("Chat deleted successfully", chat.ResponseObject);
+                    ._403_Forbidden("Unable to delete chat because it is not empty");
             }
             return chat;
         }

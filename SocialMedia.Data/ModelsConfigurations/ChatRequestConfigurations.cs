@@ -18,6 +18,7 @@ namespace SocialMedia.Data.ModelsConfigurations
                 .HasForeignKey(e => e.UserWhoReceivedRequestId);
             builder.Property(e => e.UserWhoReceivedRequestId).IsRequired();
             builder.Property(e => e.UserWhoSentRequestId).IsRequired();
+            builder.Property(e => e.SentAt).IsRequired().HasDefaultValueSql("getdate()");
         }
     }
 }

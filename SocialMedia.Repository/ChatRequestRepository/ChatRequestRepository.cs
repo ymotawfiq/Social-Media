@@ -22,7 +22,8 @@ namespace SocialMedia.Repository.ChatRequestRepository
             {
                 Id = t.Id,
                 UserWhoReceivedRequestId = t.UserWhoReceivedRequestId,
-                UserWhoSentRequestId = t.UserWhoSentRequestId
+                UserWhoSentRequestId = t.UserWhoSentRequestId,
+                SentAt = t.SentAt
             };
         }
 
@@ -40,7 +41,8 @@ namespace SocialMedia.Repository.ChatRequestRepository
             {
                 Id = e.Id,
                 UserWhoReceivedRequestId = e.UserWhoReceivedRequestId,
-                UserWhoSentRequestId = e.UserWhoSentRequestId
+                UserWhoSentRequestId = e.UserWhoSentRequestId,
+                SentAt = e.SentAt
             }).ToListAsync();
         }
 
@@ -50,7 +52,8 @@ namespace SocialMedia.Repository.ChatRequestRepository
             {
                 UserWhoSentRequestId = e.UserWhoSentRequestId,
                 Id = e.Id,
-                UserWhoReceivedRequestId = e.UserWhoReceivedRequestId
+                UserWhoReceivedRequestId = e.UserWhoReceivedRequestId,
+                SentAt = e.SentAt
             }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
         }
 
@@ -72,14 +75,16 @@ namespace SocialMedia.Repository.ChatRequestRepository
             {
                 UserWhoSentRequestId = e.UserWhoSentRequestId,
                 Id = e.Id,
-                UserWhoReceivedRequestId = e.UserWhoReceivedRequestId
+                UserWhoReceivedRequestId = e.UserWhoReceivedRequestId,
+                SentAt = e.SentAt
             }).Where(e => e.UserWhoReceivedRequestId == user1.Id)
             .Where(e => e.UserWhoSentRequestId == user2.Id).FirstOrDefaultAsync())!;
             var case2 = (await _dbContext.ChatRequests.Select(e => new ChatRequest
             {
                 UserWhoSentRequestId = e.UserWhoSentRequestId,
                 Id = e.Id,
-                UserWhoReceivedRequestId = e.UserWhoReceivedRequestId
+                UserWhoReceivedRequestId = e.UserWhoReceivedRequestId,
+                SentAt = e.SentAt
             }).Where(e => e.UserWhoReceivedRequestId == user2.Id)
             .Where(e => e.UserWhoSentRequestId == user1.Id).FirstOrDefaultAsync())!;
             return case1 == null ? case2! : case1;
@@ -93,7 +98,8 @@ namespace SocialMedia.Repository.ChatRequestRepository
                    {
                        Id = c.Id,
                        UserWhoReceivedRequestId = c.UserWhoReceivedRequestId,
-                       UserWhoSentRequestId = c.UserWhoSentRequestId
+                       UserWhoSentRequestId = c.UserWhoSentRequestId,
+                       SentAt = c.SentAt
                    });
         }
 

@@ -6,20 +6,55 @@ using SocialMedia.Data.Models;
 using SocialMedia.Data.Models.ApiResponseModel;
 using SocialMedia.Data.Models.Authentication;
 using SocialMedia.Repository.ChatRequestRepository;
+using SocialMedia.Service.BlockService;
 using SocialMedia.Service.GenericReturn;
+using SocialMedia.Service.UserChatService;
 
 namespace SocialMedia.Service.ChatRequestService
 {
     public class ChatRequestService : IChatRequestService
     {
         private readonly IChatRequestRepository _chatRequestRepository;
+        private readonly IUserChatService _userChatService;
         private readonly UserManagerReturn _userManagerReturn;
+        private readonly IBlockService _blockService;
         public ChatRequestService(IChatRequestRepository _chatRequestRepository,
-            UserManagerReturn _userManagerReturn)
+            UserManagerReturn _userManagerReturn, IBlockService _blockService,
+            IUserChatService _userChatService)
         {
             this._chatRequestRepository = _chatRequestRepository;
             this._userManagerReturn = _userManagerReturn;
+            this._blockService = _blockService;
+            this._userChatService = _userChatService;
         }
+
+        public async Task<ApiResponse<ChatRequest>> AcceptChatRequestAsync(string requestId, SiteUser user)
+        {
+            var chatRequest = await _chatRequestRepository.GetByIdAsync(requestId);
+            if (chatRequest != null)
+            {
+                if(chatRequest.UserWhoReceivedRequestId == user.Id)
+                {
+                    var acceptRequest = await _userChatService.AddUserChatAsync(new AddUserChatDto
+                    {
+                        UserIdOrNameOrEmail = chatRequest.UserWhoSentRequestId
+                    }, user);
+                    if (acceptRequest.IsSuccess)
+                    {
+                        await DeleteChatRequestByIdAsync(requestId, user);
+                        return StatusCodeReturn<ChatRequest>
+                            ._200_Success("Chat request accepted successfully");
+                    }
+                    return StatusCodeReturn<ChatRequest>
+                        ._500_ServerError(acceptRequest.Message);
+                }
+                return StatusCodeReturn<ChatRequest>
+                    ._403_Forbidden();
+            }
+            return StatusCodeReturn<ChatRequest>
+                    ._404_NotFound("Chat request not found");
+        }
+
         public async Task<ApiResponse<ChatRequest>> AddChatRequestAsync(AddChatRequestDto addChatRequestDto,
             SiteUser user)
         {
@@ -27,17 +62,24 @@ namespace SocialMedia.Service.ChatRequestService
                 addChatRequestDto.UserIdOrNameOrEmail);
             if(receivedUser != null)
             {
-                var isSentBefore = await _chatRequestRepository.GetChatRequestAsync(user, receivedUser);
-                if (isSentBefore == null)
+                var isBlocked = await _blockService.GetBlockByUserIdAndBlockedUserIdAsync(
+                    receivedUser.Id, user.Id);
+                if (isBlocked.ResponseObject == null)
                 {
-                    addChatRequestDto.UserIdOrNameOrEmail = receivedUser.Id;
-                    var newChatRequest = await _chatRequestRepository.AddAsync(ConvertFromDto
-                        .ConvertFromChatRequestDto_Add(addChatRequestDto, user));
+                    var isSentBefore = await _chatRequestRepository.GetChatRequestAsync(user, receivedUser);
+                    if (isSentBefore == null)
+                    {
+                        addChatRequestDto.UserIdOrNameOrEmail = receivedUser.Id;
+                        var newChatRequest = await _chatRequestRepository.AddAsync(ConvertFromDto
+                            .ConvertFromChatRequestDto_Add(addChatRequestDto, user));
+                        return StatusCodeReturn<ChatRequest>
+                            ._201_Created("Chat request sent successfully", newChatRequest);
+                    }
                     return StatusCodeReturn<ChatRequest>
-                        ._201_Created("Chat request sent successfully", newChatRequest);
+                        ._403_Forbidden("Chat request already sent before");
                 }
                 return StatusCodeReturn<ChatRequest>
-                    ._403_Forbidden("Chat request already sent before");
+                        ._403_Forbidden();
             }
             return StatusCodeReturn<ChatRequest>
                     ._404_NotFound("User you want to send chat request not found");
@@ -60,7 +102,7 @@ namespace SocialMedia.Service.ChatRequestService
             var chatRequest = await _chatRequestRepository.GetByIdAsync(id);
             if (chatRequest != null)
             {
-                if(chatRequest.UserWhoReceivedRequestId==user.Id
+                if(chatRequest.UserWhoReceivedRequestId == user.Id
                     || chatRequest.UserWhoSentRequestId == user.Id)
                 {
                     return StatusCodeReturn<ChatRequest>
