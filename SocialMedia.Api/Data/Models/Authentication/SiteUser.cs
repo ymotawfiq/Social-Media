@@ -45,5 +45,6 @@ namespace SocialMedia.Api.Data.Models.Authentication
         public List<ArchievedChat>? ArchievedChats { get; set; }
         public List<MessageReact>? MessageReacts { get; set; }
 
+
     }
 }

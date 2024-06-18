@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using SocialMedia.Api.Data;
 
 #nullable disable
 
@@ -154,7 +155,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ArchievedChat", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ArchievedChat", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -179,7 +180,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("ArchievedChats");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -310,7 +311,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Block", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -333,7 +334,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Blocks");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ChatMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMessage", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -378,7 +379,7 @@ namespace SocialMedia.Api.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ChatRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatRequest", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -409,7 +410,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("ChatRequests");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Follower", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -431,7 +432,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Followers");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Friend", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Friend", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -454,7 +455,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Friends");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.FriendRequest", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -482,7 +483,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("FriendRequests");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Group", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Group", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -519,7 +520,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Groups");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupAccessRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupAccessRequest", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -544,7 +545,58 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("GroupAccessRequests");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChat", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CreatorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Created By User Id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Group Name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.ToTable("GroupChats");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChatMember", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GroupChatId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Group Chat Id");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit")
+                        .HasColumnName("Is Join Request Accepted");
+
+                    b.Property<string>("MemberId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Member Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("GroupChatId", "MemberId")
+                        .IsUnique();
+
+                    b.ToTable("GroupChatMembers");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMember", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -569,7 +621,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("GroupMembers");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupMemberRole", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMemberRole", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -594,7 +646,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("GroupMemberRoles");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupPost", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupPost", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -625,7 +677,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("GroupPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupRole", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupRole", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -642,7 +694,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("GroupRoles");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.MessageReact", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.MessageReact", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -673,7 +725,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("MessageReacts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Page", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -701,7 +753,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Pages");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PageFollower", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PageFollower", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -726,7 +778,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("PageFollowers");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PagePost", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PagePost", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -750,7 +802,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("PagePosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Policy", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -768,7 +820,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Policies");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Post", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -815,7 +867,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostComment", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -857,7 +909,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("PostComments");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostImages", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostImages", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -882,7 +934,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("PostImages");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostReacts", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostReacts", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -914,7 +966,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("PostReacts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostView", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostView", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -938,7 +990,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("PostViews");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.React", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -956,7 +1008,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Reacts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.SarehneMessage", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -997,7 +1049,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("SarehneMessages");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.SavedPosts", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.SavedPosts", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -1029,7 +1081,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("SavedPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserChat", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -1052,7 +1104,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("UserChats");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserSavedPostsFolders", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -1089,7 +1141,7 @@ namespace SocialMedia.Api.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", null)
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1098,7 +1150,7 @@ namespace SocialMedia.Api.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", null)
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1113,7 +1165,7 @@ namespace SocialMedia.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", null)
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1122,22 +1174,22 @@ namespace SocialMedia.Api.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", null)
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ArchievedChat", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ArchievedChat", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.UserChat", "UserChat")
+                    b.HasOne("SocialMedia.Api.Data.Models.UserChat", "UserChat")
                         .WithMany("ArchievedChats")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("ArchievedChats")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1148,33 +1200,33 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("UserChat");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Authentication.SiteUser", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Policy", "AccountPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "AccountPolicy")
                         .WithMany("UserAccountPolicies")
                         .HasForeignKey("AccountPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "PostPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "PostPolicy")
                         .WithMany("UserPostPolicies")
                         .HasForeignKey("AccountPostPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "CommentPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "CommentPolicy")
                         .WithMany("UserCommentPolicies")
                         .HasForeignKey("CommentPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "FriendListPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "FriendListPolicy")
                         .WithMany("UserFriendListPolicies")
                         .HasForeignKey("FriendListPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "ReactPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "ReactPolicy")
                         .WithMany("UserReactPolicies")
                         .HasForeignKey("ReactPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1191,9 +1243,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("ReactPolicy");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Block", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Block", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("Blocks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1202,19 +1254,19 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ChatMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMessage", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.UserChat", "Chat")
+                    b.HasOne("SocialMedia.Api.Data.Models.UserChat", "Chat")
                         .WithMany("ChatMessages")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.ChatMessage", "MessageReplay")
+                    b.HasOne("SocialMedia.Api.Data.Models.ChatMessage", "MessageReplay")
                         .WithMany("MessageReplays")
                         .HasForeignKey("MessageId");
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("ChatMessages")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1227,15 +1279,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ChatRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatRequest", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "UserWhoReceived")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "UserWhoReceived")
                         .WithMany("ReceivedUserRequests")
                         .HasForeignKey("UserWhoReceivedRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "UserWhoSent")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "UserWhoSent")
                         .WithMany("SentUserRequests")
                         .HasForeignKey("UserWhoSentRequestId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1246,9 +1298,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("UserWhoSent");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Follower", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Follower", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("Followers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1257,9 +1309,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Friend", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Friend", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("Friends")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1268,9 +1320,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.FriendRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.FriendRequest", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("FriendRequests")
                         .HasForeignKey("UserWhoSendId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1279,15 +1331,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Group", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Group", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("Groups")
                         .HasForeignKey("CreatedUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "GroupPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "GroupPolicy")
                         .WithMany("GroupPolicies")
                         .HasForeignKey("GroupPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1298,15 +1350,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupAccessRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupAccessRequest", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Group", "Group")
+                    b.HasOne("SocialMedia.Api.Data.Models.Group", "Group")
                         .WithMany("GroupAccessRequests")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("GroupAccessRequests")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1317,15 +1369,45 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChat", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Group", "Group")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("GroupChats")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChatMember", b =>
+                {
+                    b.HasOne("SocialMedia.Api.Data.Models.GroupChat", "GroupChat")
+                        .WithMany("ChatMembers")
+                        .HasForeignKey("GroupChatId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
+                        .WithMany("ChatMembers")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GroupChat");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMember", b =>
+                {
+                    b.HasOne("SocialMedia.Api.Data.Models.Group", "Group")
                         .WithMany("GroupMembers")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("GroupMembers")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1336,15 +1418,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupMemberRole", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMemberRole", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.GroupMember", "GroupMember")
+                    b.HasOne("SocialMedia.Api.Data.Models.GroupMember", "GroupMember")
                         .WithMany("GroupMemberRoles")
                         .HasForeignKey("GroupMemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.GroupRole", "GroupRole")
+                    b.HasOne("SocialMedia.Api.Data.Models.GroupRole", "GroupRole")
                         .WithMany("GroupMemberRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1355,21 +1437,21 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("GroupRole");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupPost", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupPost", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Group", "Group")
+                    b.HasOne("SocialMedia.Api.Data.Models.Group", "Group")
                         .WithMany("GroupPosts")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("GroupPosts")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("GroupPosts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1382,21 +1464,21 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.MessageReact", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.MessageReact", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.ChatMessage", "ChatMessage")
+                    b.HasOne("SocialMedia.Api.Data.Models.ChatMessage", "ChatMessage")
                         .WithMany("MessageReacts")
                         .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.React", "React")
+                    b.HasOne("SocialMedia.Api.Data.Models.React", "React")
                         .WithMany("MessageReacts")
                         .HasForeignKey("ReactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("MessageReacts")
                         .HasForeignKey("ReactedUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1409,9 +1491,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Page", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "Creator")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "Creator")
                         .WithMany("Pages")
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1420,15 +1502,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PageFollower", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PageFollower", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("PageFollowers")
                         .HasForeignKey("FollowerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Page", "Page")
+                    b.HasOne("SocialMedia.Api.Data.Models.Page", "Page")
                         .WithMany("PageFollowers")
                         .HasForeignKey("PageId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1439,15 +1521,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PagePost", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PagePost", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Page", "Page")
+                    b.HasOne("SocialMedia.Api.Data.Models.Page", "Page")
                         .WithMany("PagePosts")
                         .HasForeignKey("PageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("PagePosts")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1458,27 +1540,27 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Post", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Policy", "CommentPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "CommentPolicy")
                         .WithMany("CommentPolicies")
                         .HasForeignKey("CommentPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "PostPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "PostPolicy")
                         .WithMany("PostPolicies")
                         .HasForeignKey("PostPolicyId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Policy", "ReactPolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "ReactPolicy")
                         .WithMany("ReactPolicies")
                         .HasForeignKey("ReactPolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("Posts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1493,19 +1575,19 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostComment", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.PostComment", "BaseComment")
+                    b.HasOne("SocialMedia.Api.Data.Models.PostComment", "BaseComment")
                         .WithMany("Replays")
                         .HasForeignKey("CommentId");
 
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("PostComments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("PostComments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1518,9 +1600,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostImages", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostImages", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("PostImages")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1529,21 +1611,21 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostReacts", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostReacts", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("PostReacts")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.React", "React")
+                    b.HasOne("SocialMedia.Api.Data.Models.React", "React")
                         .WithMany("PostReacts")
                         .HasForeignKey("PostReactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("PostReacts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1556,9 +1638,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostView", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostView", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("PostViews")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1567,15 +1649,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.SarehneMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.SarehneMessage", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Policy", "SarehneMessagePolicy")
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "SarehneMessagePolicy")
                         .WithMany("SarehneMessagePolicies")
                         .HasForeignKey("MessagePolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("SarehneMessages")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1586,21 +1668,21 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.SavedPosts", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.SavedPosts", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.UserSavedPostsFolders", "UserSavedPostsFolder")
+                    b.HasOne("SocialMedia.Api.Data.Models.UserSavedPostsFolders", "UserSavedPostsFolder")
                         .WithMany("SavedPosts")
                         .HasForeignKey("FolderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Post", "Post")
+                    b.HasOne("SocialMedia.Api.Data.Models.Post", "Post")
                         .WithMany("SavedPosts")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("SavedPosts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1613,15 +1695,15 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("UserSavedPostsFolder");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserChat", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User1")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User1")
                         .WithMany("User1Chats")
                         .HasForeignKey("User1Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User2")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User2")
                         .WithMany("User2Chats")
                         .HasForeignKey("User2Id")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1632,9 +1714,9 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User2");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserSavedPostsFolders", b =>
                 {
-                    b.HasOne("SocialMedia.Data.Models.Authentication.SiteUser", "User")
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
                         .WithMany("UserSavedPostsFolders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1643,11 +1725,13 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Authentication.SiteUser", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Navigation("ArchievedChats");
 
                     b.Navigation("Blocks");
+
+                    b.Navigation("ChatMembers");
 
                     b.Navigation("ChatMessages");
 
@@ -1658,6 +1742,8 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Friends");
 
                     b.Navigation("GroupAccessRequests");
+
+                    b.Navigation("GroupChats");
 
                     b.Navigation("GroupMembers");
 
@@ -1692,14 +1778,14 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("UserSavedPostsFolders");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.ChatMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMessage", b =>
                 {
                     b.Navigation("MessageReacts");
 
                     b.Navigation("MessageReplays");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Group", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Group", b =>
                 {
                     b.Navigation("GroupAccessRequests");
 
@@ -1708,24 +1794,29 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("GroupPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupMember", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChat", b =>
+                {
+                    b.Navigation("ChatMembers");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMember", b =>
                 {
                     b.Navigation("GroupMemberRoles");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.GroupRole", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupRole", b =>
                 {
                     b.Navigation("GroupMemberRoles");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Page", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Page", b =>
                 {
                     b.Navigation("PageFollowers");
 
                     b.Navigation("PagePosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Policy", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Policy", b =>
                 {
                     b.Navigation("CommentPolicies");
 
@@ -1748,7 +1839,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("UserReactPolicies");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Post", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Post", b =>
                 {
                     b.Navigation("GroupPosts");
 
@@ -1765,26 +1856,26 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("SavedPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.PostComment", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.PostComment", b =>
                 {
                     b.Navigation("Replays");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.React", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.React", b =>
                 {
                     b.Navigation("MessageReacts");
 
                     b.Navigation("PostReacts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserChat", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>
                 {
                     b.Navigation("ArchievedChats");
 
                     b.Navigation("ChatMessages");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.UserSavedPostsFolders", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserSavedPostsFolders", b =>
                 {
                     b.Navigation("SavedPosts");
                 });

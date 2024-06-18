@@ -16,7 +16,6 @@ using SocialMedia.Api.Repository.FollowerRepository;
 using SocialMedia.Api.Repository.FriendRequestRepository;
 using SocialMedia.Api.Repository.FriendsRepository;
 using SocialMedia.Api.Repository.GroupAccessRequestRepository;
-using SocialMedia.Api.Repository.GroupMemberRepository;
 using SocialMedia.Api.Repository.GroupMemberRoleRepository;
 using SocialMedia.Api.Repository.GroupPostsRepository;
 using SocialMedia.Api.Repository.GroupRepository;
@@ -65,6 +64,7 @@ using SocialMedia.Api.Service.UserChatService;
 using SocialMedia.Api.Service.UserSavedPostsFoldersService;
 using System.Text;
 using System.Text.Json.Serialization;
+using SocialMedia.Api.Repository.GroupMemberRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 

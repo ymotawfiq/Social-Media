@@ -4,7 +4,7 @@ using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.GroupRolesService;
 
-namespace SocialMedia.Api.Api.Controllers
+namespace SocialMedia.Api.Controllers
 {
     [ApiController]
     public class GroupRoleController : ControllerBase

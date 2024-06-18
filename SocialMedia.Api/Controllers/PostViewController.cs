@@ -6,7 +6,7 @@ using SocialMedia.Api.Repository.PostRepository;
 using SocialMedia.Api.Repository.PostViewRepository;
 using SocialMedia.Api.Service.GenericReturn;
 
-namespace SocialMedia.Api.Api.Controllers
+namespace SocialMedia.Api.Controllers
 {
     [ApiController]
     public class PostViewController : ControllerBase

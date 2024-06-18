@@ -6,7 +6,7 @@ using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.SavedPostsService;
 
-namespace SocialMedia.Api.Api.Controllers
+namespace SocialMedia.Api.Controllers
 {
     [ApiController]
     public class SavePostsController : ControllerBase
