@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.ApiResponseModel;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.PolicyService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Data.Models.ApiResponseModel;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.PolicyService;
 
 namespace SocialMedia.Api.Controllers
 {

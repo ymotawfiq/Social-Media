@@ -1,32 +1,32 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿
+
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.DTOs.Authentication.Login;
-using SocialMedia.Data.DTOs.Authentication.Register;
-using SocialMedia.Data.DTOs.Authentication.ResetEmail;
-using SocialMedia.Data.DTOs.Authentication.ResetPassword;
-using SocialMedia.Data.DTOs.Authentication.UpdateAccount;
-using SocialMedia.Data.DTOs.Authentication.User;
-using SocialMedia.Data.Models.ApiResponseModel;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Data.Models.MessageModel;
-using SocialMedia.Repository.PolicyRepository;
-using SocialMedia.Repository.PostRepository;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.SendEmailService;
-using SocialMedia.Service.UserAccountService;
+using SocialMedia.Api.Data.DTOs.Authentication.Login;
+using SocialMedia.Api.Data.DTOs.Authentication.Register;
+using SocialMedia.Api.Data.DTOs.Authentication.ResetEmail;
+using SocialMedia.Api.Data.DTOs.Authentication.ResetPassword;
+using SocialMedia.Api.Data.DTOs.Authentication.UpdateAccount;
+using SocialMedia.Api.Data.DTOs.Authentication.User;
+using SocialMedia.Api.Data.Models.ApiResponseModel;
+using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Data.Models.MessageModel;
+using SocialMedia.Api.Repository.PolicyRepository;
+using SocialMedia.Api.Repository.PostRepository;
+using SocialMedia.Api.Service.AccountService;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.SendEmailService;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace SocialMedia.Api.Controllers
 {
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IUserManagement _userManagementService;
+        private readonly IAccountService _userManagementService;
         private readonly IEmailService _emailService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IPolicyRepository _policyRepository;
@@ -34,7 +34,7 @@ namespace SocialMedia.Api.Controllers
         private readonly UserManagerReturn _userManagerReturn;
         public AccountController
             (
-            IUserManagement _userManagementService,
+            IAccountService _userManagementService,
             IEmailService _emailService,
             UserManager<SiteUser> _userManager,
             IPolicyRepository _policyRepository,

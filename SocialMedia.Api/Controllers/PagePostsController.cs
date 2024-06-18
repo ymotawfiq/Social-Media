@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.PagePostsService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.PagePostsService;
 
 namespace SocialMedia.Api.Controllers
 {

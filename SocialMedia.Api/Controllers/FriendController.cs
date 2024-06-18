@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Service.FriendsService;
-using SocialMedia.Service.GenericReturn;
+using SocialMedia.Api.Service.FriendsService;
+using SocialMedia.Api.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {

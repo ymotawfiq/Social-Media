@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.PagesFollowersService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.PagesFollowersService;
 
 namespace SocialMedia.Api.Controllers
 {

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.PostCommentService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.PostCommentService;
 
-namespace SocialMedia.Api.Controllers
+namespace SocialMedia.Api.Api.Controllers
 {
     [ApiController]
     public class PostCommentsController : ControllerBase

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.GroupAccessRequestService;
-using SocialMedia.Service.GroupManager;
-using SocialMedia.Service.GroupService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.GroupAccessRequestService;
+using SocialMedia.Api.Service.GroupManager;
+using SocialMedia.Api.Service.GroupService;
 
 namespace SocialMedia.Api.Controllers
 {

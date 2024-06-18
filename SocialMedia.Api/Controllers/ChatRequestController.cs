@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Repository.ChatRequestRepository;
-using SocialMedia.Service.ChatRequestService;
-using SocialMedia.Service.GenericReturn;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Repository.ChatRequestRepository;
+using SocialMedia.Api.Service.ChatRequestService;
+using SocialMedia.Api.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {

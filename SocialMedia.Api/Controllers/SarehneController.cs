@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.SarehneService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.SarehneService;
 
-namespace SocialMedia.Api.Controllers
+namespace SocialMedia.Api.Api.Controllers
 {
     [ApiController]
     public class SarehneController : ControllerBase

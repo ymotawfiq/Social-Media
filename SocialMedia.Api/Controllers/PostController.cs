@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.ApiResponseModel;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.PostRepository;
-using SocialMedia.Service.BlockService;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.PostService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Data.Models.ApiResponseModel;
+using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Repository.PostRepository;
+using SocialMedia.Api.Service.BlockService;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.PostService;
 
 namespace SocialMedia.Api.Controllers
 {

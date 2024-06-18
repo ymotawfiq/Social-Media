@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.Models;
-using SocialMedia.Data.Models.ApiResponseModel;
-using SocialMedia.Repository.PostRepository;
-using SocialMedia.Repository.PostViewRepository;
-using SocialMedia.Service.GenericReturn;
+using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.ApiResponseModel;
+using SocialMedia.Api.Repository.PostRepository;
+using SocialMedia.Api.Repository.PostViewRepository;
+using SocialMedia.Api.Service.GenericReturn;
 
-namespace SocialMedia.Api.Controllers
+namespace SocialMedia.Api.Api.Controllers
 {
     [ApiController]
     public class PostViewController : ControllerBase

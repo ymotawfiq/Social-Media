@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Repository.FriendRequestRepository;
-using SocialMedia.Service.FriendRequestService;
-using SocialMedia.Service.GenericReturn;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Repository.FriendRequestRepository;
+using SocialMedia.Api.Service.FriendRequestService;
+using SocialMedia.Api.Service.GenericReturn;
 
 namespace SocialMedia.Api.Controllers
 {

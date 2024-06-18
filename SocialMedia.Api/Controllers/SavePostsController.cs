@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Data.Models.Authentication;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.SavedPostsService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.SavedPostsService;
 
-namespace SocialMedia.Api.Controllers
+namespace SocialMedia.Api.Api.Controllers
 {
     [ApiController]
     public class SavePostsController : ControllerBase

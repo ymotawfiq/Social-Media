@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Data.DTOs;
-using SocialMedia.Service.GenericReturn;
-using SocialMedia.Service.GroupRolesService;
+using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Service.GenericReturn;
+using SocialMedia.Api.Service.GroupRolesService;
 
-namespace SocialMedia.Api.Controllers
+namespace SocialMedia.Api.Api.Controllers
 {
     [ApiController]
     public class GroupRoleController : ControllerBase
