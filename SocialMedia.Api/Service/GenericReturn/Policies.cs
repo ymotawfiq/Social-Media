@@ -55,6 +55,16 @@ namespace SocialMedia.Api.Service.GenericReturn
             "USER", "ADMIN", "PUBLISHER"
         };
 
+        public List<string> GroupChatRoles { get; private set; } = new List<string>
+        {
+            "USER", "ADMIN"
+        };
+
+        public List<string> Roles { get; private set; } = new List<string>
+        {
+            "USER", "ADMIN", "PUBLISHER"
+        };
+
 
     }
 }

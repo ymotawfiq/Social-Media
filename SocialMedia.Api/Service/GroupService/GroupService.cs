@@ -8,7 +8,7 @@ using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.GroupMemberRepository;
 using SocialMedia.Api.Repository.GroupMemberRoleRepository;
 using SocialMedia.Api.Repository.GroupRepository;
-using SocialMedia.Api.Repository.GroupRoleRepository;
+using SocialMedia.Api.Repository.RoleRepository;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.GroupManager;
 using SocialMedia.Api.Service.PolicyService;
@@ -19,18 +19,18 @@ namespace SocialMedia.Api.Service.GroupService
     {
         private readonly IGroupRepository _groupRepository;
         private readonly IPolicyService _policyService;
-        private readonly IGroupRoleRepository _groupRoleRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         private readonly IGroupManager _groupManager;
         public GroupService(IGroupRepository _groupRepository, IPolicyService _policyService,
-            IGroupRoleRepository _groupRoleRepository, IGroupManager _groupManager,
+            IRoleRepository _roleRepository, IGroupManager _groupManager,
             IGroupMemberRepository _groupMemberRepository, 
             IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupRepository = _groupRepository;
             this._policyService = _policyService;
-            this._groupRoleRepository = _groupRoleRepository;
+            this._roleRepository = _roleRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
             this._groupManager = _groupManager;
@@ -40,7 +40,7 @@ namespace SocialMedia.Api.Service.GroupService
             var policy = await _policyService.GetPolicyByIdOrNameAsync(addGroupDto.GroupPolicyIdOrName);
             if(policy != null && policy.ResponseObject != null)
             {
-                var adminRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("admin");
+                var adminRole = await _roleRepository.GetRoleByRoleNameAsync("admin");
                 if (adminRole != null)
                 {
                     addGroupDto.GroupPolicyIdOrName = policy.ResponseObject.Id;
@@ -163,7 +163,7 @@ namespace SocialMedia.Api.Service.GroupService
 
 
         private async Task<ApiResponse<Group>> CreateGroupWithMemberAdmin(AddGroupDto addGroupDto,
-            SiteUser user, GroupRole adminRole)
+            SiteUser user, Role adminRole)
         {
             var newGroup = await _groupRepository.AddAsync(ConvertFromDto
                 .ConvertFromGroupDto_Add(addGroupDto, user));

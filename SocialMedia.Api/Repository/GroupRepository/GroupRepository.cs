@@ -2,18 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.Models;
-using SocialMedia.Api.Repository.GroupRoleRepository;
+using SocialMedia.Api.Repository.RoleRepository;
 
 namespace SocialMedia.Api.Repository.GroupRepository
 {
     public class GroupRepository : IGroupRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IGroupRoleRepository _groupRoleRepository;
-        public GroupRepository(ApplicationDbContext _dbContext, IGroupRoleRepository _groupRoleRepository)
+        public GroupRepository(ApplicationDbContext _dbContext)
         {
             this._dbContext = _dbContext;
-            this._groupRoleRepository = _groupRoleRepository;
         }
 
         public async Task<Group> AddAsync(Group t)

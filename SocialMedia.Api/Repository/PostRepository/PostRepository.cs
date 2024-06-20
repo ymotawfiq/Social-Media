@@ -2,8 +2,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Api.Data;
-using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.ApiResponseModel.ResponseObject;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.PolicyRepository;
 
@@ -19,7 +19,7 @@ namespace SocialMedia.Api.Repository.PostRepository
             this._policyRepository = _policyRepository;
         }
 
-        public async Task<PostDto> AddPostAsync(Post post, List<PostImages> postImages)
+        public async Task<PostResponseObject> AddPostAsync(Post post, List<PostImages> postImages)
         {
             await _dbContext.Posts.AddAsync(post);
             if (postImages != null && postImages.Count != 0)
@@ -55,7 +55,7 @@ namespace SocialMedia.Api.Repository.PostRepository
             await _dbContext.PostImages.Where(e => e.PostId == postId).ExecuteDeleteAsync();
             return true;
         }
-        public async Task<PostDto> GetPostWithImagesByPostIdAsync(string postId)
+        public async Task<PostResponseObject> GetPostWithImagesByPostIdAsync(string postId)
         {
             var post = await GetPostByIdAsync(postId);
             var images = from i in await _dbContext.PostImages.ToListAsync()
@@ -78,9 +78,9 @@ namespace SocialMedia.Api.Repository.PostRepository
                     ReactPolicyId = e.ReactPolicyId
                 }).FirstOrDefaultAsync())!;
         }
-        public async Task<IEnumerable<PostDto>> GetUserPostsForFriendsAsync(SiteUser user)
+        public async Task<IEnumerable<PostResponseObject>> GetUserPostsForFriendsAsync(SiteUser user)
         {
-            List<PostDto> friendsPosts = new();
+            List<PostResponseObject> friendsPosts = new();
             var policy = await _policyRepository.GetPolicyByNameAsync("private");
             var posts = from p in await GetUserPostsAsync(user)
                         where p.Post.PostPolicyId != policy.Id
@@ -92,9 +92,9 @@ namespace SocialMedia.Api.Repository.PostRepository
             return friendsPosts;
         }
 
-        public async Task<IEnumerable<PostDto>> GetUserPostsForFriendsOfFriendsAsync(SiteUser user)
+        public async Task<IEnumerable<PostResponseObject>> GetUserPostsForFriendsOfFriendsAsync(SiteUser user)
         {
-            List<PostDto> friendsOfFriendsPosts = new();
+            List<PostResponseObject> friendsOfFriendsPosts = new();
             var friendsOfFriendsPolicy = await _policyRepository.GetPolicyByNameAsync("friends of friends");
             var publicPolicy = await _policyRepository.GetPolicyByNameAsync("public");
             var posts = from p in await GetUserPostsAsync(user)
@@ -111,7 +111,7 @@ namespace SocialMedia.Api.Repository.PostRepository
         {
             await _dbContext.SaveChangesAsync();
         }
-        public async Task<PostDto> UpdatePostAsync(Post post, List<PostImages> postImages)
+        public async Task<PostResponseObject> UpdatePostAsync(Post post, List<PostImages> postImages)
         {
             try
             {
@@ -136,7 +136,7 @@ namespace SocialMedia.Api.Repository.PostRepository
             await SaveChangesAsync();
             return true;
         }
-        public async Task<IEnumerable<PostDto>> GetUserPostsAsync(SiteUser user)
+        public async Task<IEnumerable<PostResponseObject>> GetUserPostsAsync(SiteUser user)
         {
             try
             {
@@ -152,7 +152,7 @@ namespace SocialMedia.Api.Repository.PostRepository
                         ReactPolicyId = e.ReactPolicyId,
                     }).ToListAsync();
                             
-                var postsDto = new List<PostDto>();
+                var postsDto = new List<PostResponseObject>();
                 foreach (var p in posts)
                 {
                     var postImages = await _dbContext.PostImages.Where(e => e.PostId == p.Id)
@@ -171,7 +171,7 @@ namespace SocialMedia.Api.Repository.PostRepository
                 throw;
             }
         }
-        public async Task<IEnumerable<PostDto>> GetUserPostsByPolicyAsync(SiteUser user, Policy policy)
+        public async Task<IEnumerable<PostResponseObject>> GetUserPostsByPolicyAsync(SiteUser user, Policy policy)
         {
             return from i in await GetUserPostsAsync(user)
                    where i.Post.PostPolicyId == policy.Id
@@ -205,11 +205,11 @@ namespace SocialMedia.Api.Repository.PostRepository
             await SaveChangesAsync();
             return;
         }
-        private PostDto CreatePostDtoObject(Post post, List<PostImages> postImages)
+        private PostResponseObject CreatePostDtoObject(Post post, List<PostImages> postImages)
         {
             if (postImages != null)
             {
-                return new PostDto
+                return new PostResponseObject
                 {
                     Post = new Post
                     {
@@ -230,7 +230,7 @@ namespace SocialMedia.Api.Repository.PostRepository
                 };
             }
 
-            return new PostDto
+            return new PostResponseObject
             {
                 Post = new Post
                 {

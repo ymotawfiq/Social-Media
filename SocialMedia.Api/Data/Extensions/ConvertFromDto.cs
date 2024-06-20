@@ -221,18 +221,18 @@ namespace SocialMedia.Api.Data.Extensions
         }
 
 
-        public static GroupRole ConvertFromGroupRoleDto_Add(AddGroupRoleDto addGroupRoleDto)
+        public static Role ConvertFromGroupRoleDto_Add(AddGroupRoleDto addGroupRoleDto)
         {
-            return new GroupRole
+            return new Role
             {
                 Id = Guid.NewGuid().ToString(),
                 RoleName = addGroupRoleDto.RoleName
             };
         }
 
-        public static GroupRole ConvertFromGroupRoleDto_Update(UpdateGroupRoleDto updateGroupRoleDto)
+        public static Role ConvertFromGroupRoleDto_Update(UpdateGroupRoleDto updateGroupRoleDto)
         {
-            return new GroupRole
+            return new Role
             {
                 Id = updateGroupRoleDto.Id,
                 RoleName = updateGroupRoleDto.RoleName

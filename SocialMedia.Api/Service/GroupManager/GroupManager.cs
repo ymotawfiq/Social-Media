@@ -7,7 +7,7 @@ using SocialMedia.Api.Repository.GroupAccessRequestRepository;
 using SocialMedia.Api.Repository.GroupMemberRepository;
 using SocialMedia.Api.Repository.GroupMemberRoleRepository;
 using SocialMedia.Api.Repository.GroupRepository;
-using SocialMedia.Api.Repository.GroupRoleRepository;
+using SocialMedia.Api.Repository.RoleRepository;
 using SocialMedia.Api.Service.GenericReturn;
 
 namespace SocialMedia.Api.Service.GroupManager
@@ -15,19 +15,19 @@ namespace SocialMedia.Api.Service.GroupManager
     public class GroupManager : IGroupManager
     {
         private readonly IGroupAccessRequestRepository _groupAccessRequestRepository;
-        private readonly IGroupRoleRepository _groupRoleRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly IGroupRepository _groupRepository;
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly UserManagerReturn _userManagerReturn;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         public GroupManager(IGroupAccessRequestRepository _groupAccessRequestRepository,
-            IGroupRoleRepository _groupRoleRepository, IGroupRepository _groupRepository,
+            IRoleRepository _roleRepository, IGroupRepository _groupRepository,
             IGroupMemberRepository _groupMemberRepository, UserManagerReturn _userManagerReturn,
             IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupAccessRequestRepository = _groupAccessRequestRepository;
             this._groupRepository = _groupRepository;
-            this._groupRoleRepository = _groupRoleRepository;
+            this._roleRepository = _roleRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._userManagerReturn = _userManagerReturn;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
@@ -42,7 +42,7 @@ namespace SocialMedia.Api.Service.GroupManager
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
                 if (isAdmin.ResponseObject)
                 {
-                    var userRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("user");
+                    var userRole = await _roleRepository.GetRoleByRoleNameAsync("user");
                     if (userRole != null)
                     {
                         var groupMember = new GroupMember
@@ -80,7 +80,7 @@ namespace SocialMedia.Api.Service.GroupManager
                 var isAdmin = await IsInRoleAsync(admin, group, "admin");
                 if (isAdmin != null && isAdmin.ResponseObject)
                 {
-                    var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
+                    var getRole = await _roleRepository.GetRoleByRoleNameAsync(role);
                     if (getRole != null)
                     {
                         return await CheckRoleAndAddToUserAsync(groupMember, group, getRole);
@@ -104,7 +104,7 @@ namespace SocialMedia.Api.Service.GroupManager
                 var isAdmin = await IsInRoleAsync(user, group, "admin");
                 if (isAdmin.ResponseObject)
                 {
-                    var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
+                    var getRole = await _roleRepository.GetRoleByRoleNameAsync(role);
                     if (getRole != null)
                     {
                         return await CheckRoleAndAddToUserAsync(groupMember, group, getRole);
@@ -169,7 +169,7 @@ namespace SocialMedia.Api.Service.GroupManager
                     List<string> roles = new();
                     foreach (var role in userGroupRolesIds)
                     {
-                        roles.Add((await _groupRoleRepository.GetByIdAsync(role.RoleId)).RoleName);
+                        roles.Add((await _roleRepository.GetByIdAsync(role.RoleId)).RoleName);
                     }
                     return StatusCodeReturn<IEnumerable<string>>
                         ._200_Success("Roles found successfully", roles);
@@ -195,7 +195,7 @@ namespace SocialMedia.Api.Service.GroupManager
 
         public async Task<ApiResponse<bool>> IsInRoleAsync(SiteUser user, Group group, string role)
         {
-            var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
+            var getRole = await _roleRepository.GetRoleByRoleNameAsync(role);
             if (getRole != null)
             {
                 var groupMember = await _groupMemberRepository.GetGroupMemberAsync(
@@ -255,7 +255,7 @@ namespace SocialMedia.Api.Service.GroupManager
         public async Task<ApiResponse<bool>> RemoveFromRoleAsync(
             string groupMemberId, SiteUser user, string role)
         {
-            var getRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync(role);
+            var getRole = await _roleRepository.GetRoleByRoleNameAsync(role);
             if (getRole != null)
             {
                 var groupMember = await _groupMemberRepository.GetByIdAsync(groupMemberId);
@@ -295,7 +295,7 @@ namespace SocialMedia.Api.Service.GroupManager
 
 
         private async Task<ApiResponse<bool>> CheckUserRoleAndRemoveFromAsync(SiteUser user, Group group,
-            GroupRole getRole, ApiResponse<IEnumerable<string>> userRoles, GroupMember groupMember)
+            Role getRole, ApiResponse<IEnumerable<string>> userRoles, GroupMember groupMember)
         {
             if (userRoles.ResponseObject != null && userRoles.ResponseObject.ToList().Count > 1)
             {
@@ -320,7 +320,7 @@ namespace SocialMedia.Api.Service.GroupManager
         }
 
         private async Task<ApiResponse<bool>> CheckRoleAndAddToUserAsync(GroupMember groupMember,
-            Group group, GroupRole role)
+            Group group, Role role)
         {
             var isMemberInRole = await IsInRoleAsync(
             await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(groupMember.MemberId),

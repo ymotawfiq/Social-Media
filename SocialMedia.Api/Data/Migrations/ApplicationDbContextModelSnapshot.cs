@@ -545,57 +545,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("GroupAccessRequests");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChat", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CreatorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Created By User Id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Group Name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.ToTable("GroupChats");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChatMember", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("GroupChatId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Group Chat Id");
-
-                    b.Property<bool>("IsAccepted")
-                        .HasColumnType("bit")
-                        .HasColumnName("Is Join Request Accepted");
-
-                    b.Property<string>("MemberId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Member Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("GroupChatId", "MemberId")
-                        .IsUnique();
-
-                    b.ToTable("GroupChatMembers");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMember", b =>
                 {
                     b.Property<string>("Id")
@@ -675,23 +624,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("GroupPosts");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleName")
-                        .IsUnique();
-
-                    b.ToTable("GroupRoles");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.MessageReact", b =>
@@ -1006,6 +938,23 @@ namespace SocialMedia.Api.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Reacts");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Role", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleName")
+                        .IsUnique();
+
+                    b.ToTable("Role");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.SarehneMessage", b =>
@@ -1369,36 +1318,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChat", b =>
-                {
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("GroupChats")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChatMember", b =>
-                {
-                    b.HasOne("SocialMedia.Api.Data.Models.GroupChat", "GroupChat")
-                        .WithMany("ChatMembers")
-                        .HasForeignKey("GroupChatId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("ChatMembers")
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GroupChat");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMember", b =>
                 {
                     b.HasOne("SocialMedia.Api.Data.Models.Group", "Group")
@@ -1426,7 +1345,7 @@ namespace SocialMedia.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Api.Data.Models.GroupRole", "GroupRole")
+                    b.HasOne("SocialMedia.Api.Data.Models.Role", "GroupRole")
                         .WithMany("GroupMemberRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1731,8 +1650,6 @@ namespace SocialMedia.Api.Data.Migrations
 
                     b.Navigation("Blocks");
 
-                    b.Navigation("ChatMembers");
-
                     b.Navigation("ChatMessages");
 
                     b.Navigation("Followers");
@@ -1742,8 +1659,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Friends");
 
                     b.Navigation("GroupAccessRequests");
-
-                    b.Navigation("GroupChats");
 
                     b.Navigation("GroupMembers");
 
@@ -1794,17 +1709,7 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("GroupPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupChat", b =>
-                {
-                    b.Navigation("ChatMembers");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupMember", b =>
-                {
-                    b.Navigation("GroupMemberRoles");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.GroupRole", b =>
                 {
                     b.Navigation("GroupMemberRoles");
                 });
@@ -1866,6 +1771,11 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("MessageReacts");
 
                     b.Navigation("PostReacts");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Role", b =>
+                {
+                    b.Navigation("GroupMemberRoles");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>

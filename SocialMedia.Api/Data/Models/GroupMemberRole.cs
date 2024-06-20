@@ -7,6 +7,6 @@ namespace SocialMedia.Api.Data.Models
         public string GroupMemberId { get; set; } = null!;
         public string RoleId { get; set; } = null!;
         public GroupMember? GroupMember { get; set; }
-        public GroupRole? GroupRole { get; set; }
+        public Role? GroupRole { get; set; }
     }
 }

@@ -8,8 +8,8 @@ using SocialMedia.Api.Repository.GroupAccessRequestRepository;
 using SocialMedia.Api.Repository.GroupMemberRepository;
 using SocialMedia.Api.Repository.GroupMemberRoleRepository;
 using SocialMedia.Api.Repository.GroupRepository;
-using SocialMedia.Api.Repository.GroupRoleRepository;
 using SocialMedia.Api.Repository.PolicyRepository;
+using SocialMedia.Api.Repository.RoleRepository;
 using SocialMedia.Api.Service.GenericReturn;
 
 namespace SocialMedia.Api.Service.GroupAccessRequestService
@@ -20,18 +20,18 @@ namespace SocialMedia.Api.Service.GroupAccessRequestService
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly IGroupRepository _groupRepository;
         private readonly IPolicyRepository _policyRepository;
-        private readonly IGroupRoleRepository _groupRoleRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         public GroupAccessRequestService(IGroupAccessRequestRepository _groupAccessRequestRepository,
             IGroupMemberRepository _groupMemberRepository, IGroupRepository _groupRepository,
             IPolicyRepository _policyRepository,
-            IGroupRoleRepository _groupRoleRepository, IGroupMemberRoleRepository _groupMemberRoleRepository)
+            IRoleRepository _roleRepository, IGroupMemberRoleRepository _groupMemberRoleRepository)
         {
             this._groupAccessRequestRepository = _groupAccessRequestRepository;
             this._groupMemberRepository = _groupMemberRepository;
             this._groupRepository = _groupRepository;
             this._policyRepository = _policyRepository;
-            this._groupRoleRepository = _groupRoleRepository;
+            this._roleRepository = _roleRepository;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
 
         }
@@ -84,7 +84,7 @@ namespace SocialMedia.Api.Service.GroupAccessRequestService
         {
             if (groupPolicy.PolicyType == "PUBLIC")
             {
-                var userRole = await _groupRoleRepository.GetGroupRoleByRoleNameAsync("user");
+                var userRole = await _roleRepository.GetRoleByRoleNameAsync("user");
                 if (userRole != null)
                 {
                     var groupMember = new GroupMember
