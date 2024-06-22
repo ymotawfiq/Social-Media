@@ -155,31 +155,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ArchievedChat", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ChatId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Chat Id");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("User Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("ChatId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("ArchievedChats");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.Property<string>("Id")
@@ -334,7 +309,38 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("Blocks");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Chat", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Creator Id");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("PolicyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Chat Policy Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("PolicyId");
+
+                    b.ToTable("Chat");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMember", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -344,70 +350,63 @@ namespace SocialMedia.Api.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("Chat Id");
 
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Message");
+                    b.Property<bool>("IsMember")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("MessageId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Photo")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Photo");
-
-                    b.Property<string>("SenderId")
+                    b.Property<string>("Member1Id")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Sender Id");
+                        .HasColumnName("Member 1 Id");
 
-                    b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                    b.Property<string>("Member2Id")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Member 2 Id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
 
-                    b.HasIndex("MessageId");
+                    b.HasIndex("Member1Id", "ChatId")
+                        .IsUnique();
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("Member2Id", "ChatId")
+                        .IsUnique()
+                        .HasFilter("[Member 2 Id] IS NOT NULL");
 
-                    b.ToTable("ChatMessages", t =>
-                        {
-                            t.HasCheckConstraint("CheckPhotoAndImageNotPothNull", "(Photo is NOT null AND Message is null) OR (Photo is null AND Message is NOT null)");
-                        });
+                    b.HasIndex("Member2Id", "Member1Id")
+                        .IsUnique()
+                        .HasFilter("[Member 2 Id] IS NOT NULL");
+
+                    b.HasIndex("Member2Id", "Member1Id", "ChatId")
+                        .IsUnique()
+                        .HasFilter("[Member 2 Id] IS NOT NULL");
+
+                    b.ToTable("ChatMember");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMemberRole", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("IsAccepted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
-
-                    b.Property<string>("UserWhoReceivedRequestId")
+                    b.Property<string>("ChatMemberId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Chat Member Id");
 
-                    b.Property<string>("UserWhoSentRequestId")
+                    b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Role Id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserWhoSentRequestId");
+                    b.HasIndex("RoleId");
 
-                    b.HasIndex("UserWhoReceivedRequestId", "UserWhoSentRequestId")
+                    b.HasIndex("ChatMemberId", "RoleId")
                         .IsUnique();
 
-                    b.ToTable("ChatRequests");
+                    b.ToTable("ChatMemberRole");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Follower", b =>
@@ -624,37 +623,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("GroupPosts");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.MessageReact", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MessageId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Message Id");
-
-                    b.Property<string>("ReactId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("React Id");
-
-                    b.Property<string>("ReactedUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("Reacted User Id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("ReactId");
-
-                    b.HasIndex("ReactedUserId");
-
-                    b.ToTable("MessageReacts");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Page", b =>
@@ -1030,29 +998,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.ToTable("SavedPosts");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("User1Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("User2Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User2Id");
-
-                    b.HasIndex("User1Id", "User2Id")
-                        .IsUnique();
-
-                    b.ToTable("UserChats");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.UserSavedPostsFolders", b =>
                 {
                     b.Property<string>("Id")
@@ -1130,25 +1075,6 @@ namespace SocialMedia.Api.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ArchievedChat", b =>
-                {
-                    b.HasOne("SocialMedia.Api.Data.Models.UserChat", "UserChat")
-                        .WithMany("ArchievedChats")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("ArchievedChats")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("UserChat");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Authentication.SiteUser", b =>
                 {
                     b.HasOne("SocialMedia.Api.Data.Models.Policy", "AccountPolicy")
@@ -1203,48 +1129,65 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Chat", b =>
                 {
-                    b.HasOne("SocialMedia.Api.Data.Models.UserChat", "Chat")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Api.Data.Models.ChatMessage", "MessageReplay")
-                        .WithMany("MessageReplays")
-                        .HasForeignKey("MessageId");
-
                     b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("SenderId")
+                        .WithMany("Chats")
+                        .HasForeignKey("CreatorId");
+
+                    b.HasOne("SocialMedia.Api.Data.Models.Policy", "Policy")
+                        .WithMany("Chats")
+                        .HasForeignKey("PolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Chat");
-
-                    b.Navigation("MessageReplay");
+                    b.Navigation("Policy");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatRequest", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMember", b =>
                 {
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "UserWhoReceived")
-                        .WithMany("ReceivedUserRequests")
-                        .HasForeignKey("UserWhoReceivedRequestId")
+                    b.HasOne("SocialMedia.Api.Data.Models.Chat", "Chat")
+                        .WithMany("ChatMembers")
+                        .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "UserWhoSent")
-                        .WithMany("SentUserRequests")
-                        .HasForeignKey("UserWhoSentRequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User1")
+                        .WithMany("ChatMembers1")
+                        .HasForeignKey("Member1Id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserWhoReceived");
+                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User2")
+                        .WithMany("ChatMembers2")
+                        .HasForeignKey("Member2Id");
 
-                    b.Navigation("UserWhoSent");
+                    b.Navigation("Chat");
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMemberRole", b =>
+                {
+                    b.HasOne("SocialMedia.Api.Data.Models.ChatMember", "ChatMember")
+                        .WithMany("ChatMemberRoles")
+                        .HasForeignKey("ChatMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Api.Data.Models.Role", "Role")
+                        .WithMany("ChatMemberRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ChatMember");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Follower", b =>
@@ -1379,33 +1322,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.MessageReact", b =>
-                {
-                    b.HasOne("SocialMedia.Api.Data.Models.ChatMessage", "ChatMessage")
-                        .WithMany("MessageReacts")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Api.Data.Models.React", "React")
-                        .WithMany("MessageReacts")
-                        .HasForeignKey("ReactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
-                        .WithMany("MessageReacts")
-                        .HasForeignKey("ReactedUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChatMessage");
-
-                    b.Navigation("React");
 
                     b.Navigation("User");
                 });
@@ -1614,25 +1530,6 @@ namespace SocialMedia.Api.Data.Migrations
                     b.Navigation("UserSavedPostsFolder");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>
-                {
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User1")
-                        .WithMany("User1Chats")
-                        .HasForeignKey("User1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User2")
-                        .WithMany("User2Chats")
-                        .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User1");
-
-                    b.Navigation("User2");
-                });
-
             modelBuilder.Entity("SocialMedia.Api.Data.Models.UserSavedPostsFolders", b =>
                 {
                     b.HasOne("SocialMedia.Api.Data.Models.Authentication.SiteUser", "User")
@@ -1646,11 +1543,13 @@ namespace SocialMedia.Api.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Authentication.SiteUser", b =>
                 {
-                    b.Navigation("ArchievedChats");
-
                     b.Navigation("Blocks");
 
-                    b.Navigation("ChatMessages");
+                    b.Navigation("ChatMembers1");
+
+                    b.Navigation("ChatMembers2");
+
+                    b.Navigation("Chats");
 
                     b.Navigation("Followers");
 
@@ -1666,8 +1565,6 @@ namespace SocialMedia.Api.Data.Migrations
 
                     b.Navigation("Groups");
 
-                    b.Navigation("MessageReacts");
-
                     b.Navigation("PageFollowers");
 
                     b.Navigation("Pages");
@@ -1678,26 +1575,21 @@ namespace SocialMedia.Api.Data.Migrations
 
                     b.Navigation("Posts");
 
-                    b.Navigation("ReceivedUserRequests");
-
                     b.Navigation("SarehneMessages");
 
                     b.Navigation("SavedPosts");
 
-                    b.Navigation("SentUserRequests");
-
-                    b.Navigation("User1Chats");
-
-                    b.Navigation("User2Chats");
-
                     b.Navigation("UserSavedPostsFolders");
                 });
 
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMessage", b =>
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.Chat", b =>
                 {
-                    b.Navigation("MessageReacts");
+                    b.Navigation("ChatMembers");
+                });
 
-                    b.Navigation("MessageReplays");
+            modelBuilder.Entity("SocialMedia.Api.Data.Models.ChatMember", b =>
+                {
+                    b.Navigation("ChatMemberRoles");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Group", b =>
@@ -1723,6 +1615,8 @@ namespace SocialMedia.Api.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Policy", b =>
                 {
+                    b.Navigation("Chats");
+
                     b.Navigation("CommentPolicies");
 
                     b.Navigation("GroupPolicies");
@@ -1768,21 +1662,14 @@ namespace SocialMedia.Api.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.React", b =>
                 {
-                    b.Navigation("MessageReacts");
-
                     b.Navigation("PostReacts");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.Role", b =>
                 {
+                    b.Navigation("ChatMemberRoles");
+
                     b.Navigation("GroupMemberRoles");
-                });
-
-            modelBuilder.Entity("SocialMedia.Api.Data.Models.UserChat", b =>
-                {
-                    b.Navigation("ArchievedChats");
-
-                    b.Navigation("ChatMessages");
                 });
 
             modelBuilder.Entity("SocialMedia.Api.Data.Models.UserSavedPostsFolders", b =>

@@ -8,7 +8,6 @@ using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.BlockRepository;
 using SocialMedia.Api.Repository.FriendRequestRepository;
 using SocialMedia.Api.Repository.FriendsRepository;
-using SocialMedia.Api.Repository.UserChatRepository;
 using SocialMedia.Api.Service.FriendsService;
 using SocialMedia.Api.Service.GenericReturn;
 
@@ -21,9 +20,8 @@ namespace SocialMedia.Api.Service.FriendRequestService
         private readonly IFriendsRepository _friendsRepository;
         private readonly UserManagerReturn _userManagerReturn;
         private readonly IBlockRepository _blockRepository;
-        private readonly IUserChatRepository _userChatRepository;
         public FriendRequestService(IFriendRequestRepository _friendRequestRepository
-            , IFriendService _friendService, IUserChatRepository _userChatRepository,
+            , IFriendService _friendService,
             IFriendsRepository friendsRepository, UserManagerReturn _userManagerReturn,
             IBlockRepository _blockRepository)
         {
@@ -32,7 +30,6 @@ namespace SocialMedia.Api.Service.FriendRequestService
             _friendsRepository = friendsRepository;
             this._userManagerReturn = _userManagerReturn;
             this._blockRepository = _blockRepository;
-            this._userChatRepository = _userChatRepository;
         }
 
 
@@ -166,12 +163,6 @@ namespace SocialMedia.Api.Service.FriendRequestService
                                 FriendId = friendRequest.UserWhoReceivedId,
                                 UserId = friendRequest.UserWhoSendId
                             });
-                        await _userChatRepository.AddAsync(new UserChat
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            User1Id = friendRequest.UserWhoReceivedId,
-                            User2Id = friendRequest.UserWhoSendId
-                        });
                         return StatusCodeReturn<FriendRequest>
                             ._200_Success("Friend request accepted successfully");
                     }

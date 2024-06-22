@@ -17,11 +17,11 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles ="Admin")]
         [HttpPost("addGroupRole")]
-        public async Task<IActionResult> AddGroupRoleAsync([FromBody] AddGroupRoleDto addGroupRoleDto)
+        public async Task<IActionResult> AddRoleAsync([FromBody] AddRoleDto addRoleDto)
         {
             try
             {
-                var response = await _rolesService.AddGroupRoleAsync(addGroupRoleDto);
+                var response = await _rolesService.AddRoleAsync(addRoleDto);
                 return Ok(response);
             }
             catch(Exception ex)
@@ -33,11 +33,11 @@ namespace SocialMedia.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("updateGroupRole")]
-        public async Task<IActionResult> UpdateGroupRoleAsync([FromBody] UpdateGroupRoleDto updateGroupRoleDto)
+        public async Task<IActionResult> UpdateRoleAsync([FromBody] UpdateRoleDto updateRoleDto)
         {
             try
             {
-                var response = await _rolesService.UpdateGroupRoleAsync(updateGroupRoleDto);
+                var response = await _rolesService.UpdateRoleAsync(updateRoleDto);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -47,12 +47,12 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpGet("getGroupRoleById/{groupRoleId}")]
-        public async Task<IActionResult> GetGroupRoleByIdAsync([FromRoute] string groupRoleId)
+        [HttpGet("getGroupRoleById/{roleId}")]
+        public async Task<IActionResult> GetRoleByIdAsync([FromRoute] string roleId)
         {
             try
             {
-                var response = await _rolesService.GetGroupRoleByIdAsync(groupRoleId);
+                var response = await _rolesService.GetRoleByIdAsync(roleId);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -62,12 +62,12 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpGet("getGroupRoleByName/{groupRoleName}")]
-        public async Task<IActionResult> GetGroupRoleByNameAsync([FromRoute] string groupRoleName)
+        [HttpGet("getGroupRoleByName/{roleName}")]
+        public async Task<IActionResult> GetRoleByNameAsync([FromRoute] string roleName)
         {
             try
             {
-                var response = await _rolesService.GetGroupRoleByRoleNameAsync(groupRoleName);
+                var response = await _rolesService.GetRoleByRoleNameAsync(roleName);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -77,12 +77,12 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpDelete("deleteGroupRoleById/{groupRoleId}")]
-        public async Task<IActionResult> DeleteGroupRoleByIdAsync([FromRoute] string groupRoleId)
+        [HttpDelete("deleteGroupRoleById/{roleId}")]
+        public async Task<IActionResult> DeleteRoleByIdAsync([FromRoute] string roleId)
         {
             try
             {
-                var response = await _rolesService.DeleteGroupRoleByIdAsync(groupRoleId);
+                var response = await _rolesService.DeleteRoleByIdAsync(roleId);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -92,12 +92,12 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpDelete("deleteGroupRoleByName/{groupRoleName}")]
-        public async Task<IActionResult> DeleteGroupRoleByNameAsync([FromRoute] string groupRoleName)
+        [HttpDelete("deleteGroupRoleByName/{roleName}")]
+        public async Task<IActionResult> DeleteRoleByNameAsync([FromRoute] string roleName)
         {
             try
             {
-                var response = await _rolesService.DeleteGroupRoleByRoleNameAsync(groupRoleName);
+                var response = await _rolesService.DeleteRoleByRoleNameAsync(roleName);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -108,11 +108,11 @@ namespace SocialMedia.Api.Controllers
         }
 
         [HttpGet("getGroupRoles")]
-        public async Task<IActionResult> GetGroupRolesAsync()
+        public async Task<IActionResult> GetRolesAsync()
         {
             try
             {
-                var response = await _rolesService.GetGroupRolesAsync();
+                var response = await _rolesService.GetRolesAsync();
                 return Ok(response);
             }
             catch (Exception ex)

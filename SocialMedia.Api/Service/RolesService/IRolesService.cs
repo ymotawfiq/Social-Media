@@ -1,16 +1,19 @@
 ﻿
 using SocialMedia.Api.Data.DTOs;
+using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.ApiResponseModel;
 
 namespace SocialMedia.Api.Service.RolesService
 {
     public interface IRolesService
     {
-        Task<object> AddGroupRoleAsync(AddGroupRoleDto addGroupRoleDto);
-        Task<object> UpdateGroupRoleAsync(UpdateGroupRoleDto updateGroupRoleDto);
-        Task<object> GetGroupRoleByIdAsync(string groupRoleId);
-        Task<object> GetGroupRoleByRoleNameAsync(string groupRoleName);
-        Task<object> DeleteGroupRoleByIdAsync(string groupRoleId);
-        Task<object> DeleteGroupRoleByRoleNameAsync(string groupRoleName);
-        Task<object> GetGroupRolesAsync();
+        Task<ApiResponse<Role>> AddRoleAsync(AddRoleDto addGroupRoleDto);
+        Task<ApiResponse<Role>> UpdateRoleAsync(UpdateRoleDto updateGroupRoleDto);
+        Task<ApiResponse<Role>> GetRoleByIdAsync(string groupRoleId);
+        Task<ApiResponse<Role>> GetRoleByIdOrNameAsync(string groupRoleIdOrName);
+        Task<ApiResponse<Role>> GetRoleByRoleNameAsync(string groupRoleName);
+        Task<ApiResponse<Role>> DeleteRoleByIdAsync(string groupRoleId);
+        Task<ApiResponse<Role>> DeleteRoleByRoleNameAsync(string groupRoleName);
+        Task<ApiResponse<IEnumerable<Role>>> GetRolesAsync();
     }
 }

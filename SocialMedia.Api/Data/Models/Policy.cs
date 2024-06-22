@@ -18,5 +18,6 @@ namespace SocialMedia.Api.Data.Models
         public List<SiteUser>? UserPostPolicies { get; set; } 
         public List<Group>? GroupPolicies { get; set; }
         public List<SarehneMessage>? SarehneMessagePolicies { get; set; } 
+        public List<Chat>? Chats { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 
 using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.ApiResponseModel.ResponseObject;
 using SocialMedia.Api.Data.Models.Authentication;
 
 namespace SocialMedia.Api.Data.Extensions
@@ -221,7 +222,7 @@ namespace SocialMedia.Api.Data.Extensions
         }
 
 
-        public static Role ConvertFromGroupRoleDto_Add(AddGroupRoleDto addGroupRoleDto)
+        public static Role ConvertFromRoleDto_Add(AddRoleDto addGroupRoleDto)
         {
             return new Role
             {
@@ -230,7 +231,7 @@ namespace SocialMedia.Api.Data.Extensions
             };
         }
 
-        public static Role ConvertFromGroupRoleDto_Update(UpdateGroupRoleDto updateGroupRoleDto)
+        public static Role ConvertFromRoleDto_Update(UpdateRoleDto updateGroupRoleDto)
         {
             return new Role
             {
@@ -316,78 +317,33 @@ namespace SocialMedia.Api.Data.Extensions
             return sarehneMessage;
         }
 
-        public static UserChat ConvertFromUserChatDto_Add(AddUserChatDto addUserChatDto, SiteUser user)
+
+        public static Chat ConvertFromPrivateChatDto_Add(AddChatDto addChatDto, Policy policy)
         {
-            return new UserChat
+            return new Chat
             {
+
                 Id = Guid.NewGuid().ToString(),
-                User1Id = user.Id,
-                User2Id = addUserChatDto.UserIdOrNameOrEmail
+                Name = addChatDto.Name!,
+                CreatorId = null!,
+                Description = addChatDto.Description!,
+                PolicyId = policy.Id
+                
             };
         }
 
-        public static ChatRequest ConvertFromChatRequestDto_Add(AddChatRequestDto addChatRequestDto,
-            SiteUser user)
+        public static Chat ConvertFromNonPrivateChatDto_Add(
+            AddChatDto addChatDto, Policy policy, SiteUser user)
         {
-            return new ChatRequest
+            return new Chat
             {
                 Id = Guid.NewGuid().ToString(),
-                UserWhoReceivedRequestId = addChatRequestDto.UserIdOrNameOrEmail,
-                UserWhoSentRequestId = user.Id,
+                Name = addChatDto.Name!,
+                CreatorId = user.Id,
+                Description = addChatDto.Description!,
+                PolicyId = policy.Id
             };
         }
-
-        public static ChatMessage ConvertFromChatMessageDto_Add(AddChatMessageDto addChatMessageDto,
-            SiteUser user, string photoUniqueName)
-        {
-            return new ChatMessage
-            {
-                ChatId =addChatMessageDto.ChatId,
-                Id = Guid.NewGuid().ToString(),
-                Message = addChatMessageDto.Message,
-                Photo = photoUniqueName,
-                SenderId = user.Id,
-            };
-        }
-
-        public static ArchievedChat ConvertFromArchievedChatDto_Add(ArchieveChatDto archieveChatDto,
-            SiteUser user)
-        {
-            return new ArchievedChat
-            {
-                Id = Guid.NewGuid().ToString(),
-                ChatId = archieveChatDto.ChatId,
-                UserId = user.Id
-            };
-        }
-
-        public static ChatMessage ConvertFromChatMessageReplayDto_Add(
-            AddChatMessageReplayDto addChatMessageReplayDto, SiteUser user, UserChat chat,
-            string photoUniqueName)
-        {
-            return new ChatMessage
-            {
-                ChatId = chat.Id,
-                Id = Guid.NewGuid().ToString(),
-                Message = addChatMessageReplayDto.Message,
-                Photo = photoUniqueName,
-                SenderId = user.Id,
-                MessageId = addChatMessageReplayDto.MessageId
-            };
-        }
-
-        public static MessageReact ConvertFromMessageReactDto_Add(AddMessageReactDto addMessageReactDto,
-            SiteUser user)
-        {
-            return new MessageReact
-            {
-                Id = Guid.NewGuid().ToString(),
-                MessageId = addMessageReactDto.MessageId,
-                ReactId = addMessageReactDto.ReactId,
-                ReactedUserId = user.Id
-            };
-        }
-
 
 
     }

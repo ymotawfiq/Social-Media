@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.ApiResponseModel;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Data.ModelsConfigurations;
 
@@ -59,11 +60,9 @@ namespace SocialMedia.Api.Data
                    .ApplyConfiguration(new GroupMemberRoleConfigurations())
                    .ApplyConfiguration(new GroupPostsConfigurations())
                    .ApplyConfiguration(new SarehneMessagesConfigurations())
-                   .ApplyConfiguration(new UserChatConfigurations())
-                   .ApplyConfiguration(new ChatRequestConfigurations())
-                   .ApplyConfiguration(new ChatMessageConfigurations())
-                   .ApplyConfiguration(new ArchievedChatConfigurations())
-                   .ApplyConfiguration(new MessageReactsConfigurations());
+                   .ApplyConfiguration(new ChatConfigurations())
+                   .ApplyConfiguration(new ChatMemberConfigurations())
+                   .ApplyConfiguration(new ChatMemberRoleConfigurations());
         }
 
 
@@ -90,11 +89,9 @@ namespace SocialMedia.Api.Data
         public DbSet<GroupMemberRole> GroupMemberRoles { get; set; }
         public DbSet<GroupPost> GroupPosts { get; set; }
         public DbSet<SarehneMessage> SarehneMessages { get; set; }
-        public DbSet<UserChat> UserChats { get; set; }
-        public DbSet<ChatRequest> ChatRequests  { get; set; }
-        public DbSet<ChatMessage> ChatMessages  { get; set; }
-        public DbSet<ArchievedChat> ArchievedChats { get; set; }
-        public DbSet<MessageReact> MessageReacts { get; set; }
+        public DbSet<Chat> Chat { get; set; }
+        public DbSet<ChatMember> ChatMember { get; set; }
+        public DbSet<ChatMemberRole> ChatMemberRole { get; set; }
 
     }
 }
