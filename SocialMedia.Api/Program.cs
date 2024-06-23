@@ -60,6 +60,13 @@ using SocialMedia.Api.Service.ChatService;
 using SocialMedia.Api.Repository.ChatMemberRepository;
 using SocialMedia.Api.Repository.ChatMemberRoleRepository;
 using SocialMedia.Api.Service.ChatManagerService;
+using SocialMedia.Api.Repository.PrivateChatRepository;
+using SocialMedia.Api.Repository.ChatMessageRepository;
+using SocialMedia.Api.Repository.MessageReactRepository;
+using SocialMedia.Api.Repository.ArchievedChatRepository;
+using SocialMedia.Api.Service.ChatMessageService;
+using SocialMedia.Api.Service.MessageReactService;
+using SocialMedia.Api.Service.ArchievedChatService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -163,6 +170,9 @@ builder.Services.AddScoped<IGroupAccessRequestService, GroupAccessRequestService
 builder.Services.AddScoped<ISarehneService, SarehneService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IChatManagerService, ChatManagerService>();
+builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+builder.Services.AddScoped<IMessageReactService, MessageReactService>();
+builder.Services.AddScoped<IArchievedChatService, ArchievedChatService>();
 
 // repositories injection
 builder.Services.AddScoped<IReactRepository, ReactRepository>();
@@ -190,6 +200,10 @@ builder.Services.AddScoped<ISarehneRepository, SarehneRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IChatMemberRepository, ChatMemberRepository>();
 builder.Services.AddScoped<IChatMemberRoleRepository, ChatMemberRoleRepository>();
+builder.Services.AddScoped<IPrivateChatRepository, PrivateChatRepository>();
+builder.Services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+builder.Services.AddScoped<IMessageReactRepository, MessageReactRepository>();
+builder.Services.AddScoped<IArchievedChatRepository, ArchievedChatRepository>();
 
 
 

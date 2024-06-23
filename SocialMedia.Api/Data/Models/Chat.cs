@@ -13,5 +13,8 @@ namespace SocialMedia.Api.Data.Models
         public SiteUser? User { get; set; }
         public Policy? Policy { get; set; }
         public List<ChatMember>? ChatMembers { get; set; }
+        public List<PrivateChat>? PrivateChats { get; set; }
+        public List<ChatMessage>? ChatMessages { get; set; }
+        public List<ArchievedChat>? ArchievedChats { get; set; }
     }
 }

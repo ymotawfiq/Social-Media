@@ -62,7 +62,11 @@ namespace SocialMedia.Api.Data
                    .ApplyConfiguration(new SarehneMessagesConfigurations())
                    .ApplyConfiguration(new ChatConfigurations())
                    .ApplyConfiguration(new ChatMemberConfigurations())
-                   .ApplyConfiguration(new ChatMemberRoleConfigurations());
+                   .ApplyConfiguration(new ChatMemberRoleConfigurations())
+                   .ApplyConfiguration(new PrivateChatConfigurations())
+                   .ApplyConfiguration(new ChatMessageConfigurations())
+                   .ApplyConfiguration(new MessageReactConfigurations())
+                   .ApplyConfiguration(new ArchievedChatConfigurations());
         }
 
 
@@ -92,6 +96,10 @@ namespace SocialMedia.Api.Data
         public DbSet<Chat> Chat { get; set; }
         public DbSet<ChatMember> ChatMember { get; set; }
         public DbSet<ChatMemberRole> ChatMemberRole { get; set; }
+        public DbSet<PrivateChat> PrivateChat { get; set; }
+        public DbSet<ChatMessage> ChatMessage { get; set; }
+        public DbSet<MessageReact> MessageReact { get; set; }
+        public DbSet<ArchievedChat> ArchievedChat { get; set; }
 
     }
 }

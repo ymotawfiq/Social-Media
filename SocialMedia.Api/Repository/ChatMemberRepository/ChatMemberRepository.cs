@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Repository.ChatRepository;
 
 namespace SocialMedia.Api.Repository.ChatMemberRepository
 {
@@ -15,14 +17,7 @@ namespace SocialMedia.Api.Repository.ChatMemberRepository
         {
             await _dbContext.ChatMember.AddAsync(t);
             await SaveChangesAsync();
-            return new ChatMember
-            {
-                ChatId = t.ChatId,
-                Id = t.Id,
-                IsMember = t.IsMember,
-                Member1Id = t.Member1Id,
-                Member2Id = t.Member2Id
-            };
+            return ChatMember(t);
         }
 
         public async Task<ChatMember> DeleteByIdAsync(string id)
@@ -30,25 +25,17 @@ namespace SocialMedia.Api.Repository.ChatMemberRepository
             var chatMember = await GetByIdAsync(id);
             _dbContext.ChatMember.Remove(chatMember);
             await SaveChangesAsync();
-            return new ChatMember
-            {
-                Id = chatMember.Id,
-                ChatId = chatMember.ChatId,
-                IsMember = chatMember.IsMember,
-                Member1Id = chatMember.Member1Id,
-                Member2Id = chatMember.Member2Id
-            };
+            return ChatMember(chatMember);
         }
 
         public async Task<IEnumerable<ChatMember>> GetAllAsync()
         {
             return await _dbContext.ChatMember.Select(e => new ChatMember
             {
+                Id = e.Id,
                 ChatId = e.ChatId,
-                Member2Id = e.Member2Id,
-                Member1Id = e.Member1Id,
                 IsMember = e.IsMember,
-                Id = e.Id
+                MemberId = e.MemberId
             }).ToListAsync();
         }
 
@@ -56,11 +43,10 @@ namespace SocialMedia.Api.Repository.ChatMemberRepository
         {
             var chatMember = await _dbContext.ChatMember.Select(e => new ChatMember
             {
+                Id = e.Id,
                 ChatId = e.ChatId,
-                Member2Id = e.Member2Id,
-                Member1Id = e.Member1Id,
                 IsMember = e.IsMember,
-                Id = e.Id
+                MemberId = e.MemberId
             }).Where(e => e.Id == id).FirstOrDefaultAsync();
             return chatMember!;
         }
@@ -75,8 +61,7 @@ namespace SocialMedia.Api.Repository.ChatMemberRepository
                     ChatId = t.ChatId,
                     Id = t.Id,
                     IsMember = t.IsMember,
-                    Member1Id = t.Member1Id,
-                    Member2Id = t.Member2Id
+                    MemberId = t.MemberId,
                 });
         }
 
@@ -91,103 +76,22 @@ namespace SocialMedia.Api.Repository.ChatMemberRepository
             chatMember.IsMember = t.IsMember;
             _dbContext.Update(chatMember);
             await SaveChangesAsync();
-            return new ChatMember
-            {
-                ChatId = chatMember.ChatId,
-                Id = chatMember.Id,
-                IsMember = chatMember.IsMember,
-                Member1Id = chatMember.Member1Id,
-                Member2Id = chatMember.Member2Id
-            };
+            return ChatMember(chatMember);
         }
 
 
         public async Task<ChatMember> GetByMemberAndChatIdAsync(string chatId, string MemberId)
         {
-            var chatMember1 = await _dbContext.ChatMember.Select(e=>new ChatMember
+            return (await _dbContext.ChatMember.Select(e => new ChatMember
             {
+                Id = e.Id,
                 ChatId = e.ChatId,
-                Member2Id = e.Member2Id,
-                Member1Id = e.Member1Id,
                 IsMember = e.IsMember,
-                Id = e.Id
-            }).Where(e => e.ChatId == chatId).Where(e=>e.Member1Id == MemberId).FirstOrDefaultAsync();
-            var chatMember2 = await _dbContext.ChatMember.Select(e => new ChatMember
-            {
-                ChatId = e.ChatId,
-                Member2Id = e.Member2Id,
-                Member1Id = e.Member1Id,
-                IsMember = e.IsMember,
-                Id = e.Id
-            }).Where(e => e.ChatId == chatId).Where(e => e.Member2Id == MemberId).FirstOrDefaultAsync();
-            chatMember1 = chatMember1 == null ? chatMember2 : chatMember1;
-            return chatMember1!;
+                MemberId = e.MemberId
+            }).Where(e => e.ChatId == chatId).Where(e=>e.MemberId == MemberId).FirstOrDefaultAsync())!;
         }
 
-        public async Task<bool> AddRangeAsync(List<ChatMember> members)
-        {
-            var list = new List<ChatMember>();
-            for(int i=0; i<members.Count; i++)
-            {
-                list.Add(members.ElementAt(i));
-            }
-            await _dbContext.AddRangeAsync(list);
-            await SaveChangesAsync();
-            return true;
-        }
 
-        public async Task<ChatMember> GetByMember1AndMember2IdAsync(string member1Id,
-            string member2Id)
-        {
-            var chatMember1 = await _dbContext.ChatMember.Select(e => new ChatMember
-            {
-                ChatId = e.ChatId,
-                Member2Id = e.Member2Id,
-                Member1Id = e.Member1Id,
-                IsMember = e.IsMember,
-                Id = e.Id
-            }).Where(e => e.Member1Id == member1Id).Where(e => e.Member2Id == member2Id).FirstOrDefaultAsync();
-            var chatMember2 = await _dbContext.ChatMember.Select(e => new ChatMember
-            {
-                ChatId = e.ChatId,
-                Member2Id = e.Member2Id,
-                Member1Id = e.Member1Id,
-                IsMember = e.IsMember,
-                Id = e.Id
-            }).Where(e => e.Member1Id == member2Id).Where(e => e.Member2Id == member1Id).FirstOrDefaultAsync();
-            chatMember1 = chatMember1 == null ? chatMember2 : chatMember1;
-            return chatMember1!;
-        }
-
-        public async Task<IEnumerable<ChatMember>> GetPrivateChatRequestsAsync(string member2Id)
-        {
-            return
-                from t in await GetAllAsync()
-                where t.Member2Id == member2Id && !t.IsMember
-                select (new ChatMember
-                {
-                    ChatId = t.ChatId,
-                    Id = t.Id,
-                    IsMember = t.IsMember,
-                    Member1Id = t.Member1Id,
-                    Member2Id = t.Member2Id
-                });
-        }
-
-        public async Task<IEnumerable<ChatMember>> GetPrivateChatsAsync(string userId)
-        {
-            return
-                from t in await GetAllAsync()
-                where (t.Member1Id == userId || t.Member2Id == userId)  && t.IsMember
-                select (new ChatMember
-                {
-                    ChatId = t.ChatId,
-                    Id = t.Id,
-                    IsMember = t.IsMember,
-                    Member1Id = t.Member1Id,
-                    Member2Id = t.Member2Id
-                });
-        }
 
         public async Task<IEnumerable<ChatMember>> GetGroupChatJoinRequestsAsync(string chatId)
         {
@@ -199,9 +103,70 @@ namespace SocialMedia.Api.Repository.ChatMemberRepository
                     ChatId = t.ChatId,
                     Id = t.Id,
                     IsMember = t.IsMember,
-                    Member1Id = t.Member1Id,
-                    Member2Id = t.Member2Id
+                    MemberId = t.MemberId,
                 });
+        }
+
+        public async Task<IEnumerable<ChatMember>> GetNotAcceptedGroupChatRequestsAsync(string userId)
+        {
+            return from c in await GetAllAsync()
+                   where c.MemberId == userId && !c.IsMember
+                   select (new ChatMember
+                   {
+                       ChatId = c.ChatId,
+                       Id = c.Id,
+                       IsMember = c.IsMember,
+                       MemberId = c.MemberId,
+                   });
+        }
+
+        private ChatMember ChatMember(ChatMember t)
+        {
+            if (t != null)
+            {
+                return new ChatMember
+                {
+                    ChatId = t.ChatId,
+                    Id = t.Id,
+                    IsMember = t.IsMember,
+                    MemberId = t.MemberId,
+                    Chat = Chat(t.ChatId),
+                    User = User(t.MemberId),
+                };
+            }
+            return null!;
+        }
+
+        private Chat Chat(string chatId)
+        {
+            if (chatId != null)
+            {
+                return (_dbContext.Chat.Select(e => new Chat
+                {
+                    Id = e.Id,
+                    CreatorId = e.CreatorId,
+                    Name = e.Name,
+                    Description = e.Description,
+                    PolicyId = e.PolicyId,
+                }).FirstOrDefault(e => e.Id == chatId))!;
+            }
+            return null!;
+        }
+
+        private SiteUser User(string userId)
+        {
+            if (userId != null)
+            {
+                var user = _dbContext.Users.FirstOrDefault(e => e.Id == userId)!;
+                return new SiteUser
+                {
+                    Id = userId,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    DisplayName = user.DisplayName
+                };
+            }
+            return null!;
         }
 
 

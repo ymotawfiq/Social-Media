@@ -345,6 +345,35 @@ namespace SocialMedia.Api.Data.Extensions
             };
         }
 
+        public static ChatMessage ConvertAddChatMessageDto_Add(AddChatMessageDto addChatMessageDto,
+            string photoUniqueName, SiteUser user)
+        {
+            return new ChatMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                ChatId = addChatMessageDto.ChatId,
+                Message = addChatMessageDto.Message,
+                Photo = photoUniqueName,
+                SenderId = user.Id,
+                SentAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+        }
+
+        public static MessageReact ConvertAddMessageReactDto_Add(AddMessageReactDto addMessageReactDto,
+                SiteUser user)
+        {
+            return new MessageReact
+            {
+                Id = Guid.NewGuid().ToString(),
+                MessageId = addMessageReactDto.MessageId,
+                ReactId = addMessageReactDto.ReactId,
+                ReactedUserId = user.Id,
+                SentAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+        }
+
 
     }
 }

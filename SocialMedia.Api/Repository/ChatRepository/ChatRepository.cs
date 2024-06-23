@@ -1,15 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Repository.PolicyRepository;
+using System;
 
 namespace SocialMedia.Api.Repository.ChatRepository
 {
     public class ChatRepository : IChatRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        public ChatRepository(ApplicationDbContext _dbContext)
+        private readonly IPolicyRepository _policyRepository;
+        public ChatRepository(ApplicationDbContext _dbContext, IPolicyRepository _policyRepository)
         {
             this._dbContext = _dbContext;
+            this._policyRepository = _policyRepository;
         }
 
         public async Task<Chat> AddAsync(Chat t)
@@ -22,7 +26,8 @@ namespace SocialMedia.Api.Repository.ChatRepository
                 CreatorId = t.CreatorId,
                 Description = t.Description,
                 Name = t.Name,
-                PolicyId = t.PolicyId
+                PolicyId = t.PolicyId,
+                Policy = await _policyRepository.GetByIdAsync(t.PolicyId)
             };
         }
 
@@ -64,6 +69,21 @@ namespace SocialMedia.Api.Repository.ChatRepository
                 Name = e.Name
             }).Where(e => e.Id == id).FirstOrDefaultAsync())!;
             return chat;
+        }
+
+        public async Task<IEnumerable<Chat>> GetUserCreatedChatsAsync(string userId)
+        {
+            return
+                from c in await GetAllAsync()
+                where c.CreatorId == userId
+                select (new Chat
+                {
+                    Id = c.Id,
+                    CreatorId = c.CreatorId,
+                    Description = c.Description,
+                    Name = c.Name,
+                    PolicyId = c.PolicyId
+                });
         }
 
         public async Task SaveChangesAsync()

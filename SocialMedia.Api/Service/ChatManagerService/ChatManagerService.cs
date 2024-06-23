@@ -1,11 +1,11 @@
 ﻿using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Data.Models;
 using SocialMedia.Api.Data.Models.ApiResponseModel;
-using SocialMedia.Api.Data.Models.ApiResponseModel.ResponseObject;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.ChatMemberRepository;
 using SocialMedia.Api.Repository.ChatMemberRoleRepository;
 using SocialMedia.Api.Repository.ChatRepository;
+using SocialMedia.Api.Repository.PrivateChatRepository;
 using SocialMedia.Api.Service.BlockService;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.PolicyService;
@@ -23,9 +23,10 @@ namespace SocialMedia.Api.Service.ChatManagerService
         private readonly IRolesService _rolesService;
         private readonly IPolicyService _policyService;
         private readonly IBlockService _blockService;
+        private readonly IPrivateChatRepository _privateChatRepository;
         public ChatManagerService(IChatMemberRepository _chatMemberRepository, IPolicyService _policyService,
             IChatRepository _chatRepository, UserManagerReturn _userManagerReturn,
-            IBlockService _blockService,
+            IBlockService _blockService, IPrivateChatRepository _privateChatRepository, 
             IChatMemberRoleRepository _chatMemberRoleRepository, IRolesService _rolesService)
         {
             this._chatMemberRepository = _chatMemberRepository;
@@ -35,81 +36,125 @@ namespace SocialMedia.Api.Service.ChatManagerService
             this._rolesService = _rolesService;
             this._policyService = _policyService;
             this._blockService = _blockService;
+            this._privateChatRepository = _privateChatRepository;
         }
 
 
 
         #region Private Chat
-        public async Task<ApiResponse<ChatMember>> AddPrivateChatRequestAsync(
+        public async Task<ApiResponse<PrivateChat>> UnSendPrivateChatRequestAsync(string privateChatId, 
+            SiteUser user)
+        {
+            var privateChat = await _privateChatRepository.GetByIdAsync(privateChatId);
+            if (privateChat != null)
+            {
+                if (!privateChat.IsAccepted)
+                {
+                    if (privateChat.User1Id == user.Id)
+                    {
+                        await _privateChatRepository.DeleteByIdAsync(privateChatId);
+                        await _chatRepository.DeleteByIdAsync(privateChat.ChatId);
+                        return StatusCodeReturn<PrivateChat>
+                            ._200_Success("Private chat request unsent successfully", privateChat);
+                    }
+                    return StatusCodeReturn<PrivateChat>
+                            ._403_Forbidden();
+                }
+                return StatusCodeReturn<PrivateChat>
+                            ._403_Forbidden("Chat request already accepted");
+            }
+            return StatusCodeReturn<PrivateChat>
+                        ._404_NotFound("No sent request ound");
+        }
+
+        public async Task<ApiResponse<PrivateChat>> AddPrivateChatRequestAsync(
             string userIdOrNameOrEmail, SiteUser user1)
         {
             var user2 = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(userIdOrNameOrEmail);
             var policy = await _policyService.GetPolicyByIdOrNameAsync("private");
-            var abiliy = await IsAbleToSendPrivateChatRequestAsync(user1, userIdOrNameOrEmail);
+            var abiliy = await IsAbleToSendPrivateChatRequestAsync<PrivateChat>(user1, userIdOrNameOrEmail);
             if (abiliy.IsSuccess)
             {
                 var chat = await _chatRepository.AddAsync(ChatObject(null!, null!, 
                     policy.ResponseObject!.Id));
 
-                var chatMember = await _chatMemberRepository.AddAsync(ChatMember(
-                    chat.Id, user1.Id, user2.Id, false));
-                return StatusCodeReturn<ChatMember>
-                    ._201_Created("Chat request sent successfully", chatMember);
+                var privateChat = await _privateChatRepository.AddAsync(AddPrivateChat(
+                    chat.Id, user1.Id, user2.Id));
+                return StatusCodeReturn<PrivateChat>
+                    ._201_Created("Chat request sent successfully", privateChat);
             }
             return abiliy;
         }
 
-        public async Task<ApiResponse<ChatMember>> AcceptPrivateChatRequestAsync(
-            string chatId, SiteUser user)
+        public async Task<ApiResponse<PrivateChat>> AcceptPrivateChatRequestAsync(string chatId, SiteUser user)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
             if (chat != null)
             {
-                var chatMember = await _chatMemberRepository.GetByMemberAndChatIdAsync(chat.Id, user.Id);
-                if (chatMember != null)
+                var privateChat = await _privateChatRepository.GetByMemberAndChatIdAsync(chat.Id, user.Id);
+                if (privateChat != null)
                 {
-                    if (chatMember.Member2Id == user.Id)
+                    if (privateChat.User2Id == user.Id)
                     {
-                        chatMember.IsMember = true;
-                        await _chatMemberRepository.UpdateAsync(chatMember);
-                        return StatusCodeReturn<ChatMember>
-                            ._200_Success("Chat request accepted successfully", chatMember);
+                        privateChat.IsAccepted = true;
+                        await _privateChatRepository.UpdateAsync(privateChat);
+                        return StatusCodeReturn<PrivateChat>
+                            ._200_Success("Chat request accepted successfully", privateChat);
                     }
-                    return StatusCodeReturn<ChatMember>
+                    return StatusCodeReturn<PrivateChat>
                         ._403_Forbidden();
                 }
-                return StatusCodeReturn<ChatMember>
+                return StatusCodeReturn<PrivateChat>
                         ._404_NotFound("No request found");
             }
-            return StatusCodeReturn<ChatMember>
+            return StatusCodeReturn<PrivateChat>
                         ._404_NotFound("Chat not found");
         }
 
-        public async Task<ApiResponse<IEnumerable<ChatMember>>> GetPrivateChatRequestsAsync(SiteUser user)
+        public async Task<ApiResponse<IEnumerable<PrivateChat>>> GetReceivedPrivateChatRequestsAsync(
+            SiteUser user)
         {
-            var chatRequests = await _chatMemberRepository.GetPrivateChatRequestsAsync(user.Id);
+            var chatRequests = await _privateChatRepository.GetReceivedChatRequestsAsync(user.Id);
             if (chatRequests.ToList().Count == 0)
             {
-                return StatusCodeReturn<IEnumerable<ChatMember>>
-                    ._200_Success("No private chat requests found", chatRequests);
+                return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("No received chat requests found", chatRequests);
             }
-            return StatusCodeReturn<IEnumerable<ChatMember>>
-                    ._200_Success("Chat requests found successfully", chatRequests);
+            return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("Received chat requests found successfully", chatRequests);
         }
 
-        public async Task<ApiResponse<IEnumerable<ChatMember>>> GetPrivateChatsAsync(SiteUser user)
+        public async Task<ApiResponse<IEnumerable<PrivateChat>>> GetSentPrivateChatRequestsAsync(
+            SiteUser user)
         {
-            var chatRequests = await _chatMemberRepository.GetPrivateChatsAsync(user.Id);
+            var chatRequests = await _privateChatRepository.GetSentChatRequestsAsync(user.Id);
             if (chatRequests.ToList().Count == 0)
             {
-                return StatusCodeReturn<IEnumerable<ChatMember>>
-                    ._200_Success("No private chat requests found", chatRequests);
+                return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("No sent chat requests found", chatRequests);
             }
-            return StatusCodeReturn<IEnumerable<ChatMember>>
-                    ._200_Success("Chat requests found successfully", chatRequests);
+            return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("Sent Chat requests found successfully", chatRequests);
         }
 
-        private async Task<ApiResponse<ChatMember>> IsAbleToSendPrivateChatRequestAsync(
+        public async Task<ApiResponse<IEnumerable<PrivateChat>>> GetPrivateChatsAsync(SiteUser user)
+        {
+            var chatRequests = await _privateChatRepository.GetUserChatsAsync(user.Id);
+            if (chatRequests != null)
+            {
+                if (chatRequests.ToList().Count == 0)
+                {
+                    return StatusCodeReturn<IEnumerable<PrivateChat>>
+                        ._200_Success("No private chats found", chatRequests);
+                }
+                return StatusCodeReturn<IEnumerable<PrivateChat>>
+                        ._200_Success("Private chats found successfully", chatRequests);
+            }
+            return StatusCodeReturn<IEnumerable<PrivateChat>>
+                        ._404_NotFound("No private chat requests found");
+        }
+
+        private async Task<ApiResponse<T>> IsAbleToSendPrivateChatRequestAsync<T>(
             SiteUser user1, string userIdOrNameOrEmail)
         {
             var user2 = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(userIdOrNameOrEmail);
@@ -121,35 +166,220 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     var policy = await _policyService.GetPolicyByIdOrNameAsync("private");
                     if (policy != null && policy.ResponseObject != null)
                     {
-                        var chatMember = await _chatMemberRepository.GetByMember1AndMember2IdAsync(user1.Id,
+                        var chatMember = await _privateChatRepository.GetByMember1AndMember2IdAsync(user1.Id,
                             user2.Id);
                         if (chatMember != null)
                         {
-                            if (chatMember.IsMember)
+                            if (chatMember.IsAccepted)
                             {
-                                return StatusCodeReturn<ChatMember>
+                                return StatusCodeReturn<T>
                                     ._403_Forbidden("You already has private chat with this user");
                             }
-                            return StatusCodeReturn<ChatMember>
+                            return StatusCodeReturn<T>
                                     ._403_Forbidden("Please wait untill accept your chat request");
                         }
-                        return StatusCodeReturn<ChatMember>
+                        return StatusCodeReturn<T>
                                     ._200_Success("Allowed");
                     }
-                    return StatusCodeReturn<ChatMember>
+                    return StatusCodeReturn<T>
                         ._404_NotFound("Policy not found");
                 }
-                return StatusCodeReturn<ChatMember>
+                return StatusCodeReturn<T>
                                      ._403_Forbidden();
             }
-            return StatusCodeReturn<ChatMember>
+            return StatusCodeReturn<T>
                     ._404_NotFound("User you want to send chat request not found");
         }
 
+        public async Task<ApiResponse<PrivateChat>> BlockChatByChatIdAsync(string chatId, SiteUser user)
+        {
+            var privateChat = await _privateChatRepository.GetByMemberAndChatIdAsync(chatId, user.Id);
+            if (privateChat != null)
+            {
+                if(privateChat.User1Id == user.Id)
+                {
+                    privateChat.IsBlockedByUser1 = true;
+                }
+                else
+                {
+                    privateChat.IsBlockedByUser2 = true;
+                }
+                privateChat.IsBlocked = true;
+                await _privateChatRepository.UpdateAsync(privateChat);
+                return StatusCodeReturn<PrivateChat>
+                    ._200_Success("Blocked successfully", privateChat);
+            }
+            return StatusCodeReturn<PrivateChat>
+                ._404_NotFound("Chat not found");
+        }
+
+        public async Task<ApiResponse<PrivateChat>> BlockChatByPrivateChatIdAsync(string privateChatId,
+            SiteUser user)
+        {
+            var privateChat = await _privateChatRepository.GetByIdAsync(privateChatId);
+            return await BlockChatByChatIdAsync(privateChat.ChatId, user);
+        }
+
+        public async Task<ApiResponse<PrivateChat>> UnBlockChatByChatIdAsync(string chatId, SiteUser user)
+        {
+            var privateChat = await _privateChatRepository.GetByMemberAndChatIdAsync(chatId, user.Id);
+            if (privateChat != null)
+            {
+                if (privateChat.User1Id == user.Id)
+                {
+                    privateChat.IsBlockedByUser1 = false;
+                }
+                else
+                {
+                    privateChat.IsBlockedByUser2 = false;
+                }
+                if(!privateChat.IsBlockedByUser1 && !privateChat.IsBlockedByUser2)
+                {
+                    privateChat.IsBlocked = false;
+                }
+                await _privateChatRepository.UpdateAsync(privateChat);
+                return StatusCodeReturn<PrivateChat>
+                    ._200_Success("Unblocked successfully", privateChat);
+            }
+            return StatusCodeReturn<PrivateChat>
+                ._404_NotFound("Chat not found");
+        }
+
+        public async Task<ApiResponse<PrivateChat>> UnBlockChatByPrivateChatIdAsync(string privateChatId,
+            SiteUser user)
+        {
+            var privateChat = await _privateChatRepository.GetByIdAsync(privateChatId);
+            return await UnBlockChatByChatIdAsync(privateChat.ChatId, user);
+        }
+
+
         #endregion
 
+        public async Task<ApiResponse<Chat>> GetGroupChatByIdAsync(string chatId, SiteUser user)
+        {
+            var chat = await _chatRepository.GetByIdAsync(chatId);
+            if (chat != null)
+            {
+                var policy = await _policyService.GetPolicyByNameAsync("private");
+                if (policy != null && policy.ResponseObject != null)
+                {
+                    if (policy.ResponseObject.Id != chat.PolicyId)
+                    {
+                        return StatusCodeReturn<Chat>
+                            ._200_Success("Chat found successfully", chat);
+                    }
+                    return StatusCodeReturn<Chat>
+                    ._403_Forbidden();
+                }
+                return StatusCodeReturn<Chat>
+                    ._404_NotFound("Private policy not found");
+            }
+            return StatusCodeReturn<Chat>
+                    ._404_NotFound("Chat not found");
+        }
+
+        public async Task<ApiResponse<Chat>> DeleteGroupChatByIdAsync(string chatId, SiteUser user)
+        {
+            var chat = await _chatRepository.GetByIdAsync(chatId);
+            if (chat != null)
+            {
+                if(chat.CreatorId == user.Id)
+                {
+                    await _chatRepository.DeleteByIdAsync(chatId);
+                    return StatusCodeReturn<Chat>
+                            ._200_Success("Chat deleted successfully", chat);
+                }
+                return StatusCodeReturn<Chat>
+                    ._403_Forbidden();
+            }
+            return StatusCodeReturn<Chat>
+                    ._404_NotFound("Chat not found");
+        }
+
+        public async Task<ApiResponse<IEnumerable<PrivateChat>>> GetNotAcceptedPrivateChatRequestsAsync(
+            SiteUser user)
+        {
+            var chatRequests = await _privateChatRepository.GetSentChatRequestsAsync(user.Id);
+            if (chatRequests.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("No private chat join requests sent", chatRequests);
+            }
+            return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("Private chat join requests found successfully", chatRequests);
+        }
+
+        public async Task<ApiResponse<IEnumerable<ChatMember>>> GetNotAcceptedGroupChatRequestsAsync(
+            SiteUser user)
+        {
+            var chatRequests = await _chatMemberRepository.GetNotAcceptedGroupChatRequestsAsync(user.Id);
+            if (chatRequests.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<ChatMember>>
+                    ._200_Success("No group chat join requests sent", chatRequests);
+            }
+            return StatusCodeReturn<IEnumerable<ChatMember>>
+                    ._200_Success("Group chat join requests found successfully", chatRequests);
+        }
 
         #region Group Chat
+
+        public async Task<ApiResponse<IEnumerable<Chat>>> GetGroupChatsCreatedByUserAsync(SiteUser user)
+        {
+            var chats = await _chatRepository.GetUserCreatedChatsAsync(user.Id);
+            if (chats.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<Chat>>
+                    ._200_Success("No group chat Created by you", chats);
+            }
+            return StatusCodeReturn<IEnumerable<Chat>>
+                    ._200_Success("Group chats found successfully", chats);
+        }
+
+        public async Task<ApiResponse<Chat>> UpdateGroupChatByIdAsync(UpdateChatDto updateChatDto,
+            SiteUser user)
+        {
+            var chat = await _chatRepository.GetByIdAsync(updateChatDto.ChatId);
+            if (chat != null)
+            {
+                if((await IsInRoleRoleAsync(updateChatDto.ChatId, "admin", user)).IsSuccess)
+                {
+                    chat.Name = updateChatDto.Name;
+                    chat.Description = updateChatDto.Description;
+                    var updatedChat = await _chatRepository.UpdateAsync(chat);
+                    return StatusCodeReturn<Chat>
+                        ._200_Success("Chat updated successfully", updatedChat);
+                }
+                return StatusCodeReturn<Chat>
+                        ._403_Forbidden();
+            }
+            return StatusCodeReturn<Chat>
+                    ._404_NotFound("Chat not found");
+        }
+
+        public async Task<ApiResponse<ChatMember>> UnSendGroupChatRequestAsync(string chatMemberId,
+            SiteUser user)
+        {
+            var chatMember = await _chatMemberRepository.GetByIdAsync(chatMemberId);
+            if (chatMember != null)
+            {
+                if (!chatMember.IsMember)
+                {
+                    if (chatMember.MemberId == user.Id)
+                    {
+                        await _chatMemberRepository.DeleteByIdAsync(chatMemberId);
+                        return StatusCodeReturn<ChatMember>
+                            ._200_Success("Group chat request unsent successfully", chatMember);
+                    }
+                    return StatusCodeReturn<ChatMember>
+                            ._403_Forbidden();
+                }
+                return StatusCodeReturn<ChatMember>
+                            ._403_Forbidden("Chat request already accepted");
+            }
+            return StatusCodeReturn<ChatMember>
+                        ._404_NotFound("No sent request found");
+        }
 
         public async Task<ApiResponse<Chat>> AddGroupChatAsync(AddChatDto addChatDto,
             SiteUser user)
@@ -163,7 +393,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     var chat = await _chatRepository.AddAsync(ChatObject(addChatDto, user, 
                         policy.ResponseObject.Id));
                     var newChatMember = await _chatMemberRepository.AddAsync(
-                        ChatMember(chat.Id, user.Id, null!, false));
+                        ChatMember(chat.Id, user.Id, null!, true));
                     await _chatMemberRoleRepository.AddAsync(ChatMemberRole(
                         newChatMember.Id, role.ResponseObject.Id));
                     return StatusCodeReturn<Chat>
@@ -461,7 +691,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
             if (chatMember != null)
             {
                 var member = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
-                    chatMember.Member1Id);
+                    chatMember.MemberId);
                 var role = await _rolesService.GetRoleByIdOrNameAsync(roleIdOrName);
                 if((await IsAbleToAssignRoleToMemberAsync(chatMember.ChatId,
                     roleIdOrName, user, member)).IsSuccess)
@@ -511,15 +741,26 @@ namespace SocialMedia.Api.Service.ChatManagerService
             {
                 if ((await IsInRoleRoleAsync(chatId, "admin", admin)).IsSuccess)
                 {
-                    var memberRole = await _chatMemberRoleRepository.GetByChatAndRoleIdAsync(
-                        chatId, role.ResponseObject!.Id);
-                    if (memberRole != null)
+                    var memberRoles = await GetMemberRolesByChatIdAsync(chatId, member);
+                    if (memberRoles.ResponseObject != null)
                     {
+                        if (memberRoles.ResponseObject.ToList().Count > 1)
+                        {
+                            var memberRole = await _chatMemberRoleRepository.GetByChatAndRoleIdAsync(
+                                    chatId, role.ResponseObject!.Id);
+                            if (memberRole != null)
+                            {
+                                return StatusCodeReturn<ChatMemberRole>
+                                ._200_Success("Allowed", memberRole);
+                            }
+                            return StatusCodeReturn<ChatMemberRole>
+                            ._403_Forbidden("Not in role");
+                        }
                         return StatusCodeReturn<ChatMemberRole>
-                        ._200_Success("Allowed", memberRole);
+                            ._403_Forbidden();
                     }
                     return StatusCodeReturn<ChatMemberRole>
-                    ._403_Forbidden("Not in role");
+                            ._404_NotFound("Member has no roles");
                 }
                 return await IsInRoleRoleAsync(chatId, "admin", admin);
             }
@@ -700,8 +941,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
                 {
                     Id = Guid.NewGuid().ToString(),
                     ChatId = chatId,
-                    Member1Id = member1Id,
-                    Member2Id = member2Id,
+                    MemberId = member1Id,
                     IsMember = b
                 };
             }
@@ -709,8 +949,24 @@ namespace SocialMedia.Api.Service.ChatManagerService
             {
                 Id = Guid.NewGuid().ToString(),
                 ChatId = chatId,
-                Member1Id = member1Id,
+                MemberId = member1Id,
                 IsMember = b
+            };
+        }
+
+        private PrivateChat AddPrivateChat(string chatId, string member1Id, string member2Id)
+        {
+
+            return new PrivateChat
+            {
+                Id = Guid.NewGuid().ToString(),
+                ChatId = chatId,
+                User1Id = member1Id,
+                User2Id = member2Id,
+                IsAccepted = false,
+                IsBlocked = false,
+                IsBlockedByUser1 = false,
+                IsBlockedByUser2 = false
             };
         }
 

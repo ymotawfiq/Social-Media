@@ -48,7 +48,6 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-
         [HttpPut("acceptPrivateChatRequest")]
         public async Task<IActionResult> AcceptPrivateChatRequestAsync(string chatId)
         {
@@ -90,7 +89,7 @@ namespace SocialMedia.Api.Controllers
                         HttpContext.User.Identity.Name);
                     if (user != null)
                     {
-                        var response = await _chatManagerService.GetPrivateChatRequestsAsync(user);
+                        var response = await _chatManagerService.GetReceivedPrivateChatRequestsAsync(user);
                         return Ok(response);
                     }
                     return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
@@ -190,6 +189,119 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpPut("blockChatByChatId")]
+        public async Task<IActionResult> BlockChatByChatIdAsync(string chatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.BlockChatByChatIdAsync(chatId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("blockChatByPrivateChatId")]
+        public async Task<IActionResult> BlockChatByPrivateChatIdAsync(string privateChatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.BlockChatByPrivateChatIdAsync(privateChatId,
+                            user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("unBlockChatByChatId")]
+        public async Task<IActionResult> UnBlockChatByChatIdAsync(string chatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.UnBlockChatByChatIdAsync(chatId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPut("unBlockChatByPrivateChatId")]
+        public async Task<IActionResult> UnBlockChatByPrivateChatIdAsync(string privateChatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.UnBlockChatByPrivateChatIdAsync(
+                            privateChatId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
 
         [HttpPut("acceptGroupChatJoinRequest")]
         public async Task<IActionResult> AcceptGroupChatJoinRequestAsync(string chatMemberId)
@@ -220,8 +332,91 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpPut("updateGroupChat")]
+        public async Task<IActionResult> UpdateGroupChatAsync([FromBody] UpdateChatDto updateChatDto)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.UpdateGroupChatByIdAsync(updateChatDto, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
 
-        [HttpGet("getGroupChatMembersRequestsByChatId/{chatId}")]
+        [HttpGet("getGroupChatById/{chatId}")]
+        public async Task<IActionResult> GetGroupChatByIdAsync(string chatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.GetGroupChatByIdAsync(chatId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpDelete("deleteGroupChatById/{chatId}")]
+        public async Task<IActionResult> DeleteGroupChatByIdAsync(string chatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.DeleteGroupChatByIdAsync(chatId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpGet("getGroupChatMembersByChatId/{chatId}")]
         public async Task<IActionResult> GetGroupChatMembersRequestsAsync(string chatId)
         {
             try
@@ -277,6 +472,62 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
+        [HttpGet("getNotAcceptedPrivateChatJoinRequests")]
+        public async Task<IActionResult> GetNoAcceptedPrivateChatJoinRequestsAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.GetNotAcceptedPrivateChatRequestsAsync(user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+
+        [HttpGet("getNotAcceptedGroupChatJoinRequests")]
+        public async Task<IActionResult> GetNotAcceptedGroupChatJoinRequestsAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.GetNotAcceptedGroupChatRequestsAsync(user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
 
         [HttpPut("addMemberToGroupChat")]
         public async Task<IActionResult> AddMemberToGroupChatAsync(
@@ -334,6 +585,94 @@ namespace SocialMedia.Api.Controllers
                     ._500_ServerError(ex.Message));
             }
         }
+
+        [HttpGet("getUserCreatedGroups")]
+        public async Task<IActionResult> GetUserCreatedGroupsAsync()
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.GetGroupChatsCreatedByUserAsync(user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+
+        [HttpDelete("unSendPrivateChatJoinRequest/{privateChatId}")]
+        public async Task<IActionResult> UnSendPrivateChatJoinRequestAsync(string privateChatId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.UnSendPrivateChatRequestAsync(
+                            privateChatId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpDelete("unSendGroupChatJoinRequest/{chatMemberId}")]
+        public async Task<IActionResult> UnSendGroupChatJoinRequestAsync(string chatMemberId)
+        {
+            try
+            {
+                if (HttpContext.User != null && HttpContext.User.Identity != null
+                && HttpContext.User.Identity.Name != null)
+                {
+                    var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(
+                        HttpContext.User.Identity.Name);
+                    if (user != null)
+                    {
+                        var response = await _chatManagerService.UnSendGroupChatRequestAsync(
+                            chatMemberId, user);
+                        return Ok(response);
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, StatusCodeReturn<string>
+                        ._404_NotFound("User not found"));
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, StatusCodeReturn<string>
+                    ._401_UnAuthorized());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
 
         [HttpDelete("deleteGroupChatMemberByMemberId/{chatMemberId}")]
         public async Task<IActionResult> DeleteGroupChatMemberAsync(string chatMemberId)

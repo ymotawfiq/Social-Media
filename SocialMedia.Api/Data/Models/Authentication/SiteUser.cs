@@ -40,8 +40,11 @@ namespace SocialMedia.Api.Data.Models.Authentication
         public List<Page>? Pages { get; set; }
         public List<Chat>? Chats { get; set; }
         public List<ChatMember>? ChatMembers1 { get; set; }
-        public List<ChatMember>? ChatMembers2 { get; set; }
-
+        public List<PrivateChat>? PrivateChats1 { get; set; }
+        public List<PrivateChat>? PrivateChats2 { get; set; }
+        public List<ChatMessage>? ChatMessages { get; set; }
+        public List<MessageReact>? MessageReacts { get; set; }
+        public List<ArchievedChat>? ArchievedChats { get; set; }
 
     }
 }
