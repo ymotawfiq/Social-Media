@@ -21,10 +21,11 @@ namespace SocialMedia.Api.Service.ChatMessageService
         private readonly IChatRepository _chatRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IPolicyRepository _policyRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public ChatMessageService(IChatMessageRepository _chatMessageRepository, 
             IChatRepository _chatRepository, IWebHostEnvironment _webHostEnvironment, 
             IPrivateChatRepository _privateChatRepository, IChatMemberRepository _chatMemberRepository,
-            IPolicyRepository _policyRepository)
+            IPolicyRepository _policyRepository, UserManagerReturn _userManagerReturn)
         {
             this._chatRepository = _chatRepository;
             this._chatMessageRepository = _chatMessageRepository;
@@ -32,6 +33,7 @@ namespace SocialMedia.Api.Service.ChatMessageService
             this._privateChatRepository = _privateChatRepository;
             this._webHostEnvironment = _webHostEnvironment;
             this._policyRepository = _policyRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<IEnumerable<ChatMessage>>> GetChatMessagesAsync(string chatId,
             SiteUser user)
@@ -61,6 +63,8 @@ namespace SocialMedia.Api.Service.ChatMessageService
                     var newMessage = await _chatMessageRepository.AddAsync(ConvertFromDto
                         .ConvertAddChatMessageDto_Add(addChatMessageDto,
                         SaveMessageImage(addChatMessageDto.Photo!), user));
+                    newMessage.Chat = chat;
+                    newMessage.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<ChatMessage>
                         ._201_Created("Message sent successfully", newMessage);
                 }
@@ -84,6 +88,8 @@ namespace SocialMedia.Api.Service.ChatMessageService
                             DeleteMessageImage(message.Photo);
                         }
                         await _chatMessageRepository.DeleteByIdAsync(messageId);
+                        message.Chat = chat;
+                        message.User = _userManagerReturn.SetUserToReturn(user);
                         return StatusCodeReturn<ChatMessage>
                             ._200_Success("Message unsent successfully", message);
                     }
@@ -116,6 +122,10 @@ namespace SocialMedia.Api.Service.ChatMessageService
                                 message.Message = updateChatMessageDto.Message;
                                 message.UpdatedAt = DateTime.Now;
                                 await _chatMessageRepository.UpdateAsync(message);
+                                message.Chat = chat;
+                                message.User = _userManagerReturn.SetUserToReturn(user);
+                                return StatusCodeReturn<ChatMessage>
+                                    ._200_Success("Message updated successfully", message);
                             }
                             return StatusCodeReturn<ChatMessage>
                                     ._403_Forbidden("You can update message only in 5 minutes after sending");

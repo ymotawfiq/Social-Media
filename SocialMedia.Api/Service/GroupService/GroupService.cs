@@ -8,6 +8,7 @@ using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.GroupMemberRepository;
 using SocialMedia.Api.Repository.GroupMemberRoleRepository;
 using SocialMedia.Api.Repository.GroupRepository;
+using SocialMedia.Api.Repository.PolicyRepository;
 using SocialMedia.Api.Repository.RoleRepository;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.GroupManager;
@@ -23,10 +24,12 @@ namespace SocialMedia.Api.Service.GroupService
         private readonly IGroupMemberRepository _groupMemberRepository;
         private readonly IGroupMemberRoleRepository _groupMemberRoleRepository;
         private readonly IGroupManager _groupManager;
+        private readonly UserManagerReturn _userManagerReturn;
+        private readonly IPolicyRepository _policyRepository;
         public GroupService(IGroupRepository _groupRepository, IPolicyService _policyService,
             IRoleRepository _roleRepository, IGroupManager _groupManager,
-            IGroupMemberRepository _groupMemberRepository, 
-            IGroupMemberRoleRepository _groupMemberRoleRepository)
+            IGroupMemberRepository _groupMemberRepository, UserManagerReturn _userManagerReturn, 
+            IGroupMemberRoleRepository _groupMemberRoleRepository, IPolicyRepository _policyRepository)
         {
             this._groupRepository = _groupRepository;
             this._policyService = _policyService;
@@ -34,6 +37,8 @@ namespace SocialMedia.Api.Service.GroupService
             this._groupMemberRepository = _groupMemberRepository;
             this._groupMemberRoleRepository = _groupMemberRoleRepository;
             this._groupManager = _groupManager;
+            this._userManagerReturn = _userManagerReturn;
+            this._policyRepository = _policyRepository;
         }
         public async Task<ApiResponse<Group>> AddGroupAsync(AddGroupDto addGroupDto, SiteUser user)
         {
@@ -64,6 +69,8 @@ namespace SocialMedia.Api.Service.GroupService
                     if (groupMembers.ToList().Count == 0)
                     {
                         await _groupRepository.DeleteByIdAsync(groupId);
+                        group.User = _userManagerReturn.SetUserToReturn(user);
+                        group.GroupPolicy = await _policyRepository.GetByIdAsync(group.GroupPolicyId);
                         return StatusCodeReturn<Group>
                             ._200_Success("Group deleted successfully", group);
                     }
@@ -106,6 +113,9 @@ namespace SocialMedia.Api.Service.GroupService
             var group = await _groupRepository.GetByIdAsync(groupId);
             if (group != null)
             {
+                group.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(group.CreatedUserId));
+                group.GroupPolicy = await _policyRepository.GetByIdAsync(group.GroupPolicyId);
                 return StatusCodeReturn<Group>
                     ._200_Success("Group found successfully", group);
             }
@@ -122,6 +132,8 @@ namespace SocialMedia.Api.Service.GroupService
                 {
                     var updatedGroup = await _groupRepository.UpdateAsync(
                     ConvertFromDto.ConvertFromGroupDto_Update(updateGroupDto, user, group));
+                    updatedGroup.User = _userManagerReturn.SetUserToReturn(user);
+                    updatedGroup.GroupPolicy = await _policyRepository.GetByIdAsync(group.GroupPolicyId);
                     return StatusCodeReturn<Group>
                         ._200_Success("Group updated successfully", updatedGroup);
                 }
@@ -148,6 +160,8 @@ namespace SocialMedia.Api.Service.GroupService
                         updateExistGroupPolicyDto.GroupPolicyIdOrName = policy.ResponseObject.Id;
                         var updatedGroup = await _groupRepository.UpdateAsync(ConvertFromDto
                             .ConvertFromGroupDto_Update(updateExistGroupPolicyDto, group));
+                        updatedGroup.User = _userManagerReturn.SetUserToReturn(user);
+                        updatedGroup.GroupPolicy = await _policyRepository.GetByIdAsync(group.GroupPolicyId);
                         return StatusCodeReturn<Group>
                             ._200_Success("Group policy updated successfully", updatedGroup);
                     }
@@ -180,6 +194,8 @@ namespace SocialMedia.Api.Service.GroupService
                 RoleId = adminRole.Id,
                 GroupMemberId = groupMember.Id
             });
+            newGroup.User = _userManagerReturn.SetUserToReturn(user);
+            newGroup.GroupPolicy = await _policyRepository.GetByIdAsync(newGroup.GroupPolicyId);
             return StatusCodeReturn<Group>
                 ._201_Created("Group created successfully", newGroup);
         }

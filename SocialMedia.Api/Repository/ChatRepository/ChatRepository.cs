@@ -9,11 +9,9 @@ namespace SocialMedia.Api.Repository.ChatRepository
     public class ChatRepository : IChatRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IPolicyRepository _policyRepository;
-        public ChatRepository(ApplicationDbContext _dbContext, IPolicyRepository _policyRepository)
+        public ChatRepository(ApplicationDbContext _dbContext)
         {
             this._dbContext = _dbContext;
-            this._policyRepository = _policyRepository;
         }
 
         public async Task<Chat> AddAsync(Chat t)
@@ -27,7 +25,8 @@ namespace SocialMedia.Api.Repository.ChatRepository
                 Description = t.Description,
                 Name = t.Name,
                 PolicyId = t.PolicyId,
-                Policy = await _policyRepository.GetByIdAsync(t.PolicyId)
+                Policy = t.Policy,
+                User = t.User
             };
         }
 

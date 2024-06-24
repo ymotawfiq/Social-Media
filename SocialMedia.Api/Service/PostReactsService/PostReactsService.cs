@@ -23,9 +23,10 @@ namespace SocialMedia.Api.Service.PostReactsService
         private readonly IBlockRepository _blockRepository;
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendService _friendService;
+        private readonly UserManagerReturn _userManagerReturn;
         public PostReactsService(
             IPostReactsRepository _postReactsRepository,
-            IPostRepository _postRepository, 
+            IPostRepository _postRepository, UserManagerReturn _userManagerReturn,
             IReactRepository _reactRepository, IBlockRepository _blockRepository,
             IPolicyRepository _policyRepository,
             IFriendService _friendService)
@@ -36,6 +37,7 @@ namespace SocialMedia.Api.Service.PostReactsService
             this._blockRepository = _blockRepository;
             this._policyRepository = _policyRepository;
             this._friendService = _friendService;
+            this._userManagerReturn = _userManagerReturn;
         }
 
         public async Task<ApiResponse<PostReacts>> AddPostReactAsync(AddPostReactDto addPostReactDto,
@@ -57,6 +59,9 @@ namespace SocialMedia.Api.Service.PostReactsService
                             addPostReactDto.ReactId = postReact.Id;
                             var newPostReact = await _postReactsRepository.AddAsync(
                             ConvertFromDto.ConvertFromPostReactsDto_Add(addPostReactDto, user));
+                            newPostReact.User = _userManagerReturn.SetUserToReturn(user);
+                            newPostReact.React = postReact;
+                            newPostReact.Post = post;
                             return StatusCodeReturn<PostReacts>
                                 ._201_Created("Reacted successfully", newPostReact);
                         }
@@ -83,8 +88,11 @@ namespace SocialMedia.Api.Service.PostReactsService
                     if (user.Id == postReact.UserId)
                     {
                         await _postReactsRepository.DeleteByIdAsync(Id);
+                        postReact.User = _userManagerReturn.SetUserToReturn(user);
+                        postReact.React = await _reactRepository.GetByIdAsync(postReact.PostReactId);
+                        postReact.Post = post;
                         return StatusCodeReturn<PostReacts>
-                            ._200_Success("Post react deleted successfully");
+                            ._200_Success("Post react deleted successfully", postReact);
                     }
                     return StatusCodeReturn<PostReacts>
                         ._403_Forbidden();
@@ -107,8 +115,12 @@ namespace SocialMedia.Api.Service.PostReactsService
                     if (userId == postReact.UserId)
                     {
                         await _postReactsRepository.DeleteByIdAsync(postReact.Id);
+                        postReact.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(userId));
+                        postReact.React = await _reactRepository.GetByIdAsync(postReact.PostReactId);
+                        postReact.Post = post;
                         return StatusCodeReturn<PostReacts>
-                            ._200_Success("Post react deleted successfully");
+                            ._200_Success("Post react deleted successfully", postReact);
                     }
                     return StatusCodeReturn<PostReacts>
                         ._403_Forbidden();
@@ -127,6 +139,9 @@ namespace SocialMedia.Api.Service.PostReactsService
                 var post = await _postRepository.GetPostByIdAsync(postReact.PostId);
                 if ((await CheckToReactAsync<PostReacts>(user.Id, post)).IsSuccess)
                 {
+                    postReact.User = _userManagerReturn.SetUserToReturn(user);
+                    postReact.React = await _reactRepository.GetByIdAsync(postReact.PostReactId);
+                    postReact.Post = post;
                     return StatusCodeReturn<PostReacts>
                                 ._200_Success("Post react found successfully", postReact);
                 }
@@ -146,6 +161,10 @@ namespace SocialMedia.Api.Service.PostReactsService
                 var post = await _postRepository.GetPostByIdAsync(postReact.PostId);
                 if ((await CheckToReactAsync<PostReacts>(userId, post)).IsSuccess)
                 {
+                    postReact.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                        .GetUserByUserNameOrEmailOrIdAsync(userId));
+                    postReact.React = await _reactRepository.GetByIdAsync(postReact.PostReactId);
+                    postReact.Post = post;
                     return StatusCodeReturn<PostReacts>
                                 ._200_Success("Post react found successfully", postReact);
                 }
@@ -213,6 +232,9 @@ namespace SocialMedia.Api.Service.PostReactsService
                         {
                             postReact.PostReactId = updatePostReactDto.ReactId;
                             postReact = await _postReactsRepository.UpdateAsync(postReact);
+                            postReact.User = _userManagerReturn.SetUserToReturn(user);
+                            postReact.React = await _reactRepository.GetByIdAsync(postReact.PostReactId);
+                            postReact.Post = post;
                             return StatusCodeReturn<PostReacts>
                                 ._200_Success("Post react updated successfully", postReact);
                         }

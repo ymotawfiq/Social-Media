@@ -16,12 +16,14 @@ namespace SocialMedia.Api.Service.SavedPostsService
         private readonly ISavePostsRepository _savePostsRepository;
         private readonly IPostRepository _postRepository;
         private readonly IUserSavedPostsFolderService _userSavedPostsFolderService;
+        private readonly UserManagerReturn _userManagerReturn;
         public SavedPostsService(ISavePostsRepository _savePostsRepository, IPostRepository _postRepository,
-            IUserSavedPostsFolderService _userSavedPostsFolderService)
+            IUserSavedPostsFolderService _userSavedPostsFolderService, UserManagerReturn _userManagerReturn)
         {
             this._savePostsRepository = _savePostsRepository;
             this._postRepository = _postRepository;
             this._userSavedPostsFolderService = _userSavedPostsFolderService;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<SavedPosts>> SavePostAsync(SiteUser user, SavePostDto savePostDto)
         {
@@ -45,7 +47,10 @@ namespace SocialMedia.Api.Service.SavedPostsService
                             FolderId = folder.ResponseObject.Id,
                             Id = Guid.NewGuid().ToString(),
                             PostId = post.Id,
-                            UserId = user.Id
+                            UserId = user.Id,
+                            Post = post,
+                            User = _userManagerReturn.SetUserToReturn(user),
+                            UserSavedPostsFolder = folder.ResponseObject
                         }
                         );
                     return StatusCodeReturn<SavedPosts>

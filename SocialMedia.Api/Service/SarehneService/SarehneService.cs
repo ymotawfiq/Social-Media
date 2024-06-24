@@ -4,6 +4,7 @@ using SocialMedia.Api.Data.Extensions;
 using SocialMedia.Api.Data.Models;
 using SocialMedia.Api.Data.Models.ApiResponseModel;
 using SocialMedia.Api.Data.Models.Authentication;
+using SocialMedia.Api.Repository.PolicyRepository;
 using SocialMedia.Api.Repository.SarehneRepository;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.PolicyService;
@@ -16,12 +17,14 @@ namespace SocialMedia.Api.Service.SarehneService
         private readonly ISarehneRepository _sarehneRepository;
         private readonly UserManagerReturn _userManagerReturn;
         private readonly IPolicyService _policyService;
+        private readonly IPolicyRepository _policyRepository;
         public SarehneService(ISarehneRepository _sarehneRepository, UserManagerReturn _userManagerReturn,
-            IPolicyService _policyService)
+            IPolicyService _policyService, IPolicyRepository _policyRepository)
         {
             this._sarehneRepository = _sarehneRepository;
             this._userManagerReturn = _userManagerReturn;
             this._policyService = _policyService;
+            this._policyRepository = _policyRepository;
         }
 
         public async Task<ApiResponse<SarehneMessage>> DeleteMessageAsync(string messageId, SiteUser user)
@@ -32,6 +35,8 @@ namespace SocialMedia.Api.Service.SarehneService
                 if (message.ReceiverId == user.Id)
                 {
                     await _sarehneRepository.DeleteByIdAsync(messageId);
+                    message.SarehneMessagePolicy = await _policyRepository.GetByIdAsync(
+                        message.MessagePolicyId);
                     return StatusCodeReturn<SarehneMessage>
                         ._200_Success("Message deleted successfully", message);
                 }
@@ -53,6 +58,8 @@ namespace SocialMedia.Api.Service.SarehneService
                     if (message.ReceiverId == user.Id 
                     || message.MessagePolicyId == policy.ResponseObject.Id)
                     {
+                        message.SarehneMessagePolicy = await _policyRepository.GetByIdAsync(
+                        message.MessagePolicyId);
                         return StatusCodeReturn<SarehneMessage>
                             ._200_Success("Message found successfully", message);
                     }
@@ -113,6 +120,8 @@ namespace SocialMedia.Api.Service.SarehneService
                     var newMessage = await _sarehneRepository.AddAsync(ConvertFromDto
                     .ConvertFromSendSarehneMessageDto(sendSarahaMessageDto, user!, receiver, 
                     policy.ResponseObject));
+                    newMessage.SarehneMessagePolicy = await _policyRepository.GetByIdAsync(
+                        newMessage.MessagePolicyId);
                     return StatusCodeReturn<SarehneMessage>
                         ._201_Created("Message sent successfully", newMessage);
                 }
@@ -141,6 +150,8 @@ namespace SocialMedia.Api.Service.SarehneService
                             var updatedMessage = await _sarehneRepository.UpdateAsync(
                                 ConvertFromDto.ConvertFromUpdateSarehneMessagePolicyDto(
                                     updateSarehneMessagePolicyDto, message));
+                            updatedMessage.SarehneMessagePolicy = await _policyRepository.GetByIdAsync(
+                                updatedMessage.MessagePolicyId);
                             return StatusCodeReturn<SarehneMessage>
                                 ._200_Success("Policy updated successfully", updatedMessage);
                         }

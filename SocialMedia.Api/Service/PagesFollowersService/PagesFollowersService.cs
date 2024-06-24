@@ -33,6 +33,8 @@ namespace SocialMedia.Api.Service.PagesFollowersService
                 {
                     var followPage = await _pagesFollowersRepository.AddAsync(
                         ConvertFromDto.ConvertFromFollowPageDto_Add(followPageDto, user));
+                    followPage.User = _userManagerReturn.SetUserToReturn(user);
+                    followPage.Page = page;
                     return StatusCodeReturn<object>
                         ._201_Created("Followed successfully", followPage);
                 }
@@ -59,6 +61,8 @@ namespace SocialMedia.Api.Service.PagesFollowersService
                     {
                         var followPage = await _pagesFollowersRepository.AddAsync(
                             ConvertFromDto.ConvertFromFollowPageUserDto_Add(followPageUserDto));
+                        followPage.User = _userManagerReturn.SetUserToReturn(user);
+                        followPage.Page = page;
                         return StatusCodeReturn<object>
                             ._201_Created("Followed successfully", followPage);
                     }
@@ -81,6 +85,8 @@ namespace SocialMedia.Api.Service.PagesFollowersService
                 pageId, user.Id);
                 if (pageFollower != null)
                 {
+                    pageFollower.User = _userManagerReturn.SetUserToReturn(user);
+                    pageFollower.Page = page;
                     return StatusCodeReturn<object>
                         ._200_Success("Page follower found successfully", pageFollower);
                 }
@@ -126,6 +132,8 @@ namespace SocialMedia.Api.Service.PagesFollowersService
                 if (pageFollower != null)
                 {
                     await _pagesFollowersRepository.UnfollowPageByPageIdAsync(unFollowPageDto.PageId, user.Id);
+                    pageFollower.User = _userManagerReturn.SetUserToReturn(user);
+                    pageFollower.Page = page;
                     return StatusCodeReturn<object>
                         ._200_Success("Unfollowed successfully", pageFollower);
                 }

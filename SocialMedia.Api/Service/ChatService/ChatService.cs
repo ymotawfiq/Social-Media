@@ -28,8 +28,11 @@ namespace SocialMedia.Api.Service.ChatService
             {
                 if (policy.ResponseObject.PolicyType != "PRIVATE")
                 {
-                    var newChat = await _chatRepository.AddAsync(ConvertFromDto
-                    .ConvertFromNonPrivateChatDto_Add(addChatDto, policy.ResponseObject, user));
+                    var chat = ConvertFromDto
+                    .ConvertFromNonPrivateChatDto_Add(addChatDto, policy.ResponseObject, user);
+                    chat.Policy = policy.ResponseObject;
+                    chat.User = user;
+                    var newChat = await _chatRepository.AddAsync(chat);
                     return StatusCodeReturn<Chat>
                         ._201_Created("Chat created successfully", newChat);
                 }
@@ -48,8 +51,11 @@ namespace SocialMedia.Api.Service.ChatService
             {
                 if (policy.ResponseObject.PolicyType == "PRIVATE")
                 {
-                    var newChat = await _chatRepository.AddAsync(ConvertFromDto
-                    .ConvertFromPrivateChatDto_Add(addChatDto, policy.ResponseObject));
+                    var chat = ConvertFromDto
+                        .ConvertFromNonPrivateChatDto_Add(addChatDto, policy.ResponseObject, user);
+                    chat.Policy = policy.ResponseObject;
+                    chat.User = user;
+                    var newChat = await _chatRepository.AddAsync(chat);
                     return StatusCodeReturn<Chat>
                         ._201_Created("Chat created successfully", newChat);
                 }
@@ -63,7 +69,7 @@ namespace SocialMedia.Api.Service.ChatService
         public async Task<ApiResponse<Chat>> GetChatAsync(string chatId)
         {
             return StatusCodeReturn<Chat>
-                ._200_Success("", await _chatRepository.GetByIdAsync(chatId));
+                ._200_Success("Chat found successfully", await _chatRepository.GetByIdAsync(chatId));
         }
     }
 }

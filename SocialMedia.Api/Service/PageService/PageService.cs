@@ -12,14 +12,17 @@ namespace SocialMedia.Api.Service.PageService
     public class PageService : IPageService
     {
         private readonly IPageRepository _pageRepository;
-        public PageService(IPageRepository _pageRepository)
+        private readonly UserManagerReturn _userManagerReturn;
+        public PageService(IPageRepository _pageRepository, UserManagerReturn _userManagerReturn)
         {
             this._pageRepository = _pageRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<Page>> AddPageAsync(AddPageDto addPageDto, SiteUser user)
         {
             var newPage = await _pageRepository.AddAsync(ConvertFromDto.ConvertFromPageDto_Add(
                 addPageDto, user));
+            newPage.Creator = _userManagerReturn.SetUserToReturn(user);
             return StatusCodeReturn<Page>
                 ._201_Created("Page created successfully", newPage);
         }
@@ -32,6 +35,7 @@ namespace SocialMedia.Api.Service.PageService
                 if(page.CreatorId == user.Id)
                 {
                     await _pageRepository.DeleteByIdAsync(pageId);
+                    page.Creator = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<Page>
                         ._200_Success("Page deleted successfully", page);
                 }
@@ -47,6 +51,8 @@ namespace SocialMedia.Api.Service.PageService
             var page = await _pageRepository.GetByIdAsync(pageId);
             if (page != null)
             {
+                page.Creator = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(page.CreatorId));
                 return StatusCodeReturn<Page>
                     ._200_Success("Page found successfully", page);
             }
@@ -75,6 +81,7 @@ namespace SocialMedia.Api.Service.PageService
                 {
                     var updatedPage = await _pageRepository.UpdateAsync(ConvertFromDto
                         .ConvertFromPageDto_Update(updatePageDto));
+                    updatedPage.Creator = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<Page>
                         ._200_Success("Page updated successfully", updatedPage);
                 }

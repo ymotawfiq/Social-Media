@@ -17,12 +17,14 @@ namespace SocialMedia.Api.Service.FriendsService
         private readonly IFriendsRepository _friendsRepository;
         private readonly IBlockRepository _blockRepository;
         private readonly IPolicyRepository _policyRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public FriendService(IFriendsRepository _friendsRepository, IBlockRepository _blockRepository,
-            IPolicyRepository _policyRepository)
+            IPolicyRepository _policyRepository, UserManagerReturn _userManagerReturn)
         {
             this._friendsRepository = _friendsRepository;
             this._blockRepository = _blockRepository;
             this._policyRepository = _policyRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<Friend>> AddFriendAsync(AddFriendDto addFriendDto)
         {
@@ -36,6 +38,8 @@ namespace SocialMedia.Api.Service.FriendsService
                 {
                     var newFriend = await _friendsRepository.AddAsync(
                     ConvertFromDto.ConvertFromFriendtDto_Add(addFriendDto));
+                    newFriend.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                        .GetUserByUserNameOrEmailOrIdAsync(addFriendDto.FriendId));
                     return StatusCodeReturn<Friend>
                         ._201_Created("Friend added successfully to your friend list", newFriend);
                 }
@@ -54,6 +58,8 @@ namespace SocialMedia.Api.Service.FriendsService
                 if (isYourFriend != null)
                 {
                     await _friendsRepository.DeleteFriendAsync(userId, friendId);
+                    isYourFriend.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                        .GetUserByUserNameOrEmailOrIdAsync(friendId));
                     return StatusCodeReturn<Friend>
                         ._200_Success("Friend deleted successfully", isYourFriend);
                 }
@@ -72,6 +78,7 @@ namespace SocialMedia.Api.Service.FriendsService
                 if(friendship.UserId == user.Id || friendship.FriendId == user.Id)
                 {
                     var deletedFriendShip = await _friendsRepository.DeleteByIdAsync(id);
+                    deletedFriendShip.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<Friend>
                         ._200_Success("Unfriend successfully", deletedFriendShip);
                 }

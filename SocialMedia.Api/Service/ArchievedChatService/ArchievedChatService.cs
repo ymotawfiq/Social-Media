@@ -15,14 +15,16 @@ namespace SocialMedia.Api.Service.ArchievedChatService
         private readonly IChatRepository _chatRepository;
         private readonly IPrivateChatRepository _privateChatRepository;
         private readonly IChatMemberRepository _chatMemberRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public ArchievedChatService(IArchievedChatRepository _archievedChatRepository,
             IChatRepository _chatRepository, IPrivateChatRepository _privateChatRepository,
-            IChatMemberRepository _chatMemberRepository)
+            IChatMemberRepository _chatMemberRepository, UserManagerReturn _userManagerReturn)
         {
             this._chatRepository = _chatRepository;
             this._archievedChatRepository = _archievedChatRepository;
             this._chatMemberRepository = _chatMemberRepository;
             this._privateChatRepository = _privateChatRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<ArchievedChat>> ArchieveChatAsync(string chatId, SiteUser user)
         {
@@ -41,7 +43,9 @@ namespace SocialMedia.Api.Service.ArchievedChatService
                         {
                             ChatId = chatId,
                             UserId = user.Id,
-                            Id = Guid.NewGuid().ToString()
+                            Id = Guid.NewGuid().ToString(),
+                            Chat = chat,
+                            User = user
                         });
                         return StatusCodeReturn<ArchievedChat>
                             ._201_Created("Archieved successfully", archievedChat);
@@ -80,6 +84,8 @@ namespace SocialMedia.Api.Service.ArchievedChatService
             var archievedChat = await _archievedChatRepository.GetByUserAndChatIdAsync(user.Id, chatId);
             if (archievedChat != null)
             {
+                archievedChat.Chat = await _chatRepository.GetByIdAsync(chatId);
+                archievedChat.User = _userManagerReturn.SetUserToReturn(user);
                 await _archievedChatRepository.DeleteByIdAsync(archievedChat.Id);
                 return StatusCodeReturn<ArchievedChat>
                             ._200_Success("Unarchieved successfully", archievedChat);
@@ -87,5 +93,6 @@ namespace SocialMedia.Api.Service.ArchievedChatService
             return StatusCodeReturn<ArchievedChat>
                             ._404_NotFound("Archieved chat not found");
         }
+
     }
 }

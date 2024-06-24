@@ -42,6 +42,7 @@ namespace SocialMedia.Api.Service.FollowerService
                         {
                             var follow = await _followerRepository.AddAsync(
                                 ConvertFromDto.ConvertFromFollowerDto_Add(followDto, user));
+                            follow.User = _userManagerReturn.SetUserToReturn(user);
                             return StatusCodeReturn<Follower>
                                 ._200_Success("Followed successfully", follow);
                         }
@@ -75,6 +76,7 @@ namespace SocialMedia.Api.Service.FollowerService
                         FollowerId = follower.Id,
                         UserId = user.Id
                     });
+                    follow.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<Follower>
                         ._200_Success("Followed successfully", follow);
                 }
@@ -147,6 +149,7 @@ namespace SocialMedia.Api.Service.FollowerService
                     if (isFollowed != null)
                     {
                         var unfollow = await _followerRepository.UpdateAsync(followedPerson.Id, follower.Id);
+                        unfollow.User = _userManagerReturn.SetUserToReturn(follower);
                         return StatusCodeReturn<Follower>
                             ._200_Success("Unfollowed successfully", unfollow);
                     }
@@ -174,6 +177,8 @@ namespace SocialMedia.Api.Service.FollowerService
                     if (follow.FollowerId == followerId)
                     {
                         var unfollow = await _followerRepository.UpdateAsync(follow);
+                        unfollow.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(followerId));
                         return StatusCodeReturn<Follower>
                             ._200_Success("Unfollowed successfully", unfollow);
                     }

@@ -22,15 +22,20 @@ namespace SocialMedia.Api.Service.GroupPostsService
         private readonly IGroupRepository _groupRepository;
         private readonly IPolicyService _policyService;
         private readonly IGroupMemberRepository _groupMemberRepository;
+        private readonly IPostRepository _postRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public GroupPostsService(IGroupPostsRepository _groupPostsRepository, IPostService _postService,
             IGroupRepository _groupRepository, IPolicyService _policyService,
-            IGroupMemberRepository _groupMemberRepository)
+            IGroupMemberRepository _groupMemberRepository, IPostRepository _postRepository,
+            UserManagerReturn _userManagerReturn)
         {
             this._groupPostsRepository = _groupPostsRepository;
             this._groupRepository = _groupRepository;
             this._postService = _postService;
             this._policyService = _policyService;
             this._groupMemberRepository = _groupMemberRepository;
+            this._postRepository = _postRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<object> AddGroupPostAsync(AddGroupPostDto addGroupPostDto, SiteUser user)
         {
@@ -89,6 +94,10 @@ namespace SocialMedia.Api.Service.GroupPostsService
                 {
                     if (policy.ResponseObject.PolicyType == "PUBLIC")
                     {
+                        groupPost.Group = await _groupRepository.GetByIdAsync(groupPost.GroupId);
+                        groupPost.Post = await _postRepository.GetPostByIdAsync(groupPost.PostId);
+                        groupPost.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(groupPost.UserId));
                         return StatusCodeReturn<GroupPost>
                             ._200_Success("Post found successfully", groupPost);
                     }
@@ -123,6 +132,10 @@ namespace SocialMedia.Api.Service.GroupPostsService
                         user.Id, groupPost.GroupId);
                         if (isMember != null)
                         {
+                            groupPost.Group = await _groupRepository.GetByIdAsync(groupPost.GroupId);
+                            groupPost.Post = await _postRepository.GetPostByIdAsync(groupPost.PostId);
+                            groupPost.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                                .GetUserByUserNameOrEmailOrIdAsync(groupPost.UserId));
                             return StatusCodeReturn<GroupPost>
                             ._200_Success("Post found successfully", groupPost);
                         }

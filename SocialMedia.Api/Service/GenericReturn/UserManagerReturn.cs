@@ -36,5 +36,22 @@ namespace SocialMedia.Api.Service.GenericReturn
             }
             return null!;
         }
+
+        public SiteUser SetUserToReturn(SiteUser user)
+        {
+            if (user != null)
+            {
+                return new SiteUser
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    DisplayName = user.DisplayName
+                };
+            }
+            return null!;
+        }
+
+
     }
 }

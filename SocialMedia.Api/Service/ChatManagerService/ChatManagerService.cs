@@ -11,6 +11,7 @@ using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.PolicyService;
 using SocialMedia.Api.Service.RolesService;
 using System;
+using System.Data;
 
 namespace SocialMedia.Api.Service.ChatManagerService
 {
@@ -42,6 +43,20 @@ namespace SocialMedia.Api.Service.ChatManagerService
 
 
         #region Private Chat
+
+        public async Task<ApiResponse<IEnumerable<PrivateChat>>> GetNotAcceptedPrivateChatRequestsAsync(
+                SiteUser user)
+        {
+            var chatRequests = await _privateChatRepository.GetSentChatRequestsAsync(user.Id);
+            if (chatRequests.ToList().Count == 0)
+            {
+                return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("No private chat join requests sent", chatRequests);
+            }
+            return StatusCodeReturn<IEnumerable<PrivateChat>>
+                    ._200_Success("Private chat join requests found successfully", chatRequests);
+        }
+
         public async Task<ApiResponse<PrivateChat>> UnSendPrivateChatRequestAsync(string privateChatId, 
             SiteUser user)
         {
@@ -54,6 +69,9 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     {
                         await _privateChatRepository.DeleteByIdAsync(privateChatId);
                         await _chatRepository.DeleteByIdAsync(privateChat.ChatId);
+                        privateChat.User1 = _userManagerReturn.SetUserToReturn(user);
+                        privateChat.User2 = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(privateChat.User2Id));
                         return StatusCodeReturn<PrivateChat>
                             ._200_Success("Private chat request unsent successfully", privateChat);
                     }
@@ -80,6 +98,8 @@ namespace SocialMedia.Api.Service.ChatManagerService
 
                 var privateChat = await _privateChatRepository.AddAsync(AddPrivateChat(
                     chat.Id, user1.Id, user2.Id));
+                privateChat.User1 = _userManagerReturn.SetUserToReturn(user1);
+                privateChat.User2 = _userManagerReturn.SetUserToReturn(user2);
                 return StatusCodeReturn<PrivateChat>
                     ._201_Created("Chat request sent successfully", privateChat);
             }
@@ -98,6 +118,9 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     {
                         privateChat.IsAccepted = true;
                         await _privateChatRepository.UpdateAsync(privateChat);
+                        privateChat.User2 = _userManagerReturn.SetUserToReturn(user);
+                        privateChat.User1 = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(privateChat.User1Id));
                         return StatusCodeReturn<PrivateChat>
                             ._200_Success("Chat request accepted successfully", privateChat);
                     }
@@ -205,6 +228,10 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     privateChat.IsBlockedByUser2 = true;
                 }
                 privateChat.IsBlocked = true;
+                privateChat.User1 = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(privateChat.User1Id));
+                privateChat.User2 = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(privateChat.User2Id));
                 await _privateChatRepository.UpdateAsync(privateChat);
                 return StatusCodeReturn<PrivateChat>
                     ._200_Success("Blocked successfully", privateChat);
@@ -238,6 +265,10 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     privateChat.IsBlocked = false;
                 }
                 await _privateChatRepository.UpdateAsync(privateChat);
+                privateChat.User1 = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(privateChat.User1Id));
+                privateChat.User2 = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(privateChat.User2Id));
                 return StatusCodeReturn<PrivateChat>
                     ._200_Success("Unblocked successfully", privateChat);
             }
@@ -265,6 +296,8 @@ namespace SocialMedia.Api.Service.ChatManagerService
                 {
                     if (policy.ResponseObject.Id != chat.PolicyId)
                     {
+                        chat.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(chat.CreatorId));
                         return StatusCodeReturn<Chat>
                             ._200_Success("Chat found successfully", chat);
                     }
@@ -285,6 +318,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
             {
                 if(chat.CreatorId == user.Id)
                 {
+                    chat.User = _userManagerReturn.SetUserToReturn(user);
                     await _chatRepository.DeleteByIdAsync(chatId);
                     return StatusCodeReturn<Chat>
                             ._200_Success("Chat deleted successfully", chat);
@@ -294,19 +328,6 @@ namespace SocialMedia.Api.Service.ChatManagerService
             }
             return StatusCodeReturn<Chat>
                     ._404_NotFound("Chat not found");
-        }
-
-        public async Task<ApiResponse<IEnumerable<PrivateChat>>> GetNotAcceptedPrivateChatRequestsAsync(
-            SiteUser user)
-        {
-            var chatRequests = await _privateChatRepository.GetSentChatRequestsAsync(user.Id);
-            if (chatRequests.ToList().Count == 0)
-            {
-                return StatusCodeReturn<IEnumerable<PrivateChat>>
-                    ._200_Success("No private chat join requests sent", chatRequests);
-            }
-            return StatusCodeReturn<IEnumerable<PrivateChat>>
-                    ._200_Success("Private chat join requests found successfully", chatRequests);
         }
 
         public async Task<ApiResponse<IEnumerable<ChatMember>>> GetNotAcceptedGroupChatRequestsAsync(
@@ -346,6 +367,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
                 {
                     chat.Name = updateChatDto.Name;
                     chat.Description = updateChatDto.Description;
+                    chat.User = _userManagerReturn.SetUserToReturn(user);
                     var updatedChat = await _chatRepository.UpdateAsync(chat);
                     return StatusCodeReturn<Chat>
                         ._200_Success("Chat updated successfully", updatedChat);
@@ -368,6 +390,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     if (chatMember.MemberId == user.Id)
                     {
                         await _chatMemberRepository.DeleteByIdAsync(chatMemberId);
+                        chatMember.User = _userManagerReturn.SetUserToReturn(user);
                         return StatusCodeReturn<ChatMember>
                             ._200_Success("Group chat request unsent successfully", chatMember);
                     }
@@ -396,6 +419,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
                         ChatMember(chat.Id, user.Id, null!, true));
                     await _chatMemberRoleRepository.AddAsync(ChatMemberRole(
                         newChatMember.Id, role.ResponseObject.Id));
+                    chat.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<Chat>
                     ._201_Created("Group chat created successfully", chat);
                 }
@@ -449,6 +473,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
             {
                 var chatJoinRequest = await _chatMemberRepository.AddAsync(ChatMember(
                     chatId, user.Id, null!, false));
+                chatJoinRequest.User = _userManagerReturn.SetUserToReturn(user);
                 return StatusCodeReturn<ChatMember>
                     ._201_Created("Chat join request sent successfully wait untill one of admins accept",
                         chatJoinRequest);
@@ -488,6 +513,8 @@ namespace SocialMedia.Api.Service.ChatManagerService
                         var newMember = await _chatMemberRepository.UpdateAsync(chatMember);
                         await _chatMemberRoleRepository.AddAsync(ChatMemberRole(
                             chatMemberId, userRole.ResponseObject.Id));
+                        newMember.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(chatMember.MemberId));
                         return StatusCodeReturn<ChatMember>
                             ._200_Success("Request join accepted successfully", newMember);
                     }
@@ -594,11 +621,11 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     {
                         if (isAbleToAdd.ResponseObject != null)
                         {
-                            return await AcceptChatJoinRequestAsync(isAbleToAdd.ResponseObject.Id,
-                                user);
+                            return await AcceptChatJoinRequestAsync(isAbleToAdd.ResponseObject.Id, user);
                         }
                         var newMember = await _chatMemberRepository.AddAsync(ChatMember(
                             chat.Id, member.Id, null!, true));
+                        newMember.User = _userManagerReturn.SetUserToReturn(member);
                         return StatusCodeReturn<ChatMember>
                                 ._201_Created("Member added successfully", newMember);
                     }
@@ -621,6 +648,8 @@ namespace SocialMedia.Api.Service.ChatManagerService
                 if (isAdmin.IsSuccess)
                 {
                     await _chatMemberRepository.DeleteByIdAsync(chatMemberId);
+                    chatMember.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(chatMember.MemberId));
                     return StatusCodeReturn<ChatMember>
                         ._200_Success("Chat member deleted successfully", chatMember);
                 }
@@ -631,8 +660,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
                             ._404_NotFound("Chat member not found");
         }
 
-        public async Task<ApiResponse<ChatMember>> GetChatMemberAsync(string chatMemberId,
-                SiteUser user)
+        public async Task<ApiResponse<ChatMember>> GetChatMemberAsync(string chatMemberId, SiteUser user)
         {
             var chatMember = await _chatMemberRepository.GetByIdAsync(chatMemberId);
             if (chatMember != null)
@@ -641,6 +669,8 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     chatMember.ChatId, user.Id);
                 if (isChatMember != null)
                 {
+                    chatMember.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                            .GetUserByUserNameOrEmailOrIdAsync(chatMember.MemberId));
                     return StatusCodeReturn<ChatMember>
                         ._200_Success("Chat member found successfully", chatMember);
                 }
@@ -698,6 +728,8 @@ namespace SocialMedia.Api.Service.ChatManagerService
                 {
                     var memberRole = await _chatMemberRoleRepository.AddAsync(
                         ChatMemberRole(chatMemberId, role.ResponseObject!.Id));
+                    memberRole.ChatMember = chatMember;
+                    memberRole.Role = role.ResponseObject;
                     return StatusCodeReturn<ChatMemberRole>
                         ._201_Created("Role assigned to user successfully", memberRole);
                 }
@@ -782,6 +814,9 @@ namespace SocialMedia.Api.Service.ChatManagerService
                     if (isAbleToDeleteRole.IsSuccess && isAbleToDeleteRole.ResponseObject != null)
                     {
                         await _chatMemberRoleRepository.DeleteByIdAsync(isAbleToDeleteRole.ResponseObject.Id);
+                        isAbleToDeleteRole.ResponseObject.ChatMember = chatMember;
+                        isAbleToDeleteRole.ResponseObject.Role = (await _rolesService
+                            .GetRoleByIdOrNameAsync(chatMemberRoleDto.RoleIdOrName)).ResponseObject;
                         return StatusCodeReturn<ChatMemberRole>
                             ._200_Success("Role deleted successfully from user", 
                                     isAbleToDeleteRole.ResponseObject);
@@ -971,6 +1006,7 @@ namespace SocialMedia.Api.Service.ChatManagerService
         }
 
         #endregion
+
 
 
     }

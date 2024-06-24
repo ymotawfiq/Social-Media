@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Data.Extensions;
 using SocialMedia.Api.Data.Models;
@@ -23,10 +24,11 @@ namespace SocialMedia.Api.Service.PostCommentService
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IPolicyRepository _policyRepository;
         private readonly IFriendService _friendService;
+        private readonly UserManagerReturn _userManagerReturn;
         public PostCommentService(IPostCommentsRepository _postCommentsRepository,
             IPostRepository _postRepository, IWebHostEnvironment _webHostEnvironment, 
             IBlockRepository _blockRepository, IPolicyRepository _policyRepository, 
-            IFriendService _friendService)
+            IFriendService _friendService, UserManagerReturn _userManagerReturn)
         {
             this._postCommentsRepository = _postCommentsRepository;
             this._postRepository = _postRepository;
@@ -34,6 +36,7 @@ namespace SocialMedia.Api.Service.PostCommentService
             this._webHostEnvironment = _webHostEnvironment;
             this._policyRepository = _policyRepository;
             this._friendService = _friendService;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<PostComment>> AddPostCommentAsync(AddPostCommentDto addPostCommentDto,
             SiteUser user)
@@ -54,7 +57,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                             var newPostComment = await _postCommentsRepository.AddAsync(
                             ConvertFromDto.ConvertFromPostCommentDto_Add(addPostCommentDto, user,
                             SaveCommentImages(addPostCommentDto.CommentImage!)));
-                            newPostComment.User = null;
+                            newPostComment.User = _userManagerReturn.SetUserToReturn(user);
+                            newPostComment.Post = post;
                             return StatusCodeReturn<PostComment>
                                 ._201_Created("Post comment added successfully", newPostComment);
                         }
@@ -97,6 +101,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                                     PostId = replay.PostId,
                                     UserId = user.Id
                                 });
+                            commentReplay.User = _userManagerReturn.SetUserToReturn(user);
+                            commentReplay.Post = post;
                             return StatusCodeReturn<PostComment>
                                 ._201_Created("Replayed successfully", commentReplay);
                         }
@@ -129,7 +135,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                         {
                             DeleteCommentImage(postComment.CommentImage!);
                             await _postCommentsRepository.DeleteByIdAsync(postComment.Id);
-                            postComment.User = null;
+                            postComment.User = _userManagerReturn.SetUserToReturn(user);
+                            postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                             return StatusCodeReturn<PostComment>
                                 ._200_Success("Post comment deleted successfully", postComment);
                         }
@@ -164,7 +171,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                         {
                             DeleteCommentImage(postComment.CommentImage!);
                             await _postCommentsRepository.DeleteByIdAsync(postComment.Id);
-                            postComment.User = null;
+                            postComment.User = _userManagerReturn.SetUserToReturn(user);
+                            postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                             return StatusCodeReturn<PostComment>
                                 ._200_Success("Post comment deleted successfully", postComment);
                         }
@@ -199,7 +207,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                         {
                             postComment = await _postCommentsRepository.DeletePostCommentImageAsync(
                                 postId, user.Id);
-                            postComment.User = null;
+                            postComment.User = _userManagerReturn.SetUserToReturn(user);
+                            postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                             return StatusCodeReturn<PostComment>
                                 ._200_Success("Post comment image deleted successfully", postComment);
                         }
@@ -223,7 +232,9 @@ namespace SocialMedia.Api.Service.PostCommentService
             {
                 DeleteCommentImage(postComment.CommentImage!);
                 await _postCommentsRepository.DeletePostCommentImageAsync(postCommentId);
-                postComment.User = null;
+                postComment.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(postComment.UserId));
+                postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                 return StatusCodeReturn<PostComment>
                     ._200_Success("Post comment image deleted successfully", postComment);
             }
@@ -237,6 +248,9 @@ namespace SocialMedia.Api.Service.PostCommentService
             postComment.User = null;
             if (postComment != null)
             {
+                postComment.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(postComment.UserId));
+                postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                 return StatusCodeReturn<PostComment>
                     ._200_Success("Post comment found successfully", postComment);
             }
@@ -257,7 +271,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                         user.Id, userPost.UserId);
                     if (isBlocked == null)
                     {
-                        postComment.User = null;
+                        postComment.User = _userManagerReturn.SetUserToReturn(user);
+                        postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                         return StatusCodeReturn<PostComment>
                             ._200_Success("Post comment found successfully", postComment);
                     }
@@ -288,7 +303,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                             user.Id, userPost.UserId);
                         if (isBlocked == null)
                         {
-                            postComment.User = null;
+                            postComment.User = _userManagerReturn.SetUserToReturn(user);
+                            postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                             return StatusCodeReturn<PostComment>
                                 ._200_Success("Post comment found successfully", postComment);
                         }
@@ -406,7 +422,8 @@ namespace SocialMedia.Api.Service.PostCommentService
                                 }
                                 postComment = await _postCommentsRepository.UpdateAsync(
                                     postComment);
-                                postComment.User = null;
+                                postComment.User = _userManagerReturn.SetUserToReturn(user);
+                                postComment.Post = await _postRepository.GetPostByIdAsync(postComment.PostId);
                                 return StatusCodeReturn<PostComment>
                                     ._200_Success("Post comment updated successfully", postComment);
                             }

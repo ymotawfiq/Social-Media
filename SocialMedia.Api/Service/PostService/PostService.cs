@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Data.Extensions;
 using SocialMedia.Api.Data.Models;
@@ -33,14 +34,14 @@ namespace SocialMedia.Api.Service.PostService
         private readonly IGroupRepository _groupRepository;
         private readonly IBlockService _blockService;
         private readonly IGroupMemberRepository _groupMemberRepository;
-        
+        private readonly UserManagerReturn _userManagerReturn;
 
         public PostService(
             IPostRepository _postRepository, IGroupPostsRepository _groupPostsRepository,
             IPolicyRepository _policyRepository, IFriendService _friendService, IPolicyService _policyService
             , IGroupRepository _groupRepository, IGroupMemberRepository _groupMemberRepository,
             IPostViewRepository _postViewRepository, IWebHostEnvironment _webHostEnvironment,
-            IBlockService _blockService)
+            IBlockService _blockService, UserManagerReturn _userManagerReturn)
         {
             this._postRepository = _postRepository;
             this._policyRepository = _policyRepository;
@@ -52,6 +53,7 @@ namespace SocialMedia.Api.Service.PostService
             this._blockService = _blockService;
             this._groupPostsRepository = _groupPostsRepository;
             this._groupMemberRepository = _groupMemberRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<PostResponseObject>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
@@ -80,6 +82,7 @@ namespace SocialMedia.Api.Service.PostService
                 }
             }
             var newPostDto = await _postRepository.AddPostAsync(post, postImages);
+            newPostDto.Post.User = _userManagerReturn.SetUserToReturn(user);
             return StatusCodeReturn<PostResponseObject>
                     ._201_Created("Post created successfully", newPostDto);
         }
@@ -259,6 +262,7 @@ namespace SocialMedia.Api.Service.PostService
                     var updatedPost = await _postRepository.UpdatePostAsync(
                             ConvertFromPostDto(post), postImages);
                     //SetNull(updatedPost);
+                    updatedPost.Post.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<PostResponseObject>
                             ._200_Success("Post updated successfully", updatedPost);
                 }
@@ -458,7 +462,8 @@ namespace SocialMedia.Api.Service.PostService
             };
         }
 
-        private async Task<ApiResponse<PostResponseObject>> CheckGroupPostAndGetPostAsync(string postId, SiteUser user)
+        private async Task<ApiResponse<PostResponseObject>> CheckGroupPostAndGetPostAsync(string postId,
+            SiteUser user)
         {
             var post = await _postRepository.GetPostWithImagesByPostIdAsync(postId);
             var groupPost = await IsGroupPostAsync(postId);
@@ -501,6 +506,8 @@ namespace SocialMedia.Api.Service.PostService
                 var postView = await _postViewRepository.GetPostViewByPostIdAsync(post.Post.Id);
                 postView.ViewNumber = ++postView.ViewNumber;
                 await _postViewRepository.UpdateAsync(postView);
+                post.Post.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                    .GetUserByUserNameOrEmailOrIdAsync(post.Post.UserId));
                 return StatusCodeReturn<PostResponseObject>
                     ._200_Success("Post found successfully", post);
             }

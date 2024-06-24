@@ -1,4 +1,5 @@
-﻿using SocialMedia.Api.Data.DTOs;
+﻿using Microsoft.CodeAnalysis.Elfie.Serialization;
+using SocialMedia.Api.Data.DTOs;
 using SocialMedia.Api.Data.Extensions;
 using SocialMedia.Api.Data.Models;
 using SocialMedia.Api.Data.Models.ApiResponseModel;
@@ -23,10 +24,12 @@ namespace SocialMedia.Api.Service.MessageReactService
         private readonly IChatRepository _chatRepository;
         private readonly IPolicyRepository _policyRepository;
         private readonly IReactRepository _reactRepository;
+        private readonly UserManagerReturn _userManagerReturn;
         public MessageReactService(IMessageReactRepository _messageReactRepository,
             IChatMessageRepository _chatMessageRepository, IPrivateChatRepository _privateChatRepository,
             IChatMemberRepository _chatMemberRepository, IChatRepository _chatRepository,
-            IPolicyRepository _policyRepository, IReactRepository _reactRepository)
+            IPolicyRepository _policyRepository, IReactRepository _reactRepository,
+            UserManagerReturn _userManagerReturn)
         {
             this._chatMessageRepository = _chatMessageRepository;
             this._messageReactRepository = _messageReactRepository;
@@ -35,6 +38,7 @@ namespace SocialMedia.Api.Service.MessageReactService
             this._chatRepository = _chatRepository;
             this._policyRepository = _policyRepository;
             this._reactRepository = _reactRepository;
+            this._userManagerReturn = _userManagerReturn;
         }
         public async Task<ApiResponse<IEnumerable<MessageReact>>> GetReactsByMessageIdAsync(string messageId,
             SiteUser user)
@@ -75,6 +79,8 @@ namespace SocialMedia.Api.Service.MessageReactService
                         {
                             var messageReact = await _messageReactRepository.AddAsync(
                                 ConvertFromDto.ConvertAddMessageReactDto_Add(addMessageReactDto, user));
+                            messageReact.React = react;
+                            messageReact.User = _userManagerReturn.SetUserToReturn(user);
                             return StatusCodeReturn<MessageReact>
                                 ._201_Created("React to message successfully", messageReact);
                         }
@@ -103,6 +109,8 @@ namespace SocialMedia.Api.Service.MessageReactService
                     if ((await IsAbleToModifyPrivateMessageAsync<MessageReact>(chat, user)).IsSuccess)
                     {
                         await _messageReactRepository.DeleteByIdAsync(messageReact.Id);
+                        messageReact.React = await _reactRepository.GetByIdAsync(messageReact.ReactId);
+                        messageReact.User = _userManagerReturn.SetUserToReturn(user);
                         return StatusCodeReturn<MessageReact>
                             ._200_Success("Un reacted to message successfully", messageReact);
                     }

@@ -46,6 +46,7 @@ namespace SocialMedia.Api.Service.BlockService
                     await DeleteFromFriendListAsync(addBlockDto, user);
                     var newBlockedUser = await _blockRepository.AddAsync(
                             ConvertFromDto.ConvertFromBlockDto_Add(addBlockDto, user));
+                    newBlockedUser.User = _userManagerReturn.SetUserToReturn(blockedUser);
                     return StatusCodeReturn<Block>
                     ._200_Success("User blocked successfully", newBlockedUser);
                 }
@@ -77,6 +78,8 @@ namespace SocialMedia.Api.Service.BlockService
                 return StatusCodeReturn<Block>
                     ._404_NotFound("User is not in your block list");
             }
+            block.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                .GetUserByUserNameOrEmailOrIdAsync(blockedUserId));
             return StatusCodeReturn<Block>
                 ._200_Success("Blocked user found successfully", block);
         }
@@ -118,6 +121,7 @@ namespace SocialMedia.Api.Service.BlockService
                 {
                     var unblockedUser = await _blockRepository.UpdateAsync(
                             ConvertFromDto.ConvertFromBlockDto_Update(updateBlockDto, user));
+                    unblockedUser.User = _userManagerReturn.SetUserToReturn(blockedUser);
                     return StatusCodeReturn<Block>
                             ._200_Success("Block removed successfully", unblockedUser);
                 }
@@ -136,6 +140,8 @@ namespace SocialMedia.Api.Service.BlockService
                 if(block.UserId == user.Id)
                 {
                     var unblock = await _blockRepository.UpdateAsync(block);
+                    unblock.User = _userManagerReturn.SetUserToReturn(await _userManagerReturn
+                        .GetUserByUserNameOrEmailOrIdAsync(block.BlockedUserId));
                     return StatusCodeReturn<Block>
                     ._200_Success("Unblocked successfully", unblock);
                 }

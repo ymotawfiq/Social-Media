@@ -44,6 +44,7 @@ namespace SocialMedia.Api.Service.FriendRequestService
                     .GetUserByUserNameOrEmailOrIdAsync(addFriendRequestDto.PersonIdOrUserNameOrEmail)).Id;
                 var friendRequest = await _friendRequestRepository.AddAsync(
                     ConvertFromDto.ConvertFromFriendRequestDto_Add(addFriendRequestDto, user));
+                friendRequest.User = _userManagerReturn.SetUserToReturn(user);
                 return StatusCodeReturn<FriendRequest>
                     ._201_Created("Friend request sent ssuccessfully", friendRequest);
             }
@@ -60,6 +61,7 @@ namespace SocialMedia.Api.Service.FriendRequestService
                 || friendRequest.UserWhoReceivedId == user.Id)
                 {
                     await _friendRequestRepository.DeleteByIdAsync(friendRequestId);
+                    friendRequest.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<FriendRequest>
                             ._200_Success("Friend request deleted successfully");
                 }
@@ -71,13 +73,15 @@ namespace SocialMedia.Api.Service.FriendRequestService
                 ._404_NotFound("Friend request not found");
         }
 
-        public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(SiteUser sender, SiteUser receiver)
+        public async Task<ApiResponse<FriendRequest>> DeleteFriendRequestAsync(SiteUser sender, 
+            SiteUser receiver)
         {
             var friendRequest = await _friendRequestRepository.GetByUserAndPersonIdAsync(
                 sender.Id, receiver.Id);
             if (friendRequest != null)
             {
                 await _friendRequestRepository.DeleteByIdAsync(friendRequest.Id);
+                friendRequest.User = _userManagerReturn.SetUserToReturn(sender);
                 return StatusCodeReturn<FriendRequest>
                         ._200_Success("Friend request deleted successfully");
             }
@@ -107,6 +111,7 @@ namespace SocialMedia.Api.Service.FriendRequestService
                 if (friendRequest.UserWhoSendId == user.Id
                 || friendRequest.UserWhoReceivedId == user.Id)
                 {
+                    friendRequest.User = _userManagerReturn.SetUserToReturn(user);
                     return StatusCodeReturn<FriendRequest>
                             ._200_Success("Friend request found successfully");
                 }
@@ -163,6 +168,7 @@ namespace SocialMedia.Api.Service.FriendRequestService
                                 FriendId = friendRequest.UserWhoReceivedId,
                                 UserId = friendRequest.UserWhoSendId
                             });
+                        friendRequest.User = _userManagerReturn.SetUserToReturn(user);
                         return StatusCodeReturn<FriendRequest>
                             ._200_Success("Friend request accepted successfully");
                     }

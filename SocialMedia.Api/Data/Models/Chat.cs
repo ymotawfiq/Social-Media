@@ -16,5 +16,6 @@ namespace SocialMedia.Api.Data.Models
         public List<PrivateChat>? PrivateChats { get; set; }
         public List<ChatMessage>? ChatMessages { get; set; }
         public List<ArchievedChat>? ArchievedChats { get; set; }
+
     }
 }

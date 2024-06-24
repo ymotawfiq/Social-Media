@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.Models;
+using SocialMedia.Api.Data.Models.Authentication;
 
 namespace SocialMedia.Api.Repository.ArchievedChatRepository
 {
@@ -20,7 +21,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
             {
                 ChatId = t.ChatId,
                 Id = t.Id,
-                UserId = t.UserId
+                UserId = t.UserId,
             };
         }
 
@@ -33,7 +34,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
             {
                 ChatId = archievedChat.ChatId,
                 Id = archievedChat.Id,
-                UserId = archievedChat.UserId
+                UserId = archievedChat.UserId,
             };
         }
 
@@ -43,7 +44,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
             {
                 ChatId = e.ChatId,
                 Id = e.Id,
-                UserId = e.UserId
+                UserId = e.UserId,
             }).ToListAsync();
         }
 
@@ -56,7 +57,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
                 {
                     UserId = a.UserId,
                     ChatId = a.ChatId,
-                    Id = a.Id
+                    Id = a.Id,
                 });
         }
 
@@ -66,7 +67,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
             {
                 ChatId = e.ChatId,
                 Id = e.Id,
-                UserId = e.UserId
+                UserId = e.UserId,
             }).Where(e=>e.Id == id).FirstOrDefaultAsync())!;
         }
 
@@ -76,7 +77,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
             {
                 ChatId = e.ChatId,
                 Id = e.Id,
-                UserId = e.UserId
+                UserId = e.UserId,
             }).Where(e => e.ChatId == chatId).Where(e=>e.UserId == userId).FirstOrDefaultAsync())!;
         }
 
@@ -89,5 +90,7 @@ namespace SocialMedia.Api.Repository.ArchievedChatRepository
         {
             return await DeleteByIdAsync(t.Id);
         }
+
+
     }
 }

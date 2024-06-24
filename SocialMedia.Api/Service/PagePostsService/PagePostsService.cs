@@ -6,6 +6,7 @@ using SocialMedia.Api.Data.Models.ApiResponseModel;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.PagePostsRepository;
 using SocialMedia.Api.Repository.PageRepository;
+using SocialMedia.Api.Repository.PostRepository;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.PostService;
 
@@ -16,12 +17,14 @@ namespace SocialMedia.Api.Service.PagePostsService
         private readonly IPagePostsRepository _pagePostsRepository;
         private readonly IPostService _postService;
         private readonly IPageRepository _pageRepository;
+        private readonly IPostRepository _postRepository;
         public PagePostsService(IPagePostsRepository _pagePostsRepository, IPostService _postService,
-            IPageRepository _pageRepository)
+            IPageRepository _pageRepository, IPostRepository _postRepository)
         {
             this._pagePostsRepository = _pagePostsRepository;
             this._postService = _postService;
             this._pageRepository = _pageRepository;
+            this._postRepository = _postRepository;
         }
         public async Task<ApiResponse<object>> AddPagePostAsync(
             AddPagePostDto addPagePostDto, SiteUser user)
@@ -44,6 +47,8 @@ namespace SocialMedia.Api.Service.PagePostsService
                             PageId = addPagePostDto.PageId,
                             PostId = postDto.ResponseObject.Post.Id
                         });
+                        newPagePost.Page = page;
+                        newPagePost.Post = postDto.ResponseObject.Post;
                         return StatusCodeReturn<object>
                             ._201_Created("Page post created successfully", newPagePost);
                     }
@@ -64,8 +69,10 @@ namespace SocialMedia.Api.Service.PagePostsService
                 if (userPost != null && userPost.ResponseObject != null)
                 {
                     await _postService.DeletePostAsync(user, pagePost.PostId);
+                    pagePost.Page = await _pageRepository.GetByIdAsync(pagePost.PageId);
+                    pagePost.Post = await _postRepository.GetPostByIdAsync(pagePost.PostId);
                     return StatusCodeReturn<object>
-                        ._200_Success("Page post deleted successfully");
+                        ._200_Success("Page post deleted successfully", pagePost);
                 }
                 return StatusCodeReturn<object>
                     ._404_NotFound("User post not found");
@@ -92,6 +99,8 @@ namespace SocialMedia.Api.Service.PagePostsService
             var pagePost = await _pagePostsRepository.GetByIdAsync(pagePostId);
             if (pagePost != null)
             {
+                pagePost.Page = await _pageRepository.GetByIdAsync(pagePost.PageId);
+                pagePost.Post = await _postRepository.GetPostByIdAsync(pagePost.PostId);
                 return StatusCodeReturn<object>
                     ._200_Success("Page post found successfully", pagePost);
             }
