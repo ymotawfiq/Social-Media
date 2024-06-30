@@ -27,8 +27,8 @@ namespace SocialMedia.Api.Data
         private void SeedRoles(ModelBuilder builder)
         {
             builder.Entity<IdentityRole>().HasData(
-                new IdentityRole { ConcurrencyStamp = "1", Name = "Admin", NormalizedName = "Admin" },
-                new IdentityRole { ConcurrencyStamp = "2", Name = "User", NormalizedName = "User" }
+                new IdentityRole { ConcurrencyStamp = "1", Name = "ADMIN", NormalizedName = "ADMIN" },
+                new IdentityRole { ConcurrencyStamp = "2", Name = "USER", NormalizedName = "USER" }
                 );
         }
 

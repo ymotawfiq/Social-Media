@@ -57,20 +57,22 @@ namespace SocialMedia.Api.Service.AccountService
             this._policyRepository = _policyRepository;
             this._policyService = _policyService;
         }
+
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
+            roles = NormalizeRoles(roles);
             List<string> assignRoles = new();
             var siteRoles = await _roleManager.Roles.ToListAsync();
-            if (roles.Contains("Admin"))
+            if (roles.Contains("ADMIN"))
             {
                 foreach(var role in siteRoles)
                 {
                     if (role.Name != null)
                     {
-                        if (!await _userManager.IsInRoleAsync(user, role.Name))
+                        if (!await _userManager.IsInRoleAsync(user, role.Name.ToUpper()))
                         {
-                            await _userManager.AddToRoleAsync(user, role.Name);
-                            assignRoles.Add(role.Name);
+                            await _userManager.AddToRoleAsync(user, role.Name.ToUpper());
+                            assignRoles.Add(role.Name.ToUpper());
                         }
                     }
                 }
@@ -615,7 +617,18 @@ namespace SocialMedia.Api.Service.AccountService
                             ._404_NotFound("Policy not found");
         }
 
-
+        private List<string> NormalizeRoles(List<string> roles)
+        {
+            if (roles == null || roles.Count == 0)
+            {
+                return new List<string> { "USER" };
+            }
+            for (int i = 0; i < roles.Count; i++)
+            {
+                roles[i] = roles.ElementAt(i).ToUpper();
+            }
+            return roles;
+        }
 
 
         #endregion

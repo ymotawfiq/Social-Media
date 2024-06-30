@@ -17,8 +17,8 @@ namespace SocialMedia.Api.Data.ModelsConfigurations
             builder.Property(e => e.ChatId).IsRequired().HasColumnName("Chat Id");
             builder.Property(e => e.Message).IsRequired(false).HasColumnName("Message");
             builder.Property(e => e.Photo).IsRequired(false).HasColumnName("Photo");
-            builder.Property(e => e.SentAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
-            builder.Property(e => e.UpdatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
+            builder.Property(e => e.SentAt).IsRequired().HasDefaultValueSql("current_timestamp");
+            builder.Property(e => e.UpdatedAt).IsRequired().HasDefaultValueSql("current_timestamp");
             builder.ToTable(t => t.HasCheckConstraint("MessagePhotoCheck",
                 "(Photo is NOT null AND Message is null) OR (Photo is null AND Message is NOT null) OR " +
                 "(Message is NOT null AND Photo is NOT null)"));

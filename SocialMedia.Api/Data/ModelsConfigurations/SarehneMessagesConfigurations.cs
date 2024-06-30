@@ -19,7 +19,7 @@ namespace SocialMedia.Api.Data.ModelsConfigurations
             builder.HasOne(e => e.SarehneMessagePolicy).WithMany(e => e.SarehneMessagePolicies)
                 .HasForeignKey(e => e.MessagePolicyId);
             builder.Property(e => e.MessagePolicyId).IsRequired().HasColumnName("Message Policy Id");
-            builder.Property(e => e.SentAt).IsRequired().HasDefaultValueSql("getdate()");
+            builder.Property(e => e.SentAt).IsRequired().HasDefaultValueSql("current_timestamp");
         }
     }
 }
