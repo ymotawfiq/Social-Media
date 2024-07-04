@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+dQghthlwm+Rtp4TcdCiL2M6ZCf4zHYTHlJXoT6KUi0bi1rTanSvNziBI9Jr9e3RCyviH7qdkPFgt3nXHhLslg==",
+  "dgSpecHash": "5ONRsV5wmmTtJlY7hlWeylj7rZPYdswOZoVkbiqTNBChshj/XUde0LGwZggMjHKU5LYBVNeP0X8o0chiGbB1eQ==",
   "success": true,
-  "projectFilePath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
+  "projectFilePath": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Yousef\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Yousef\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

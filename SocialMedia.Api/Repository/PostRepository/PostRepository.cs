@@ -21,13 +21,23 @@ namespace SocialMedia.Api.Repository.PostRepository
 
         public async Task<PostResponseObject> AddPostAsync(Post post, List<PostImages> postImages)
         {
-            await _dbContext.Posts.AddAsync(post);
-            if (postImages != null && postImages.Count != 0)
+            var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
             {
-                await _dbContext.PostImages.AddRangeAsync(postImages);
+                await _dbContext.Posts.AddAsync(post);
+                if (postImages != null && postImages.Count != 0)
+                {
+                    await _dbContext.PostImages.AddRangeAsync(postImages);
+                }
+                await SaveChangesAsync();
+                await transaction.CommitAsync();
+                return CreatePostDtoObject(post, postImages!);
             }
-            await SaveChangesAsync();
-            return CreatePostDtoObject(post, postImages!);
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return null!;
+            }
         }
         public async Task<bool> DeletePostAsync(string postId)
         {

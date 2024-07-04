@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "h+lp5XVdBBJEZs9Ja/ceLx9gcMwgs2t1i6Fzs6A4Z7E=",
+  "Hash": "lEHOTq4LwxOCz/5MpMQv7G9QR40o8LcYt9lYACf6cTU=",
   "Source": "SocialMedia.Api",
   "BasePath": "_content/SocialMedia.Api",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "SocialMedia.Api\\wwwroot",
       "Source": "SocialMedia.Api",
-      "ContentRoot": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\",
+      "ContentRoot": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\",
       "BasePath": "_content/SocialMedia.Api",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\Images\\Post_Images\\84e8b1bd-db90-47dc-b436-f3d973702721_Screenshot_4.png",
+      "Identity": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\Images\\Post_Images\\84e8b1bd-db90-47dc-b436-f3d973702721_Screenshot_4.png",
       "SourceId": "SocialMedia.Api",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\",
+      "ContentRoot": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\wwwroot\\",
       "BasePath": "_content/SocialMedia.Api",
       "RelativePath": "Images/Post_Images/84e8b1bd-db90-47dc-b436-f3d973702721_Screenshot_4.png",
       "AssetKind": "All",

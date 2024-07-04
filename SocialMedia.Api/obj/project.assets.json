@@ -11765,11 +11765,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
+      "projectUniqueName": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
       "projectName": "SocialMedia.Api",
-      "projectPath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
+      "projectPath": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
       "packagesPath": "C:\\Users\\Yousef\\.nuget\\packages\\",
-      "outputPath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\obj\\",
+      "outputPath": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Yousef\\AppData\\Roaming\\NuGet\\NuGet.Config",

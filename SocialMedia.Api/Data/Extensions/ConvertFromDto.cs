@@ -112,17 +112,16 @@ namespace SocialMedia.Api.Data.Extensions
         }
 
 
-        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, Policy postsPolicy,
-            Policy reactPolicy, Policy commentPolicy, SiteUser user)
+        public static Post ConvertFromCreatePostDto_Add(AddPostDto createPostDto, SiteUser user)
         {
             return new Post
             {
                 Id = Guid.NewGuid().ToString(),
-                CommentPolicyId = commentPolicy.Id!,
-                PostPolicyId = postsPolicy.Id!,
+                CommentPolicyId = user.CommentPolicyId,
+                PostPolicyId = user.AccountPostPolicyId,
                 PostedAt = DateTime.Now,
                 Content = createPostDto.PostContent,
-                ReactPolicyId = reactPolicy.Id!,
+                ReactPolicyId = user.ReactPolicyId,
                 UpdatedAt = DateTime.Now,
                 UserId = user.Id
             };

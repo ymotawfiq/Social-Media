@@ -33,6 +33,24 @@ namespace SocialMedia.Api.Repository.PolicyRepository
             }
         }
 
+        public async Task<bool> AddRangeAsync(List<string> policies)
+        {
+            if((await _dbContext.Users.ToListAsync()).ToList().Count == 0
+                || await _dbContext.Users.ToListAsync() == null)
+            {
+                for (int i = 0; i < policies.Count; i++)
+                {
+                    await _dbContext.Policies.AddAsync(new Policy
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        PolicyType = policies[i].ToUpper()
+                    });
+                }
+                return true;
+            }
+            return false;
+        }
+
         public async Task<Policy> DeleteByIdAsync(string id)
         {
             try

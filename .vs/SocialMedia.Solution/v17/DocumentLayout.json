@@ -1,18 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\",
+  "WorkspaceRootPath": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\projects\\socialmedia.solution\\socialmedia.api\\controllers\\insertindatabasefortestingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\controllers\\insertindatabasefortestingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\projects\\socialmedia.solution\\socialmedia.api\\service\\postservice\\postservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\service\\postservice\\postservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\c sharp\\socialmedia.solution\\socialmedia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|d:\\my_source_code\\projects\\socialmedia.solution\\socialmedia.api\\data\\extensions\\convertfromdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E7070ED-BFB7-41A7-8602-E0DFA97ADE63}|SocialMedia.Api\\SocialMedia.Api.csproj|solutionrelative:socialmedia.api\\data\\extensions\\convertfromdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,39 +31,41 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ApplicationDbContext.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Data\\ApplicationDbContext.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Data\\ApplicationDbContext.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Data\\ApplicationDbContext.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Data\\ApplicationDbContext.cs",
-              "ViewState": "AQIAAAkAAAAAAAAAAAAAAB4AAABgAAAA",
+              "Title": "InsertInDatabaseForTestingController.cs",
+              "DocumentMoniker": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\InsertInDatabaseForTestingController.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Controllers\\InsertInDatabaseForTestingController.cs",
+              "ToolTip": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\Controllers\\InsertInDatabaseForTestingController.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Controllers\\InsertInDatabaseForTestingController.cs",
+              "ViewState": "AQIAAGAAAAAAAAAAAAAIwGoAAAAyAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-30T08:12:24.358Z",
+              "WhenOpened": "2024-07-02T17:18:10.671Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ConvertFromDto.cs",
+              "DocumentMoniker": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\Data\\Extensions\\ConvertFromDto.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Data\\Extensions\\ConvertFromDto.cs",
+              "ToolTip": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\Data\\Extensions\\ConvertFromDto.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Data\\Extensions\\ConvertFromDto.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAHIAAABRAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-02T17:05:51.698Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\appsettings.json",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\appsettings.json",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\appsettings.json",
-              "RelativeToolTip": "SocialMedia.Api\\appsettings.json",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAABqAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-06-30T08:00:29.284Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Program.cs",
-              "RelativeDocumentMoniker": "SocialMedia.Api\\Program.cs",
-              "ToolTip": "D:\\my_source_code\\C sharp\\SocialMedia.Solution\\SocialMedia.Api\\Program.cs",
-              "RelativeToolTip": "SocialMedia.Api\\Program.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAE0AAAAeAAAA",
+              "Title": "PostService.cs",
+              "DocumentMoniker": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\Service\\PostService\\PostService.cs",
+              "RelativeDocumentMoniker": "SocialMedia.Api\\Service\\PostService\\PostService.cs",
+              "ToolTip": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\Service\\PostService\\PostService.cs",
+              "RelativeToolTip": "SocialMedia.Api\\Service\\PostService\\PostService.cs",
+              "ViewState": "AQIAAB0AAAAAAAAAAAAQwFAAAAAPAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-30T08:00:14.768Z"
+              "WhenOpened": "2024-07-02T17:05:33.356Z",
+              "EditorCaption": ""
             }
           ]
         }

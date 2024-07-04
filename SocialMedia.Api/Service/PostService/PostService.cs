@@ -57,17 +57,7 @@ namespace SocialMedia.Api.Service.PostService
         }
         public async Task<ApiResponse<PostResponseObject>> AddPostAsync(SiteUser user, AddPostDto createPostDto)
         {
-            var postsPolicy = await _policyRepository.GetByIdAsync(user.AccountPostPolicyId!);
-            var reactPolicy = await _policyRepository.GetByIdAsync(user.ReactPolicyId!);
-            var commentPolicy = await _policyRepository.GetByIdAsync(user.CommentPolicyId!);
-            var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, postsPolicy, reactPolicy,
-                commentPolicy, user);
-            await _postViewRepository.AddAsync(new PostView
-            {
-                Id = Guid.NewGuid().ToString(),
-                PostId = post.Id,
-                ViewNumber = 0
-            });
+            var post = ConvertFromDto.ConvertFromCreatePostDto_Add(createPostDto, user);
             var postImages = new List<PostImages>();
             if (createPostDto.Images != null)
             {
@@ -83,6 +73,12 @@ namespace SocialMedia.Api.Service.PostService
             }
             var newPostDto = await _postRepository.AddPostAsync(post, postImages);
             newPostDto.Post.User = _userManagerReturn.SetUserToReturn(user);
+            await _postViewRepository.AddAsync(new PostView
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = post.Id,
+                ViewNumber = 0
+            });
             return StatusCodeReturn<PostResponseObject>
                     ._201_Created("Post created successfully", newPostDto);
         }
