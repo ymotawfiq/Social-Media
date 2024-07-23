@@ -10,18 +10,16 @@
         "projectUniqueName": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
         "projectName": "SocialMedia.Api",
         "projectPath": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\SocialMedia.Api.csproj",
-        "packagesPath": "C:\\Users\\Yousef\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\yousef\\.nuget\\packages\\",
         "outputPath": "D:\\my_source_code\\Projects\\SocialMedia.Solution\\SocialMedia.Api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Yousef\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\yousef\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -34,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -145,7 +138,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

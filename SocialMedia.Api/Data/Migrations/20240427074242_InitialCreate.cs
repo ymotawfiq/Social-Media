@@ -168,10 +168,8 @@ namespace SocialMedia.Api.Data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "24e485de-3e01-4272-acc5-5cea03f089cb", "3", "Owner", "Owner" },
-                    { "36f46ec0-836e-4790-b036-5e8c48d0bae2", "1", "Admin", "Admin" },
-                    { "65001ed3-ebb2-4e71-bad3-cb59b70babfc", "4", "moderator", "moderator" },
-                    { "ddb5d2b2-f1bd-4b8d-b309-745e29055878", "2", "User", "User" }
+                    { "36f46ec0-836e-4790-b036-5e8c48d0bae2", "1", "ADMIN", "ADMIN" },
+                    { "ddb5d2b2-f1bd-4b8d-b309-745e29055878", "2", "USER", "USER" }
                 });
 
             migrationBuilder.CreateIndex(

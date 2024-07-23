@@ -33,22 +33,23 @@ namespace SocialMedia.Api.Repository.PolicyRepository
             }
         }
 
-        public async Task<bool> AddRangeAsync(List<string> policies)
+        public async Task<int> AddRangeAsync()
         {
             if((await _dbContext.Users.ToListAsync()).ToList().Count == 0
                 || await _dbContext.Users.ToListAsync() == null)
             {
-                for (int i = 0; i < policies.Count; i++)
-                {
-                    await _dbContext.Policies.AddAsync(new Policy
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        PolicyType = policies[i].ToUpper()
-                    });
-                }
-                return true;
+                await _dbContext.Policies.AddRangeAsync(new List<Policy>{
+                    new Policy{Id=Guid.NewGuid().ToString(), PolicyType="public".ToUpper()},
+                    new Policy{Id=Guid.NewGuid().ToString(), PolicyType="private".ToUpper()},
+                    new Policy{Id=Guid.NewGuid().ToString(), PolicyType="friends only".ToUpper()},
+                    new Policy{Id=Guid.NewGuid().ToString(), PolicyType="friends of friends".ToUpper()},
+                });
+                await _dbContext.SaveChangesAsync();
+                if((await _dbContext.Policies.ToListAsync()).ToList().Count>0)
+                    return 1;
+                return -1;
             }
-            return false;
+            return 0;
         }
 
         public async Task<Policy> DeleteByIdAsync(string id)
