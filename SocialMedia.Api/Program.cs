@@ -67,6 +67,11 @@ using SocialMedia.Api.Repository.ArchievedChatRepository;
 using SocialMedia.Api.Service.ChatMessageService;
 using SocialMedia.Api.Service.MessageReactService;
 using SocialMedia.Api.Service.ArchievedChatService;
+using SocialMedia.Api.Service.AccountService.TokenService;
+using SocialMedia.Api.Service.AccountService.SettingsService;
+using SocialMedia.Api.Service.AccountService.TwoFactoAuthenticationService;
+using SocialMedia.Api.Service.AccountService.UserAccountService;
+using SocialMedia.Api.Service.AccountService.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,7 +130,7 @@ builder.Services.AddAuthentication(op =>
         ClockSkew = TimeSpan.Zero,
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!))
     };
 });
 
@@ -145,8 +150,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 // services injection
+builder.Services.AddScoped<ISendEmailService, SendEmailService>();
+builder.Services.AddScoped<IRolesService, RolesService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<ITwoFactoAuthenticationService, TwoFactoAuthenticationService>();
+builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 builder.Services.AddScoped<IReactService, ReactService>();
 builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 builder.Services.AddScoped<IFriendService, FriendService>();

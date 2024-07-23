@@ -4,7 +4,7 @@ using SocialMedia.Api.Data.Models;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.PolicyRepository;
 using SocialMedia.Api.Repository.PostRepository;
-using SocialMedia.Api.Service.AccountService;
+using SocialMedia.Api.Service.AccountService.RolesService;
 using SocialMedia.Api.Service.GenericReturn;
 
 
@@ -13,18 +13,18 @@ namespace SocialMedia.Api.Controllers
     [ApiController]
     public class InsertInDatabaseForTestingController : ControllerBase
     {
-        private readonly IAccountService _accountService;
         private readonly IPolicyRepository _policyRepository;
+        private readonly IRolesService _rolesService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly IPostRepository _postRepository;
-        public InsertInDatabaseForTestingController(IAccountService accountService,
+        public InsertInDatabaseForTestingController(IRolesService _rolesService,
             IPolicyRepository policyRepository, UserManager<SiteUser> userManager,
             IPostRepository postRepository)
         {
-            _accountService = accountService;
             _policyRepository = policyRepository;
             _userManager = userManager;
             _postRepository = postRepository;
+            this._rolesService = _rolesService;
         }
 
         [HttpPost("insert1000User")]
@@ -60,9 +60,9 @@ namespace SocialMedia.Api.Controllers
                     await _userManager.CreateAsync(user, "12345678");
                     if (i == 1)
                     {
-                        await _accountService.AssignRolesToUserAsync(new List<string> { "admin" }, user);
+                        await _rolesService.AssignRolesToUserAsync(new List<string> { "admin" }, user);
                     }
-                    await _accountService.AssignRolesToUserAsync(null!, user);
+                    await _rolesService.AssignRolesToUserAsync(null!, user);
                 }
                 return Ok(StatusCodeReturn<string>
                     ._201_Created("Users created successfully"));
@@ -110,9 +110,9 @@ namespace SocialMedia.Api.Controllers
                     await _userManager.CreateAsync(user, "12345678");
                     if (i == 1)
                     {
-                        await _accountService.AssignRolesToUserAsync(new List<string> { "admin" }, user);
+                        await _rolesService.AssignRolesToUserAsync(new List<string> { "admin" }, user);
                     }
-                    await _accountService.AssignRolesToUserAsync(null!, user);
+                    await _rolesService.AssignRolesToUserAsync(null!, user);
                 }
                 return Ok(StatusCodeReturn<string>
                     ._201_Created("Users created successfully"));
