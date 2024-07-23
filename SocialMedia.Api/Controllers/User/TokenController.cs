@@ -11,7 +11,6 @@ using SocialMedia.Api.Service.GenericReturn;
 namespace SocialMedia.Api.Controllers.User
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class TokenController : ControllerBase
     {
         private readonly ITokenService _tokenService;

@@ -21,7 +21,6 @@ using SocialMedia.Api.Service.SendEmailService;
 namespace SocialMedia.Api.Controllers.User
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class UserAccountController : ControllerBase
     {
         private readonly IUserAccountService _userAccountService;

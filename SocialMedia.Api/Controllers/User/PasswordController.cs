@@ -11,7 +11,6 @@ using SocialMedia.Api.Service.SendEmailService;
 namespace SocialMedia.Api.Controllers.User
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class PasswordController : ControllerBase
     {
 
