@@ -142,8 +142,8 @@ namespace SocialMedia.Api.Service.AccountService.TokenService
             return StatusCodeReturn<LoginResponse>
                 ._200_Success("Token created successfully", ResponseObject);
         }
-        public async Task<ApiResponse<EmailConfirmationDto>> GenerateEmailConfirmationTokenAsync
-            (string userNameOrEmail)
+        public async Task<ApiResponse<EmailConfirmationDto>> GenerateEmailConfirmationTokenAsync(
+            string userNameOrEmail)
         {
             var user = await _userManagerReturn.GetUserByUserNameOrEmailOrIdAsync(userNameOrEmail);
             if(user == null)
@@ -181,7 +181,6 @@ namespace SocialMedia.Api.Service.AccountService.TokenService
                 return StatusCodeReturn<LoginResponse>
                     ._404_NotFound("User not found");
             }
-
             return await GetJwtTokenAsync(user);
         }
 

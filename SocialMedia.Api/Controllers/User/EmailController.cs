@@ -32,7 +32,7 @@ namespace SocialMedia.Api.Controllers.User
             this._userManager = _userManager;
         }
         [AllowAnonymous]
-        [HttpPost("resendConfirmationEmailLink")]
+        [HttpPost("resend-confirmation-email-link")]
         public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string userNameOrEmail)
         {
             try
@@ -71,8 +71,9 @@ namespace SocialMedia.Api.Controllers.User
                     StatusCodeReturn<string>._500_ServerError(ex.Message));
             }
         }
-                [AllowAnonymous]
-        [HttpGet("generateEmailResetObject")]
+        
+        [AllowAnonymous]
+        [HttpGet("generate-email-reset-object")]
         public IActionResult GenerateEmailResetObject(string oldEmail, string newEmail
             , string token)
         {
@@ -87,7 +88,7 @@ namespace SocialMedia.Api.Controllers.User
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpPost("resetEmailLink")]
+        [HttpPost("reset-email-link")]
         public async Task<IActionResult> SendEmailToResetEmailAsync(ResetEmailObjectDto resetEmailObjectDto)
         {
             try
@@ -163,12 +164,11 @@ namespace SocialMedia.Api.Controllers.User
 
 
         [AllowAnonymous]
-        [HttpGet("confirm-email")]
+        [HttpGet("confirm-created-account")]
         public async Task<IActionResult> ConfirmEmail(string userNameOrEmail, string token)
         {
             var result = await _emailService.ConfirmEmail(userNameOrEmail, token);
             return Ok(result);
         }
-
     }
 }

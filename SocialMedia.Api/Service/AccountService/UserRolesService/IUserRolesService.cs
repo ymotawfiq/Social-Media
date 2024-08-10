@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using SocialMedia.Api.Data.Models.ApiResponseModel;
 using SocialMedia.Api.Data.Models.Authentication;
 
-namespace SocialMedia.Api.Service.AccountService.RolesService
+namespace SocialMedia.Api.Service.AccountService.UserRolesService
 {
-    public interface IRolesService
+    public interface IUserRolesService
     {
         Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user);
     }

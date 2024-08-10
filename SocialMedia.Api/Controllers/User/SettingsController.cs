@@ -7,8 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using SocialMedia.Api.Data.DTOs.Authentication.UpdateAccount;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Data.Models.MessageModel;
-using SocialMedia.Api.Service.AccountService.RolesService;
 using SocialMedia.Api.Service.AccountService.SettingsService;
+using SocialMedia.Api.Service.AccountService.UserRolesService;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.SendEmailService;
 
@@ -19,11 +19,11 @@ namespace SocialMedia.Api.Controllers.User
     {
         private readonly UserManagerReturn _userManagerReturn;
         private readonly UserManager<SiteUser> _userManager;
-        private readonly IRolesService _rolesService;
+        private readonly IUserRolesService _rolesService;
         private readonly ISettingsService _settingsService;
         private readonly ISendEmailService _sendEmailService;
         public SettingsController(UserManagerReturn _userManagerReturn, UserManager<SiteUser> _userManager,
-        IRolesService _rolesService, ISettingsService _settingsService, ISendEmailService _sendEmailService)
+        IUserRolesService _rolesService, ISettingsService _settingsService, ISendEmailService _sendEmailService)
         {
             this._userManagerReturn = _userManagerReturn;
             this._userManager = _userManager;
@@ -66,7 +66,7 @@ namespace SocialMedia.Api.Controllers.User
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("updateAccountRoles")]
+        [HttpPut("update-account-roles")]
         public async Task<IActionResult> UpdateAccountRolesAsync(
             [FromBody] UpdateAccountRolesDto updateAccountRolesDto)
         {
@@ -84,7 +84,7 @@ namespace SocialMedia.Api.Controllers.User
         }
 
 
-        [HttpPut("lockProfile")]
+        [HttpPut("lock-profile")]
         public async Task<IActionResult> LockProfileAsync()
         {
             try
@@ -111,7 +111,7 @@ namespace SocialMedia.Api.Controllers.User
             }
         }
 
-        [HttpPut("unlockProfile")]
+        [HttpPut("unlock-profile")]
         public async Task<IActionResult> UnLockProfileAsync()
         {
             try
@@ -138,7 +138,7 @@ namespace SocialMedia.Api.Controllers.User
             }
         }
 
-        [HttpPut("updateUserAccountReactPolicy")]
+        [HttpPut("update-user-account-react-policy")]
         public async Task<IActionResult> UpdateAccountReactPolicyAsync([FromBody] string policyIdOrName)
         {
             try
@@ -166,7 +166,7 @@ namespace SocialMedia.Api.Controllers.User
             }
         }
 
-        [HttpPut("updateUserAccountFriendListPolicy")]
+        [HttpPut("update-user-account-friend-list-policy")]
         public async Task<IActionResult> UpdateAccountFriendListPolicyAsync([FromBody] string policyIdOrName)
         {
             try
@@ -194,7 +194,7 @@ namespace SocialMedia.Api.Controllers.User
             }
         }
 
-        [HttpPut("updateUserAccountPostsPolicy")]
+        [HttpPut("update-user-account-posts-policy")]
         public async Task<IActionResult> UpdateAccountPostsPolicyAsync([FromBody] string policyIdOrName)
         {
             try
@@ -222,7 +222,7 @@ namespace SocialMedia.Api.Controllers.User
             }
         }
 
-        [HttpPut("updateUserAccountCommentPolicy")]
+        [HttpPut("update-user-account-comment-policy")]
         public async Task<IActionResult> UpdateAccountCommentPolicyAsync([FromBody] string policyIdOrName)
         {
             try
@@ -251,7 +251,7 @@ namespace SocialMedia.Api.Controllers.User
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpDelete("deleteAccountLink")]
+        [HttpDelete("delete-account-link")]
         public async Task<IActionResult> DeleteAccount1Async(string userNameOrEmail)
         {
             try

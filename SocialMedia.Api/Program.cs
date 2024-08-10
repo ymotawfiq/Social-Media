@@ -50,7 +50,6 @@ using SocialMedia.Api.Service.ReactService;
 using SocialMedia.Api.Service.SarehneService;
 using SocialMedia.Api.Service.SavedPostsService;
 using SocialMedia.Api.Service.SendEmailService;
-using SocialMedia.Api.Service.AccountService;
 using SocialMedia.Api.Service.UserSavedPostsFoldersService;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -72,6 +71,7 @@ using SocialMedia.Api.Service.AccountService.SettingsService;
 using SocialMedia.Api.Service.AccountService.TwoFactoAuthenticationService;
 using SocialMedia.Api.Service.AccountService.UserAccountService;
 using SocialMedia.Api.Service.AccountService.EmailService;
+using SocialMedia.Api.Service.AccountService.UserRolesService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -151,7 +151,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 // services injection
 builder.Services.AddScoped<ISendEmailService, SendEmailService>();
-builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IUserRolesService, UserRolesService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();

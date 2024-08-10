@@ -4,24 +4,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.Models.ApiResponseModel;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Service.GenericReturn;
 
-namespace SocialMedia.Api.Service.AccountService.RolesService
+namespace SocialMedia.Api.Service.AccountService.UserRolesService
 {
-    public class RolesService : IRolesService
+    public class UserRolesService : IUserRolesService
     {
         private readonly UserManager<SiteUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public RolesService(UserManager<SiteUser> _userManager, RoleManager<IdentityRole> _roleManager)
+        public UserRolesService(UserManager<SiteUser> _userManager, RoleManager<IdentityRole> _roleManager)
         {
             this._userManager = _userManager;
             this._roleManager = _roleManager;
         }
         public async Task<ApiResponse<List<string>>> AssignRolesToUserAsync(List<string> roles, SiteUser user)
         {
-            roles = NormalizeRoles(roles);
+            roles = await NormalizeRoles(roles);
             List<string> assignRoles = new();
             var siteRoles = await _roleManager.Roles.ToListAsync();
             if (roles.Contains("ADMIN"))
@@ -56,7 +57,7 @@ namespace SocialMedia.Api.Service.AccountService.RolesService
                 ._200_Success("Roles assugned successfully to user", assignRoles);
         }
         
-                private List<string> NormalizeRoles(List<string> roles)
+        private async Task<List<string>> NormalizeRoles(List<string> roles)
         {
             if (roles == null || roles.Count == 0)
             {
@@ -64,7 +65,14 @@ namespace SocialMedia.Api.Service.AccountService.RolesService
             }
             for (int i = 0; i < roles.Count; i++)
             {
+                if(await _roleManager.FindByNameAsync(roles[i])==null){
+                    continue;
+                }
                 roles[i] = roles.ElementAt(i).ToUpper();
+            }
+            if (roles.Count == 0)
+            {
+                return new List<string> { "USER" };
             }
             return roles;
         }

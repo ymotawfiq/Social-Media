@@ -7,14 +7,18 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.DTOs.Authentication.Login;
 using SocialMedia.Api.Data.DTOs.Authentication.Register;
+using SocialMedia.Api.Data.DTOs.Mappers;
+using SocialMedia.Api.Data.Extensions;
 using SocialMedia.Api.Data.Models.ApiResponseModel;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Data.Models.MessageModel;
 using SocialMedia.Api.Service.AccountService.EmailService;
-using SocialMedia.Api.Service.AccountService.RolesService;
 using SocialMedia.Api.Service.AccountService.UserAccountService;
+using SocialMedia.Api.Service.AccountService.UserRolesService;
 using SocialMedia.Api.Service.GenericReturn;
 using SocialMedia.Api.Service.SendEmailService;
 
@@ -24,22 +28,25 @@ namespace SocialMedia.Api.Controllers.User
     public class UserAccountController : ControllerBase
     {
         private readonly IUserAccountService _userAccountService;
-        private readonly IRolesService _rolesService;
+        private readonly IUserRolesService _rolesService;
         private readonly UserManager<SiteUser> _userManager;
         private readonly ISendEmailService _sendEmailService;
         private readonly IEmailService _emailService;
-        public UserAccountController(IUserAccountService _userAccountService, IRolesService _rolesService,
+        private readonly ApplicationDbContext _dbContext;
+        
+        public UserAccountController(IUserAccountService _userAccountService, IUserRolesService _rolesService,
             UserManager<SiteUser> _userManager, ISendEmailService _sendEmailService,
-            IEmailService _emailService)
+            IEmailService _emailService, ApplicationDbContext _dbContext)
         {
             this._userAccountService = _userAccountService;
             this._rolesService = _rolesService;
             this._userManager = _userManager;
             this._sendEmailService = _sendEmailService;
             this._emailService = _emailService;
+            this._dbContext = _dbContext;
         }
         [Authorize(Roles ="Admin")]
-        [HttpGet("accessToken")]
+        [HttpGet("access-token")]
         public ActionResult<string> GetAccessToken()
         {
             if (HttpContext.User != null && HttpContext.User.Identity != null
@@ -52,7 +59,7 @@ namespace SocialMedia.Api.Controllers.User
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("decodeJWTToken")]
+        [HttpGet("decode-JWT-token")]
         public ActionResult<object> DecodeAccessToken(string token)
         {
             var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
@@ -70,11 +77,15 @@ namespace SocialMedia.Api.Controllers.User
                 var tokenResponse = await _userAccountService.CreateUserWithTokenAsync(registerDto);
                 if (tokenResponse.IsSuccess && tokenResponse.ResponseObject != null)
                 {
+                    if(_dbContext.Roles.ToList().Count==0 || _dbContext.Roles.ToList() == null){
+                        return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<string>
+                            ._500_ServerError("No roles found to assign to user"));
+                    }
                     await _rolesService.AssignRolesToUserAsync(registerDto.Roles,
                         tokenResponse.ResponseObject.User);
 
 
-                    var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
+                    var confirmationLink = Url.Action(nameof(ConfirmEmail), "UserAccount",
                         new
                         {
                             token = tokenResponse.ResponseObject.Token,
@@ -173,7 +184,6 @@ namespace SocialMedia.Api.Controllers.User
                 ._400_BadRequest("You are not logged in"));
         }
 
-        [Authorize(Roles ="Admin")]
         [HttpGet("current-user")]
         public async Task<IActionResult> GetCurrentUser()
         {
@@ -226,30 +236,16 @@ namespace SocialMedia.Api.Controllers.User
                         
                         if(userByUserName.UserName == loggedInUser.UserName)
                         {
-                            var Object1 = new
-                            {
-                                DisplayName = loggedInUser.DisplayName,
-                                FirstName = loggedInUser.FirstName,
-                                Email = loggedInUser.Email,
-                                LastName = loggedInUser.LastName,
-                                PhoneNumber = loggedInUser.PhoneNumber,
-                                UserName = loggedInUser.UserName,
-                                roles = await _userManager.GetRolesAsync(loggedInUser)
-                            };
+                            var userMapperWithRoles = ConvertToDto.FromUserToUserMapperDto(loggedInUser, 
+                            await _userManager.GetRolesAsync(loggedInUser));
                             return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<object>
-                                ._200_Success("User found successfully", Object1));
+                                ._200_Success("User found successfully", userMapperWithRoles));
                         }
                     }
                 }
-                var Object = new
-                {
-                    DisplayName = userByUserName.DisplayName,
-                    FirstName = userByUserName.FirstName,
-                    LastName = userByUserName.LastName,
-                    UserName = userByUserName.UserName
-                };
+                var userMapperWithoutRoles = ConvertToDto.FromUserToUserMapperDto(userByUserName);
                 return StatusCode(StatusCodes.Status200OK, StatusCodeReturn<object>
-                                ._200_Success("User found successfully", Object));
+                       ._200_Success("User found successfully", userMapperWithoutRoles));
             }
             catch(Exception ex)
             {

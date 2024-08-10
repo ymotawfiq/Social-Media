@@ -26,7 +26,7 @@ namespace SocialMedia.Api.Controllers.User
         }
 
         [AllowAnonymous]
-        [HttpGet("generatePasswordResetObject")]
+        [HttpGet("generate-password-reset-object")]
         public ActionResult<object> GenerateResetPasswordObject(string email,string token)
         {
             var resetPasswordObject = new ResetPasswordDto

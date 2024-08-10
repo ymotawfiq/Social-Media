@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SocialMedia.Api.Data;
 using SocialMedia.Api.Data.Models;
 using SocialMedia.Api.Data.Models.Authentication;
 using SocialMedia.Api.Repository.PolicyRepository;
 using SocialMedia.Api.Repository.PostRepository;
-using SocialMedia.Api.Service.AccountService.RolesService;
+using SocialMedia.Api.Service.AccountService.UserRolesService;
 using SocialMedia.Api.Service.GenericReturn;
 
 
@@ -14,20 +15,22 @@ namespace SocialMedia.Api.Controllers
     public class InsertInDatabaseForTestingController : ControllerBase
     {
         private readonly IPolicyRepository _policyRepository;
-        private readonly IRolesService _rolesService;
+        private readonly IUserRolesService _rolesService;
         private readonly UserManager<SiteUser> _userManager;
+        private readonly ApplicationDbContext _dbContext;
         private readonly IPostRepository _postRepository;
-        public InsertInDatabaseForTestingController(IRolesService _rolesService,
+        public InsertInDatabaseForTestingController(IUserRolesService _rolesService,
             IPolicyRepository policyRepository, UserManager<SiteUser> userManager,
-            IPostRepository postRepository)
+            IPostRepository postRepository, ApplicationDbContext _dbContext)
         {
             _policyRepository = policyRepository;
             _userManager = userManager;
             _postRepository = postRepository;
             this._rolesService = _rolesService;
+            this._dbContext = _dbContext;
         }
 
-        [HttpPost("insert1000User")]
+        [HttpPost("insert-1000-user")]
         public async Task<IActionResult> Insert1000UserAsync()
         {
             try
@@ -58,9 +61,9 @@ namespace SocialMedia.Api.Controllers
                         EmailConfirmed = true
                     };
                     await _userManager.CreateAsync(user, "12345678");
-                    if (i == 1)
+                    if (i % 2 == 0)
                     {
-                        await _rolesService.AssignRolesToUserAsync(new List<string> { "admin" }, user);
+                        await _rolesService.AssignRolesToUserAsync(new List<string> { "admin".ToUpper() }, user);
                     }
                     await _rolesService.AssignRolesToUserAsync(null!, user);
                 }
@@ -73,7 +76,7 @@ namespace SocialMedia.Api.Controllers
                     ._500_ServerError(ex.Message));
             }
         }
-        [HttpPost("insertUsers")]
+        [HttpPost("insert-users")]
         public async Task<IActionResult> InsertUsersAsync(int from, int to)
         {
             try
@@ -124,7 +127,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPost("insertPolicies")]
+        [HttpPost("insert-policies")]
         public async Task<IActionResult> InsertPoliciesAsync()
         {
             try
@@ -153,7 +156,7 @@ namespace SocialMedia.Api.Controllers
             }
         }
 
-        [HttpPost("insert1000Posts")]
+        [HttpPost("insert-1000-posts")]
         public async Task<IActionResult> Insert1000PostsAsync()
         {
             try
@@ -185,6 +188,39 @@ namespace SocialMedia.Api.Controllers
                 }
                 return StatusCode(StatusCodes.Status201Created, StatusCodeReturn<object>
                     ._201_Created("Posts created successfully"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, StatusCodeReturn<object>
+                    ._500_ServerError(ex.Message));
+            }
+        }
+
+        [HttpPost("insert-roles")]
+        public async Task<IActionResult> InsertRolesAsync(){
+            try{
+                if(_dbContext.Roles.ToList().Count==0 || _dbContext.Roles.ToList() == null){
+                    await _dbContext.Roles.AddRangeAsync(
+                    [
+                            new IdentityRole{
+                                Id = Guid.NewGuid().ToString(),
+                                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                                Name = "USER",
+                                NormalizedName = "USER"
+                            },
+                            new IdentityRole{
+                                Id = Guid.NewGuid().ToString(),
+                                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                                Name = "ADMIN",
+                                NormalizedName = "ADMIN"
+                            },
+                    ]);
+                    await _dbContext.SaveChangesAsync();
+                    return StatusCode(StatusCodes.Status201Created, StatusCodeReturn<string>
+                        ._201_Created("Roles inserted successfully"));
+                }
+                return StatusCode(StatusCodes.Status403Forbidden, StatusCodeReturn<string>
+                        ._403_Forbidden("Roles already exist"));
             }
             catch (Exception ex)
             {
